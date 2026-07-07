@@ -1,0 +1,76 @@
+/* src/styles/design-system.css */
+/* ────────────────────────────────────────────────────────────── */
+/* Variables CSS globales du design system "Sylvan Command"      */
+/* ────────────────────────────────────────────────────────────── */
+
+/* Importer les fonts Google en premier */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Couleurs */
+  --color-bg: #041710;
+  --color-surface: #10231C;
+  --color-surface-high: #1A2E26;
+  --color-surface-highest: #253931;
+  --color-primary: #95D4B3;
+  --color-primary-container: #2D6A4F;
+  --color-accent: #EEC058;
+  --color-on-surface: #D1E8DC;
+  --color-on-surface-muted: #BFC9C1;
+  --color-border: rgba(255,255,255,0.12);
+  --color-error: #FFB4AB;
+
+  /* Glassmorphisme */
+  --glass-bg: rgba(10, 25, 20, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(16px);
+
+  /* Typographie */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Rayons */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Espacements */
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+}
+
+/* Classes utilitaires glass */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+}
+
+.glass-card {
+  background: rgba(16, 35, 28, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-on-surface);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--color-on-surface);
+}
