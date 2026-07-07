@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    // --- Cible et modules ---
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    // --- JSX ---
+    "jsx": "react-jsx",
+
+    // --- Rigueur TypeScript ---
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // --- Transition progressive : JS toléré, non vérifié strictement ---
+    "allowJs": true,
+    "checkJs": false,
+
+    // --- Optimisations compilateur ---
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+
+    // --- Alias Vite reproduits à l'identique ---
+    // TS6 : baseUrl est déprécié mais encore fonctionnel — ignoreDeprecations requis
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@fb": ["firebase.js"]
+    }
+  },
+  // vite.config.ts est couvert par tsconfig.node.json (outillage IDE),
+  // pas par ce tsconfig principal (application cliente)
+  "include": ["src", "firebase.js"]
+}
