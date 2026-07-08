@@ -171,6 +171,21 @@ export interface Teacher {
 
   /** Timestamp de recrutement */
   dateRecrutement: number
+
+  /** UID Firebase Auth si le compte a été activé */
+  uid?: string
+
+  /**
+   * Statut du compte Firebase Auth lié à cet enseignant. [NOUVEAU — M2]
+   *
+   * - 'pending' : profil pré-créé par admin_universite, en attente d'activation
+   *               via code d'accès (aucun compte Firebase Auth existant encore).
+   * - 'active'  : compte Firebase Auth activé et lié à ce profil.
+   */
+  accountStatus?: 'pending' | 'active'
+
+  /** Indique si le compte est actif */
+  actif?: boolean
 }
 
 // ── Notes ─────────────────────────────────────────────────────────────────────
