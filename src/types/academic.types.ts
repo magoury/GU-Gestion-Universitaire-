@@ -94,8 +94,19 @@ export interface Student {
   uid?: string
 
   /**
+   * Statut du compte Firebase Auth lié à cet étudiant. [NOUVEAU — M2]
+   *
+   * - 'pending' : profil pré-créé par admin_universite, en attente d'activation
+   *               via code d'accès (aucun compte Firebase Auth existant encore).
+   * - 'active'  : compte Firebase Auth activé et lié à ce profil.
+   *
+   * Distinct de `statut: StatutEtudiant` qui décrit le statut académique.
+   */
+  accountStatus?: 'pending' | 'active'
+
+  /**
    * Champ hérité de LoginPage.jsx (self-service).
-   * @deprecated Préférer statut: StatutEtudiant
+   * @deprecated Préférer accountStatus pour le statut Auth et statut pour l'état académique.
    */
   actif?: boolean
 
