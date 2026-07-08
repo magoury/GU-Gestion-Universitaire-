@@ -13,8 +13,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      // Alias @fb → firebase.js (fichier JS, migration M0.2 le renommera en .ts)
-      '@fb': path.resolve(__dirname, 'firebase.js'),
+      // Alias @fb → firebase.ts (migré de .js en M0.2)
+      '@fb': path.resolve(__dirname, 'firebase.ts'),
       // Alias @ → src/
       '@': path.resolve(__dirname, 'src'),
     },

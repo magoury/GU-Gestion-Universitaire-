@@ -32,10 +32,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@fb": ["firebase.js"]
+      "@fb": ["firebase.ts"]
     }
   },
   // vite.config.ts est couvert par tsconfig.node.json (outillage IDE),
   // pas par ce tsconfig principal (application cliente)
-  "include": ["src", "firebase.js"]
+  "include": ["src", "firebase.ts"]
 }
