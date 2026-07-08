@@ -7,7 +7,7 @@
 import { ref, push, get, set, update } from 'firebase/database';
 import { database, auth } from '@fb';
 import { ecrireAuditLog } from './auditService.js';
-import type { Notification, NotificationType, NotificationsResult } from '@/types';
+import type { Notification, NotificationType, NotificationsResult, Student } from '@/types';
 
 /**
  * Paramètres pour l'envoi d'une notification.
@@ -243,7 +243,12 @@ export async function envoyerAlertesPaiement(universityId: string): Promise<numb
   // 1. Lire tous les étudiants de l'université
   const studentsSnap = await get(ref(database, `universities/${universityId}/students`));
   if (!studentsSnap.exists()) return 0;
-  const students = Object.values(studentsSnap.val()) as any[];
+  // Faille 5 corrigée (identique à academicYearService.ts M4.10) :
+  // Object.values() ne retournait pas les clés Firebase → student.id = undefined sur chaque objet
+  // → verifierStatutFinancier(universityId, undefined), destinataireId: undefined, matching parent jamais vrai
+  // Object.entries() + injection clé comme id → student.id correctement peuplé
+  const students = Object.entries(studentsSnap.val() as Record<string, Omit<Student, 'id'>>)
+    .map(([id, s]) => ({ ...s, id } as Student));
 
   // 2. Charger les parents pour réconciliation linkedStudentId inverse
   const usersSnap = await get(ref(database, 'users'));
