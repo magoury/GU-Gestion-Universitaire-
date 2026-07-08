@@ -25,9 +25,15 @@ export type AuditAction =
   // Notes
   | 'NOTE_SAISIE'
   | 'NOTE_MODIFIEE'
+  | 'NOTE_SAISIE_REFUSEE'
   // Paiements
   | 'PAIEMENT_ENREGISTRE'
+  | 'PAIEMENT_REGISTRE'
+  | 'PAIEMENT_REFUSE'
   | 'FRAIS_CONFIGURES'
+  | 'CONFIG_FRAIS_REFUSEE'
+  // Notifications
+  | 'NOTIFICATION_REFUSEE'
   // Année académique
   | 'ANNEE_CLOTUREE'
   // RGPD
@@ -43,8 +49,8 @@ export type AuditAction =
   // Super Admin
   | 'UNIVERSITE_SUSPENDUE'
   | 'UNIVERSITE_REACTIVEE'
-  // Système
-  | string  // Pour éviter les erreurs sur les actions futures non encore cataloguées
+  // Système — fallback pour services .js non encore migrés (academicYearService, rgpdService)
+  | string
 
 // ── Log d'audit tenant ────────────────────────────────────────────────────────
 

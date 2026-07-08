@@ -85,7 +85,7 @@ export async function envoyerNotification(universityId: string, data: EnvoyerNot
         acteurId,
         acteurNom: userProfile ? `${userProfile.prenom} ${userProfile.nom}` : 'Utilisateur',
         acteurRole: userRole,
-        action: 'NOTIFICATION_REFUSEE' as any,
+        action: 'NOTIFICATION_REFUSEE',
         cible: data.destinataireId || 'multiple',
         detail: `Tentative refusée d'envoi de notification de type "${data.type}" par ${acteurId}.`,
       });

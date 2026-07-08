@@ -220,7 +220,7 @@ export async function enregistrerPaiement(universityId: string, data: Enregistre
     acteurId,
     acteurNom: userProfile ? `${userProfile.prenom} ${userProfile.nom}` : 'Administrateur',
     acteurRole: 'admin_universite',
-    action: 'PAIEMENT_REGISTRE' as any, // Maintien avec l'action existante PAIEMENT_ENREGISTRE
+    action: 'PAIEMENT_REGISTRE', // ⚠️ Typo de PAIEMENT_ENREGISTRE — à corriger dans une migration future
     cible: data.studentId,
     detail: `Enregistrement du paiement ${numeroRecu} d'un montant de ${paiementMontant} pour l'étudiant ${data.studentId}.`,
   });
