@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..900;1,300..900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['"Hanken Grotesk"', 'sans-serif'],
+        },
+        colors: {
+          brand: {
+            50: '#f0fdfa',
+            100: '#ccfbf1',
+            200: '#99f6e4',
+            300: '#5eead4',
+            400: '#2dd4bf',
+            500: '#14b8a6',
+            600: '#0d9488',
+            700: '#0f766e',
+            800: '#115e59',
+            900: '#134e4a',
+            950: '#042f2e',
+          },
+          surface: {
+            DEFAULT: '#0b1326',
+            dim: '#0b1326',
+            bright: '#31394d',
+            lowest: '#060e20',
+            low: '#131b2e',
+            high: '#1b2336',
+            highest: '#232b3e',
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body {
+    background-color: theme('colors.surface.DEFAULT');
+    color: theme('colors.slate.200');
+  }
+  .glass-card {
+    background: rgba(19, 27, 46, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .glass-nav {
+    background: rgba(11, 19, 38, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+</style>
+</head>
+<body class="antialiased overflow-x-hidden selection:bg-brand-500/30 selection:text-brand-200">
+<nav class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
+<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+<div class="flex items-center gap-3 font-bold text-xl tracking-tight text-white">
+<div class="w-10 h-10 bg-gradient-to-br from-brand-400 to-brand-600 rounded-xl flex items-center justify-center text-white font-extrabold shadow-lg shadow-brand-500/20">GU</div>
+      GU - Gestion Universitaire
+    </div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Fonctionnalités</a>
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Tarifs</a>
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Documentation</a>
+<a class="text-slate-400 hover:text-white text-sm font-medium transition-colors" href="#">Contact</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden sm:block px-4 py-2 text-sm font-medium text-slate-300 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-all">Se connecter</button>
+<button class="px-5 py-2.5 text-sm font-semibold text-surface-lowest bg-brand-400 hover:bg-brand-300 rounded-lg shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_25px_rgba(45,212,191,0.5)] transition-all transform hover:-translate-y-0.5">Essai gratuit</button>
+</div>
+</div>
+</nav>
+<!-- HERO -->
+<div class="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-6 text-center overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-900/20 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-brand-500/30 text-brand-300 text-sm font-medium mb-8">
+<span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+      Propulsé par IA — Nouvelle génération universitaire
+    </div>
+<h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6">
+      Gérez votre université.<br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-emerald-500">Sans friction. Sans limite.</span>
+</h1>
+<p class="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed">
+      La première plateforme SaaS multi-tenant conçue pour moderniser l'administration académique — inscriptions, notes, finances, e-learning en un seul espace.
+    </p>
+<div class="flex flex-wrap items-center justify-center gap-4 mb-20">
+<button class="px-8 py-4 text-base font-semibold text-surface-lowest bg-brand-400 hover:bg-brand-300 rounded-xl shadow-[0_0_30px_rgba(45,212,191,0.3)] hover:shadow-[0_0_40px_rgba(45,212,191,0.5)] transition-all transform hover:-translate-y-1" onclick="sendPrompt('Je veux voir le tunnel d\'onboarding et comment créer une université sur GU')">
+        Démarrer gratuitement →
+      </button>
+<button class="px-8 py-4 text-base font-semibold text-white glass-card hover:bg-white/10 rounded-xl transition-all" onclick="sendPrompt('Montre-moi une démo complète de la plateforme GU')">
+        Voir la démo
+      </button>
+</div>
+<!-- DASHBOARD PREVIEW -->
+<div class="w-full max-w-5xl glass-card rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative z-20 transform hover:scale-[1.01] transition-transform duration-500">
+<div class="h-12 bg-surface-highest/80 border-b border-white/5 flex items-center px-4 gap-2">
+<div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+<div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+<div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+<div class="flex-1 text-center text-xs font-medium text-slate-400 tracking-wide">GU — Tableau de bord Administration · Université Jean Moulin</div>
+</div>
+<div class="flex flex-col md:flex-row min-h-[400px]">
+<div class="w-full md:w-64 bg-surface-low/50 border-r border-white/5 p-4 flex flex-col hidden md:flex">
+<div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 px-3">Navigation</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-500/10 text-brand-300 text-sm font-medium"><span class="text-brand-400">❖</span> Tableau de bord</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 text-sm transition-colors"><span class="text-slate-500">👥</span> Étudiants</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 text-sm transition-colors"><span class="text-slate-500">👨‍🏫</span> Enseignants</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 text-sm transition-colors"><span class="text-slate-500">📚</span> Cours &amp; Filières</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 text-sm transition-colors"><span class="text-slate-500">📝</span> Notes &amp; Bulletins</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-slate-200 text-sm transition-colors"><span class="text-slate-500">💰</span> Finances</div>
+</div>
+</div>
+<div class="flex-1 p-6 space-y-6">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="glass-card p-4 rounded-xl">
+<div class="text-xs text-slate-400 mb-1">Étudiants actifs</div>
+<div class="text-2xl font-bold text-white">2 847</div>
+<div class="text-xs text-brand-400 mt-1 flex items-center gap-1">↑ +12% ce mois</div>
+</div>
+<div class="glass-card p-4 rounded-xl">
+<div class="text-xs text-slate-400 mb-1">Enseignants</div>
+<div class="text-2xl font-bold text-white">143</div>
+<div class="text-xs text-brand-400 mt-1 flex items-center gap-1">↑ +3 recrutés</div>
+</div>
+<div class="glass-card p-4 rounded-xl">
+<div class="text-xs text-slate-400 mb-1">Frais collectés</div>
+<div class="text-2xl font-bold text-white">94,2M</div>
+<div class="text-xs text-brand-400 mt-1 flex items-center gap-1">↑ 78% objectif</div>
+</div>
+<div class="glass-card p-4 rounded-xl">
+<div class="text-xs text-slate-400 mb-1">Cours actifs</div>
+<div class="text-2xl font-bold text-white">312</div>
+<div class="text-xs text-brand-400 mt-1 flex items-center gap-1">↑ +28 ce sem.</div>
+</div>
+</div>
+<div class="glass-card p-5 rounded-xl h-48 flex flex-col">
+<div class="text-xs font-medium text-slate-400 mb-4">Inscriptions mensuelles — Année académique 2024–25</div>
+<div class="flex-1 flex items-end gap-2">
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 45%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 62%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 80%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 95%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 70%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 55%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 40%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 30%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 25%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 50%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 65%"></div>
+<div class="w-full bg-gradient-to-t from-brand-600/20 to-brand-400/80 rounded-t-sm" style="height: 85%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- STATS BAND -->
+<div class="border-y border-white/5 bg-surface-lowest/50 py-16">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+<div class="space-y-2">
+<div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">50+</div>
+<div class="text-sm font-medium text-slate-400">Universités clientes</div>
+</div>
+<div class="space-y-2">
+<div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">120K</div>
+<div class="text-sm font-medium text-slate-400">Étudiants gérés</div>
+</div>
+<div class="space-y-2">
+<div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">99.9%</div>
+<div class="text-sm font-medium text-slate-400">Disponibilité garantie</div>
+</div>
+<div class="space-y-2">
+<div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">&lt; 48h</div>
+<div class="text-sm font-medium text-slate-400">Onboarding complet</div>
+</div>
+</div>
+</div>
+<!-- FEATURES -->
+<section class="py-24 px-6 relative">
+<div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-900/10 via-surface-DEFAULT to-surface-DEFAULT pointer-events-none"></div>
+<div class="max-w-7xl mx-auto relative z-10">
+<div class="text-brand-400 font-bold text-sm tracking-widest uppercase mb-4">Fonctionnalités</div>
+<div class="max-w-2xl mb-16">
+<h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-6">Tout ce dont votre établissement a besoin, en un clic</h2>
+<p class="text-lg text-slate-400 leading-relaxed">De l'inscription des étudiants à la clôture d'année académique, GU automatise chaque processus critique de votre institution.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">🎓</div>
+<h3 class="text-xl font-bold text-white mb-3">Gestion des étudiants</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Matricules automatiques, suivi de parcours complet, gestion des statuts et réinscriptions annuelles en quelques secondes.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📊</div>
+<h3 class="text-xl font-bold text-white mb-3">Notes &amp; Bulletins IA</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Calcul automatique des moyennes pondérées, génération de bulletins officiels et classements en temps réel.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">💳</div>
+<h3 class="text-xl font-bold text-white mb-3">Finances intégrées</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Suivi des frais de scolarité, tranches de paiement, reçus automatiques et alertes de défaut — connecté à Stripe.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📚</div>
+<h3 class="text-xl font-bold text-white mb-3">E-learning &amp; Bibliothèque</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Hébergement de supports pédagogiques, suivi de progression des étudiants et gestion des emprunts physiques.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">🔐</div>
+<h3 class="text-xl font-bold text-white mb-3">Multi-tenant sécurisé</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Isolation stricte des données par université via Firebase Security Rules. Chaque établissement est totalement étanche.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl hover:bg-surface-high/50 transition-all group border-t-2 border-t-transparent hover:border-t-brand-400">
+<div class="w-12 h-12 bg-brand-500/10 border border-brand-500/20 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📋</div>
+<h3 class="text-xl font-bold text-white mb-3">Audit &amp; Conformité RGPD</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Logs immuables de toutes les actions critiques. Export complet des données personnelles en un clic pour chaque étudiant.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ROLES -->
+<section class="py-24 px-6 bg-surface-lowest">
+<div class="max-w-7xl mx-auto">
+<div class="text-brand-400 font-bold text-sm tracking-widest uppercase mb-4 text-center">Espaces dédiés</div>
+<h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-6 text-center">Une plateforme, cinq expériences taillées sur mesure</h2>
+<p class="text-lg text-slate-400 text-center max-w-2xl mx-auto mb-12">Chaque profil dispose d'un espace optimisé pour ses besoins réels — sans surcharge d'information.</p>
+<div class="flex flex-wrap justify-center gap-3 mb-12">
+<button class="role-tab active px-5 py-2.5 rounded-lg text-sm font-semibold transition-all bg-brand-500/10 text-brand-400 border border-brand-500/30" onclick="switchRole('admin', this)">Admin Université</button>
+<button class="role-tab px-5 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white glass-card hover:bg-white/5 transition-all" onclick="switchRole('teacher', this)">Enseignant</button>
+<button class="role-tab px-5 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white glass-card hover:bg-white/5 transition-all" onclick="switchRole('student', this)">Étudiant</button>
+<button class="role-tab px-5 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white glass-card hover:bg-white/5 transition-all" onclick="switchRole('parent', this)">Parent</button>
+<button class="role-tab px-5 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white glass-card hover:bg-white/5 transition-all" onclick="switchRole('superadmin', this)">Super Admin</button>
+</div>
+<div class="glass-card p-8 rounded-2xl border border-white/5">
+<div class="role-content grid grid-cols-1 md:grid-cols-2 gap-6 animate-[fadeIn_0.3s_ease]" id="role-admin">
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Tour de contrôle centrale</h4><p class="text-sm text-slate-400">Validez les inscriptions, gérez les filières et suivez les paiements depuis un seul tableau de bord.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Import CSV massif</h4><p class="text-sm text-slate-400">Injectez des centaines d'étudiants et enseignants en une seule opération via fichier Excel.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Clôture d'année académique</h4><p class="text-sm text-slate-400">Automatisez la progression des étudiants, figez les notes et archivez l'année en un clic.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Relevés &amp; Documents officiels</h4><p class="text-sm text-slate-400">Générez et exportez des relevés de notes certifiés, attestations et bulletins au format PDF.</p></div>
+</div>
+</div>
+<!-- Other roles would follow similar structure, hidden by default -->
+<div class="role-content hidden grid grid-cols-1 md:grid-cols-2 gap-6" id="role-teacher">
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Saisie rapide des notes</h4><p class="text-sm text-slate-400">Interface ergonomique pour noter les devoirs, examens et projets avec coefficients en temps réel.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Dépôt de ressources</h4><p class="text-sm text-slate-400">Publiez cours, PDF et liens multimédias directement accessibles à vos étudiants.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Suivi des charges horaires</h4><p class="text-sm text-slate-400">Visualisez vos cours assignés, classes et volume d'heures hebdomadaires.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Communication intégrée</h4><p class="text-sm text-slate-400">Envoyez des annonces ciblées à vos classes et répondez aux demandes étudiantes.</p></div>
+</div>
+</div>
+<div class="role-content hidden grid grid-cols-1 md:grid-cols-2 gap-6" id="role-student">
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Notes &amp; bulletins en temps réel</h4><p class="text-sm text-slate-400">Consultez vos résultats dès leur publication et téléchargez vos bulletins officiels.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Accès E-learning</h4><p class="text-sm text-slate-400">Retrouvez tous vos supports de cours, vidéos et ressources pédagogiques au même endroit.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Historique financier</h4><p class="text-sm text-slate-400">Suivez vos paiements de scolarité, téléchargez vos reçus et gérez vos échéances.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Export RGPD personnel</h4><p class="text-sm text-slate-400">Téléchargez l'intégralité de vos données personnelles en JSON structuré à tout moment.</p></div>
+</div>
+</div>
+<div class="role-content hidden grid grid-cols-1 md:grid-cols-2 gap-6" id="role-parent">
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Suivi des résultats</h4><p class="text-sm text-slate-400">Consultez les notes et moyennes de votre enfant dès leur publication par l'enseignant.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Alertes de paiement</h4><p class="text-sm text-slate-400">Recevez des notifications automatiques sur les échéances de frais de scolarité à venir.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Suivi des absences</h4><p class="text-sm text-slate-400">Visualisez le taux de présence et les absences justifiées ou non de votre enfant.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Contact administration</h4><p class="text-sm text-slate-400">Accédez aux canaux officiels de communication avec l'équipe administrative.</p></div>
+</div>
+</div>
+<div class="role-content hidden grid grid-cols-1 md:grid-cols-2 gap-6" id="role-superadmin">
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Monitoring global du SaaS</h4><p class="text-sm text-slate-400">Visualisez en temps réel les revenus, le nombre de tenants actifs et la santé de l'infrastructure.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Gestion des abonnements</h4><p class="text-sm text-slate-400">Activez, suspendez ou résiliez l'accès d'une université en cas de défaut de paiement.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Onboarding automatisé</h4><p class="text-sm text-slate-400">Chaque nouvelle université se configure en self-service via le tunnel d'inscription intégré.</p></div>
+</div>
+<div class="flex gap-4 p-5 bg-surface-high/30 rounded-xl border border-white/5">
+<div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0 font-bold">✓</div>
+<div><h4 class="text-white font-bold mb-2">Dashboard financier SaaS</h4><p class="text-sm text-slate-400">Analysez les revenus par plan, les conversions et les churn rate depuis un panel centralisé.</p></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PRICING -->
+<section class="py-24 px-6 relative">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<div class="text-brand-400 font-bold text-sm tracking-widest uppercase mb-4">Tarifs</div>
+<h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4">Transparent. Sans surprise.</h2>
+<p class="text-lg text-slate-400 max-w-xl mx-auto">Choisissez le plan adapté à la taille de votre établissement et commencez en quelques minutes.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="glass-card rounded-3xl p-8 flex flex-col border border-white/5">
+<h3 class="text-lg font-bold text-slate-300 uppercase tracking-widest mb-4">Standard</h3>
+<div class="text-5xl font-extrabold text-white mb-2">490 <span class="text-lg font-medium text-slate-500">€/mois</span></div>
+<p class="text-sm text-slate-400 mb-8 pb-8 border-b border-white/5">Idéal pour les petits établissements jusqu'à 500 étudiants</p>
+<ul class="space-y-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Jusqu'à 500 étudiants</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> 5 espaces utilisateurs</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Gestion notes &amp; bulletins</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Paiements Stripe</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Support email 5j/7</li>
+<li class="flex items-center gap-3 text-sm text-slate-600"><span>✗</span> Clôture automatique</li>
+<li class="flex items-center gap-3 text-sm text-slate-600"><span>✗</span> API &amp; Webhooks</li>
+</ul>
+<button class="w-full py-3.5 rounded-xl text-sm font-bold text-white border border-white/10 hover:bg-white/5 transition-colors" onclick="sendPrompt('Comment souscrire au plan Standard GU ?')">Commencer</button>
+</div>
+<div class="rounded-3xl p-8 flex flex-col relative bg-gradient-to-b from-brand-900/40 to-surface-high border border-brand-500/30 shadow-2xl shadow-brand-500/10 transform lg:-translate-y-4">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-500 text-surface-lowest text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">⭐ Plus populaire</div>
+<h3 class="text-lg font-bold text-brand-400 uppercase tracking-widest mb-4">Premium</h3>
+<div class="text-5xl font-extrabold text-white mb-2">1 290 <span class="text-lg font-medium text-slate-400">€/mois</span></div>
+<p class="text-sm text-slate-300 mb-8 pb-8 border-b border-white/10">Pour les universités de taille moyenne jusqu'à 3 000 étudiants</p>
+<ul class="space-y-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> Jusqu'à 3 000 étudiants</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> 5 espaces + audit logs</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> Import CSV/Excel massif</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> E-learning intégré</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> Clôture d'année auto</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> Conformité RGPD</li>
+<li class="flex items-center gap-3 text-sm text-white"><span class="text-brand-400">✓</span> Support prioritaire 7j/7</li>
+</ul>
+<button class="w-full py-3.5 rounded-xl text-sm font-bold text-surface-lowest bg-brand-400 hover:bg-brand-300 transition-colors shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_25px_rgba(45,212,191,0.5)]" onclick="sendPrompt('Je veux souscrire au plan Premium GU, comment procéder ?')">Démarrer l'essai gratuit</button>
+</div>
+<div class="glass-card rounded-3xl p-8 flex flex-col border border-white/5">
+<h3 class="text-lg font-bold text-slate-300 uppercase tracking-widest mb-4">Enterprise</h3>
+<div class="text-4xl font-extrabold text-white mb-4 mt-2">Sur devis</div>
+<p class="text-sm text-slate-400 mb-8 pb-8 border-b border-white/5">Pour les grandes universités et réseaux multi-campus sans limite</p>
+<ul class="space-y-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Étudiants illimités</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Multi-campus / réseau</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> API &amp; Webhooks complets</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> SSO &amp; Intégrations custom</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> SLA 99.9% garanti</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Compte dédié</li>
+<li class="flex items-center gap-3 text-sm text-slate-300"><span class="text-brand-400">✓</span> Formation &amp; accompagnement</li>
+</ul>
+<button class="w-full py-3.5 rounded-xl text-sm font-bold text-white border border-white/10 hover:bg-white/5 transition-colors" onclick="sendPrompt('Je veux demander une démo Enterprise pour GU')">Demander une démo</button>
+</div>
+</div>
+</div>
+</section>
+<!-- TESTIMONIALS -->
+<section class="py-24 px-6 bg-surface-lowest">
+<div class="max-w-7xl mx-auto">
+<div class="text-brand-400 font-bold text-sm tracking-widest uppercase mb-4">Témoignages</div>
+<h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-16">Ce que disent nos directeurs</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="glass-card p-8 rounded-2xl border border-white/5">
+<div class="text-brand-400 text-sm tracking-widest mb-6">★★★★★</div>
+<p class="text-slate-300 text-sm leading-relaxed italic mb-8">"En 48 heures, nous avions migré 2 400 étudiants, configuré nos filières et lancé les paiements en ligne. GU a divisé par 5 notre charge administrative."</p>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-600 to-emerald-900 flex items-center justify-center text-white font-bold text-sm">DK</div>
+<div>
+<div class="text-white font-bold text-sm">Dr. Konaté Seydou</div>
+<div class="text-slate-500 text-xs">Directeur Général — ISEG Abidjan</div>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 rounded-2xl border border-white/5">
+<div class="text-brand-400 text-sm tracking-widest mb-6">★★★★★</div>
+<p class="text-slate-300 text-sm leading-relaxed italic mb-8">"La génération automatique des bulletins et le calcul des moyennes nous font économiser des semaines de travail à chaque fin de semestre. Indispensable."</p>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-600 to-emerald-900 flex items-center justify-center text-white font-bold text-sm">MB</div>
+<div>
+<div class="text-white font-bold text-sm">Prof. Mbaye Diallo</div>
+<div class="text-slate-500 text-xs">Doyen — Université Cheikh Anta Diop</div>
+</div>
+</div>
+</div>
+<div class="glass-card p-8 rounded-2xl border border-white/5">
+<div class="text-brand-400 text-sm tracking-widest mb-6">★★★★★</div>
+<p class="text-slate-300 text-sm leading-relaxed italic mb-8">"L'espace parents a transformé notre relation avec les familles. Ils voient les notes en temps réel et les alertes de paiement ont réduit nos impayés de 60%."</p>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-600 to-emerald-900 flex items-center justify-center text-white font-bold text-sm">AO</div>
+<div>
+<div class="text-white font-bold text-sm">Aminata Ouédraogo</div>
+<div class="text-slate-500 text-xs">Directrice Administrative — IFAG Ouaga</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA BAND -->
+<div class="relative py-24 px-6 border-y border-white/5 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-900/20 via-surface-DEFAULT to-surface-DEFAULT text-center overflow-hidden">
+<div class="relative z-10 max-w-3xl mx-auto">
+<h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-6">Votre université mérite<br/>mieux qu'un tableur Excel.</h2>
+<p class="text-lg text-slate-400 mb-10">Rejoignez plus de 50 établissements qui ont déjà modernisé leur gestion avec GU.</p>
+<div class="flex flex-wrap items-center justify-center gap-4">
+<button class="px-8 py-4 text-sm font-bold text-surface-lowest bg-brand-400 hover:bg-brand-300 rounded-xl transition-all shadow-[0_0_20px_rgba(45,212,191,0.3)] hover:shadow-[0_0_30px_rgba(45,212,191,0.5)] transform hover:-translate-y-1" onclick="sendPrompt('Je veux démarrer l\'onboarding de mon université sur GU')">Démarrer gratuitement — 30 jours</button>
+<button class="px-8 py-4 text-sm font-bold text-white glass-card hover:bg-white/10 rounded-xl transition-all" onclick="sendPrompt('Je veux demander une démonstration personnalisée de GU')">Demander une démo →</button>
+</div>
+</div>
+</div>
+<!-- FOOTER -->
+<footer class="bg-surface-lowest pt-20 pb-10 px-6 border-t border-white/5">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+<div class="md:col-span-1">
+<div class="flex items-center gap-2 font-bold text-xl tracking-tight text-white mb-4">
+<div class="w-8 h-8 bg-gradient-to-br from-brand-400 to-brand-600 rounded-lg flex items-center justify-center text-white font-extrabold text-xs">GU</div>
+          GU
+        </div>
+<p class="text-sm text-slate-500 leading-relaxed pr-4">La plateforme SaaS de gestion universitaire de nouvelle génération. Multi-tenant, sécurisé, propulsé par IA.</p>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white uppercase tracking-widest mb-6">Produit</h4>
+<div class="flex flex-col gap-3">
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Fonctionnalités</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Tarifs</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Roadmap</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Changelog</a>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white uppercase tracking-widest mb-6">Ressources</h4>
+<div class="flex flex-col gap-3">
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Documentation</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">API Reference</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Guide d'onboarding</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Blog</a>
+</div>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white uppercase tracking-widest mb-6">Légal</h4>
+<div class="flex flex-col gap-3">
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Politique RGPD</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">CGU</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Sécurité</a>
+<a class="text-sm text-slate-400 hover:text-brand-400 transition-colors" href="#">Contact</a>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+<span>© 2025 GU - Gestion Universitaire. Tous droits réservés.</span>
+<span>Conçu pour l'Afrique et le monde francophone 🌍</span>
+</div>
+</div>
+</footer>
+<script>
+function switchRole(role, btn){
+  document.querySelectorAll('.role-tab').forEach(t => {
+    t.classList.remove('bg-brand-500/10', 'text-brand-400', 'border-brand-500/30');
+    t.classList.add('text-slate-400', 'glass-card');
+  });
+  btn.classList.add('bg-brand-500/10', 'text-brand-400', 'border-brand-500/30');
+  btn.classList.remove('text-slate-400', 'glass-card');
+  
+  document.querySelectorAll('.role-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('role-'+role).classList.remove('hidden');
+}
+</script>
+</body></html>

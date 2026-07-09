@@ -14,6 +14,28 @@
   --color-on-surface-muted: #BFC9C1;
   --font-display: 'Playfair Display', serif;
   --font-body: 'Inter', sans-serif;
+
+  /* Arbor Tech Design System (Landing Page) */
+  --color-arbor-bg: #0b1326;
+  --color-arbor-surface: #171f33;
+  --color-arbor-surface-dim: #0b1326;
+  --color-arbor-surface-bright: #31394d;
+  --color-arbor-surface-low: #131b2e;
+  --color-arbor-surface-high: #222a3d;
+  --color-arbor-surface-highest: #2d3449;
+  --color-arbor-primary: #57f1db;
+  --color-arbor-primary-container: #2dd4bf;
+  --color-arbor-on-primary: #003731;
+  --color-arbor-on-primary-container: #00574d;
+  --color-arbor-on-surface: #dae2fd;
+  --color-arbor-on-surface-variant: #bacac5;
+  --color-arbor-secondary: #9ad1cb;
+  --color-arbor-secondary-container: #144f4b;
+  --color-arbor-on-secondary-container: #89bfba;
+
+  --font-arbor-display: 'Hanken Grotesk', sans-serif;
+  --font-arbor-body: 'Inter', sans-serif;
+  --font-arbor-mono: 'Geist', monospace;
 }
 
 /* Thème DaisyUI personnalisé "sylvan" */
