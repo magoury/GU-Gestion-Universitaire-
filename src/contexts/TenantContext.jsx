@@ -9,7 +9,7 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { ref, onValue, off } from 'firebase/database';
 import { database } from '@fb';
-import { useAuth } from './AuthContext.jsx';
+import { useAuth } from './AuthContext';
 
 /** @type {import('react').Context<{universityId: string|null, universityConfig: Object|null, loadingTenant: boolean}|null>} */
 const TenantContext = createContext(null);

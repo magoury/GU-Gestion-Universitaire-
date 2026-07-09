@@ -11,7 +11,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Contexts / Providers
-import { AuthProvider } from './contexts/AuthContext.jsx';
+import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext.jsx';
 
 // Route guards
