@@ -1,7 +1,7 @@
 // src/components/landing/HeroSection.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero Section — Landing Page du SaaS GU - Gestion Universitaire.
-// Version avec Image de Fond Plein Écran + Carte Glassmorphic Flottante.
+// Version avec Image de Fond Plein Écran + Carte Glassmorphic Flottante Raffinée.
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,8 +31,13 @@ export default function HeroSection() {
       {/* 3. Conteneur principal du contenu */}
       <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pt-28 pb-16 min-h-screen">
         
-        {/* Panneau gauche : Carte Glassmorphic Flottante (occupant 7 colonnes en desktop) */}
-        <div className="lg:col-span-7 flex flex-col justify-center items-start text-left p-6 sm:p-10 lg:p-12 rounded-[0.75rem] bg-arbor-surface-low/30 backdrop-blur-xl border border-white/10 shadow-2xl animate-fade-in">
+        {/* Panneau gauche : Carte Glassmorphic Flottante Raffinée (occupant 7 colonnes en desktop) */}
+        <div 
+          className="lg:col-span-7 flex flex-col justify-center items-start text-left p-8 sm:p-12 lg:p-14 rounded-xl bg-arbor-surface-low/55 backdrop-blur-2xl border-t border-t-white/25 border-x border-x-white/15 border-b border-b-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-fade-in"
+          style={{
+            boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+          }}
+        >
           
           {/* Badge Pilule "Propulsé par IA" */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-arbor-surface-low/60 backdrop-blur-md border border-arbor-primary/30 text-arbor-primary text-xs font-arbor-mono tracking-wider mb-6">
@@ -58,13 +63,22 @@ export default function HeroSection() {
 
           {/* CTAs d'action */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            {/* CTA Primaire */}
-            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-primary-container rounded-[0.25rem] shadow-[0_0_20px_rgba(87,241,219,0.25)] hover:shadow-[0_0_35px_rgba(87,241,219,0.50)] transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer">
-              Demarrer un essai gratuit
+            {/* CTA Primaire : Démarrer un essai gratuit (Raffiné avec effet scale et icône interactive) */}
+            <button className="group w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-primary-container rounded-lg shadow-[0_0_20px_rgba(87,241,219,0.20)] hover:shadow-[0_0_35px_rgba(87,241,219,0.60)] transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+              <span>Demarrer un essai gratuit</span>
+              <svg 
+                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
             </button>
 
-            {/* CTA Secondaire */}
-            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 rounded-[0.25rem] backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer">
+            {/* CTA Secondaire : Demander une démo (Raffiné en ghost avec backdrop-blur et hover blanc translucide) */}
+            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center">
               Demander une demo
             </button>
           </div>
@@ -82,7 +96,7 @@ export default function HeroSection() {
 
         {/* 4. Widget de stats repositionné discrètement en bas à droite (occupant 5 colonnes) */}
         <div className="lg:col-span-5 w-full lg:h-[600px] flex items-end justify-center lg:justify-end">
-          <div className="w-full sm:w-auto min-w-[280px] p-6 rounded-[0.75rem] bg-arbor-surface-dim/80 backdrop-blur-lg border border-white/10 shadow-2xl flex items-center justify-between gap-6 transform hover:scale-[1.02] transition-transform duration-300">
+          <div className="w-full sm:w-auto min-w-[280px] p-6 rounded-xl bg-arbor-surface-dim/80 backdrop-blur-lg border border-white/10 shadow-2xl flex items-center justify-between gap-6 transform hover:scale-[1.02] transition-transform duration-300">
             <div className="flex flex-col">
               <span className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono tracking-widest uppercase">DISPONIBILITÉ PLATEFORME</span>
               <span className="text-lg font-bold text-white font-arbor-display tracking-tight">99.99% Uptime</span>
