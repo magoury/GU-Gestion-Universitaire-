@@ -1,78 +1,67 @@
 // src/components/landing/HeroSection.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero Section — Landing Page du SaaS GU - Gestion Universitaire.
-// Version avec Image de Fond Plein Écran + Carte Glassmorphic Flottante Corrigée.
+// Version épurée "Floating Text" sur Fond Plein Écran avec Navbar Intégrée.
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
 import forest1 from '../../assets/landing/forest-1.jpg.jpeg';
+import Navbar from './Navbar';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-arbor-bg text-arbor-on-surface flex items-center overflow-hidden font-arbor-body">
+    <section className="relative min-h-screen bg-arbor-bg text-arbor-on-surface flex flex-col justify-between overflow-hidden font-arbor-body">
       
+      {/* Navbar intégrée (fixe en haut, z-30) */}
+      <Navbar />
+
       {/* 1. Image de forêt couvrant toute la section en arrière-plan */}
       <img 
         src={forest1} 
         alt="" 
-        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0 transform scale-105"
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0 transform scale-100"
       />
 
-      {/* 2. Overlay de dégradé sombre asymétrique pour garantir la lisibilité du texte */}
-      <div className="absolute inset-0 bg-gradient-to-r from-arbor-bg via-arbor-bg/85 lg:via-arbor-bg/60 to-arbor-bg/30 z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-arbor-bg via-transparent to-transparent z-10 pointer-events-none" />
+      {/* 2. Overlay sombre uniforme pour garantir la lisibilité du texte (sans dégradé directionnel complexe) */}
+      <div className="absolute inset-0 bg-arbor-bg/65 z-10 pointer-events-none" />
 
-      {/* Grille de fond "Tech" subtile (lignes à 2% d'opacité, par-dessus l'image) */}
+      {/* Grille de fond "Tech" subtile (lignes à 2% d'opacité, par-dessus l'overlay) */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:4rem_4rem] z-10 pointer-events-none" />
 
-      {/* Halos de lumière décoratifs */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-arbor-primary/5 rounded-full blur-[100px] z-10 pointer-events-none animate-pulse" />
+      {/* Halo de lumière décoratif discret */}
+      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-arbor-primary/5 rounded-full blur-[120px] z-10 pointer-events-none" />
 
-      {/* 3. Conteneur principal du contenu */}
-      <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pt-28 pb-16 min-h-screen">
+      {/* 3. Contenu du Hero (Texte flottant directement sur l'image) */}
+      <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 flex-grow flex flex-col justify-center items-start pt-32 pb-12">
         
-        {/* Panneau gauche : Carte Glassmorphic Flottante (occupant 7 colonnes en desktop) */}
-        <div 
-          className="relative lg:col-span-7 flex flex-col justify-center items-start text-left p-8 sm:p-12 lg:p-14 rounded-xl bg-arbor-surface-low/55 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-fade-in"
-          style={{
-            boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          {/* Liseré supérieur lumineux en dégradé pour remplacer l'ancienne bordure asymétrique (corrige le bug de l'arrondi droit) */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/35 to-transparent rounded-t-xl pointer-events-none" />
-
-          {/* Badge Pilule "Propulsé par IA" */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-arbor-surface-low/60 backdrop-blur-md border border-arbor-primary/30 text-arbor-primary text-xs font-arbor-mono tracking-wider mb-6">
+        <div className="max-w-4xl flex flex-col items-start text-left">
+          
+          {/* Badge Pilule "Propulsé par IA" (Nature-Tech) */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-arbor-primary/30 text-arbor-primary text-xs font-arbor-mono tracking-wider mb-8 animate-fade-in">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-arbor-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-arbor-primary"></span>
             </span>
-            PROPULSÉ PAR IA
+            PROPULSÉ PAR IA — GESTION DE NOUVELLE GÉNÉRATION
           </div>
 
-          {/* Titre Principal H1 — Forcé en Hanken Grotesk sans-serif par style en ligne */}
-          <h1 
-            className="font-arbor-display text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6"
-            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-          >
+          {/* Titre H1 — Hanken Grotesk, sans-serif, sans l'ancien style inline grâce aux classes surchargées de index.css */}
+          <h1 className="font-arbor-display text-4xl sm:text-6xl lg:text-[72px] lg:leading-[80px] font-extrabold text-white leading-tight tracking-tight mb-6">
             Gerez votre universite.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-arbor-primary via-arbor-secondary to-emerald-400 font-extrabold">
               Sans friction. Sans limite.
             </span>
           </h1>
 
-          {/* Sous-titre — Forcé en Inter sans-serif par style en ligne */}
-          <p 
-            className="font-arbor-body text-sm sm:text-base lg:text-lg text-arbor-on-surface-variant max-w-xl mb-10 leading-relaxed"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
+          {/* Sous-titre — Inter, sans-serif */}
+          <p className="font-arbor-body text-base sm:text-lg lg:text-xl text-arbor-on-surface-variant max-w-2xl mb-10 leading-relaxed">
             La première plateforme SaaS multi-tenant conçue pour moderniser l'administration académique. Inscriptions, notes, finances, e-learning et traçabilité d'audit RGPD unifiés en un seul espace sécurisé.
           </p>
 
           {/* CTAs d'action */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            {/* CTA Primaire (Raffiné avec border-none et outline-none pour supprimer le contour blanc parasite) */}
-            <button className="group w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-primary-container border-none outline-none rounded-lg shadow-[0_0_20px_rgba(87,241,219,0.20)] hover:shadow-[0_0_35px_rgba(87,241,219,0.60)] transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+            {/* CTA Primaire (Style Glassmorphic avec accent Teal pour la hiérarchie visuelle) */}
+            <button className="group w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary/85 hover:bg-arbor-primary border border-arbor-primary/20 hover:border-arbor-primary/40 rounded-lg backdrop-blur-sm shadow-[0_0_25px_rgba(87,241,219,0.15)] hover:shadow-[0_0_35px_rgba(87,241,219,0.35)] transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
               <span>Demarrer un essai gratuit</span>
               <svg 
                 className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
@@ -85,37 +74,36 @@ export default function HeroSection() {
               </svg>
             </button>
 
-            {/* CTA Secondaire (Ghost style avec border-white/20, border-none au repos écrasé) */}
-            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 outline-none rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center">
+            {/* CTA Secondaire (Blanc Glassmorphic uniforme) */}
+            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/45 rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center">
               Demander une demo
             </button>
           </div>
 
-          {/* Petite preuve sociale */}
-          <div className="mt-10 flex flex-wrap items-center gap-4 sm:gap-6 text-[11px] text-arbor-on-surface-variant/80 font-arbor-mono tracking-wider">
-            <div>⚡ MULTI-TENANT ISOLÉ</div>
-            <div className="hidden sm:block w-1 h-1 rounded-full bg-white/20" />
-            <div>🛡️ CONFORME RGPD</div>
-            <div className="hidden sm:block w-1 h-1 rounded-full bg-white/20" />
-            <div>📈 SANS ENGAGEMENT</div>
-          </div>
-
         </div>
 
-        {/* 4. Widget de stats repositionné discrètement en bas à droite (occupant 5 colonnes) */}
-        <div className="lg:col-span-5 w-full lg:h-[600px] flex items-end justify-center lg:justify-end">
-          <div className="w-full sm:w-auto min-w-[280px] p-6 rounded-xl bg-arbor-surface-dim/80 backdrop-blur-lg border border-white/10 shadow-2xl flex items-center justify-between gap-6 transform hover:scale-[1.02] transition-transform duration-300">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono tracking-widest uppercase">DISPONIBILITÉ PLATEFORME</span>
-              <span className="text-lg font-bold text-white font-arbor-display tracking-tight">99.99% Uptime</span>
-            </div>
-            <div className="flex items-center gap-2 bg-emerald-950/60 border border-emerald-500/20 px-3 py-1.5 rounded-full text-[11px] text-arbor-primary font-arbor-mono">
-              <span className="w-2 h-2 rounded-full bg-arbor-primary animate-pulse"></span>
-              ACTIF
-            </div>
+      </div>
+
+      {/* 4. Barre de statistiques épurée et minimaliste tout en bas du Hero */}
+      <div className="relative z-20 border-t border-white/5 bg-arbor-bg/40 backdrop-blur-sm py-8">
+        <div className="max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-left font-arbor-body">
+          <div className="space-y-1">
+            <div className="text-2xl font-extrabold text-white font-arbor-display tracking-tight">50+</div>
+            <div className="text-xs text-arbor-on-surface-variant/80 font-arbor-mono">UNIVERSITÉS PARTENAIRES</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-2xl font-extrabold text-white font-arbor-display tracking-tight">120K+</div>
+            <div className="text-xs text-arbor-on-surface-variant/80 font-arbor-mono">ÉTUDIANTS INSCRITS</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-2xl font-extrabold text-white font-arbor-display tracking-tight">99.99%</div>
+            <div className="text-xs text-arbor-on-surface-variant/80 font-arbor-mono">UPTIME DE LA PLATEFORME</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-2xl font-extrabold text-white font-arbor-display tracking-tight">&lt; 48h</div>
+            <div className="text-xs text-arbor-on-surface-variant/80 font-arbor-mono">DÉPLOIEMENT MULTI-TENANT</div>
           </div>
         </div>
-
       </div>
 
       {/* 5. Garde le marqueur "tech" (indicateur diamant de défilement vertical) */}

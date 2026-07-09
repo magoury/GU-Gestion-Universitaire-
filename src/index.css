@@ -177,3 +177,14 @@ code {
 .sidebar-nav::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Classes utilitaires de police pour le design system Arbor Tech */
+.font-arbor-display {
+  font-family: 'Hanken Grotesk', sans-serif !important;
+}
+.font-arbor-body {
+  font-family: 'Inter', sans-serif !important;
+}
+.font-arbor-mono {
+  font-family: 'Geist Mono', monospace !important;
+}
