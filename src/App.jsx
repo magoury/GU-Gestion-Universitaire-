@@ -12,7 +12,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Contexts / Providers
 import { AuthProvider } from './contexts/AuthContext';
-import { TenantProvider } from './contexts/TenantContext.jsx';
+import { TenantProvider } from './contexts/TenantContext';
 
 // Route guards
 import PrivateRoute from './routes/PrivateRoute.jsx';
