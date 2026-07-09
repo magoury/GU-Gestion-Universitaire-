@@ -15,9 +15,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 
 // Route guards
-import PrivateRoute from './routes/PrivateRoute.jsx';
-import RoleRoute from './routes/RoleRoute.jsx';
-import TenantRoute from './routes/TenantRoute.jsx';
+import PrivateRoute from './routes/PrivateRoute';
+import RoleRoute from './routes/RoleRoute';
+import TenantRoute from './routes/TenantRoute';
+import SuspendedTenantPage from './pages/SuspendedTenantPage';
 
 // Pages publiques
 import LandingPage from './pages/public/LandingPage.jsx';
@@ -89,6 +90,7 @@ function App() {
 
             {/* ── Routes protégées (nécessitent authentification) ── */}
             <Route element={<PrivateRoute />}>
+              <Route path="/suspended" element={<SuspendedTenantPage />} />
 
               {/* ── Super Admin ── */}
               <Route element={<RoleRoute roles={['super_admin_plateforme']} />}>
