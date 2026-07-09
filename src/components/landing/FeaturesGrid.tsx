@@ -2,6 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FeaturesGrid — Grille des fonctionnalités de la Landing Page.
 // Segmentée par profil utilisateur (Admin, Enseignant, Étudiant, Parent).
+// Grille harmonisée à 3 fonctionnalités par profil (4x3) pour un alignement parfait.
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -16,7 +17,9 @@ import {
   LibraryIcon,
   BookIcon,
   ClockIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  UsersIcon,
+  BellIcon
 } from '../icons/Icons';
 
 interface FeatureCard {
@@ -66,6 +69,11 @@ const PROFILES_DATA: ProfileGroup[] = [
         title: "Supports Pédagogiques",
         description: "Partage de supports de cours, devoirs avec date limite et communication directe avec les étudiants de sa filière.",
         icon: BookIcon
+      },
+      {
+        title: "Messagerie Directe",
+        description: "Échanges simplifiés avec l'administration et canal de communication direct avec les parents d'élèves pour le suivi.",
+        icon: BellIcon
       }
     ]
   },
@@ -82,6 +90,11 @@ const PROFILES_DATA: ProfileGroup[] = [
         title: "Bulletins en Temps Réel",
         description: "Visualisation transparente de ses moyennes semestrielles et téléchargement des relevés officiels signés.",
         icon: CheckCircleIcon
+      },
+      {
+        title: "Bibliothèque & Annales",
+        description: "Accès à la bibliothèque virtuelle de l'université, aux annales d'examens et aux ressources de recherche.",
+        icon: BookIcon
       }
     ]
   },
@@ -98,6 +111,11 @@ const PROFILES_DATA: ProfileGroup[] = [
         title: "Règlement Scolarité",
         description: "Paiement en ligne sécurisé des tranches scolaires et consultation de l'historique de facturation.",
         icon: MoneyIcon
+      },
+      {
+        title: "Rendez-vous en Ligne",
+        description: "Demandes et planification d'entretiens pédagogiques avec les enseignants de l'étudiant en un clic.",
+        icon: UsersIcon
       }
     ]
   }
@@ -128,7 +146,7 @@ export default function FeaturesGrid() {
           </p>
         </div>
 
-        {/* Grille des profils utilisateur */}
+        {/* Grille des profils utilisateur (4 colonnes de même hauteur) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-start">
           
           {PROFILES_DATA.map((group) => {
@@ -147,7 +165,7 @@ export default function FeaturesGrid() {
                   </h3>
                 </div>
 
-                {/* Liste des cartes du profil */}
+                {/* Liste des cartes du profil (parfaitement alignées avec 3 cartes par colonne) */}
                 <div className="flex flex-col gap-4">
                   {group.features.map((feature) => {
                     const FeatureIcon = feature.icon;
