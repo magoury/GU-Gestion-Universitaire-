@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HeroSection from '../../components/landing/HeroSection';
 import {
   StudentsIcon,
   TeachersIcon,
@@ -72,7 +73,6 @@ const ESPACES_CLES = {
 function LandingPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('admin');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Animations au scroll via Intersection Observer
   useEffect(() => {
@@ -97,7 +97,6 @@ function LandingPage() {
   }, []);
 
   const scrollVersSection = (id) => {
-    setMobileMenuOpen(false);
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -109,243 +108,7 @@ function LandingPage() {
   return (
     <div className="bg-gradient-to-b from-white to-slate-50 min-h-screen text-slate-800 font-body relative overflow-x-hidden">
       
-      {/* ── SECTION 1 — NAVBAR STICKY ── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 h-16 px-8 flex items-center justify-between shadow-sm">
-        
-        {/* Gauche : Logo GU adapté au fond clair */}
-        <div 
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-          className="flex items-center gap-2.5 cursor-pointer select-none"
-        >
-          <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center border border-white/10 flex-shrink-0">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#EEC058"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m4 6 8-4 8 4" />
-              <path d="m18 10 1-4H5l1 4" />
-              <path d="M14 10v4" />
-              <path d="M10 10v4" />
-              <path d="M18 14H6" />
-              <path d="M22 22H2" />
-              <path d="M20 22v-4H4v4" />
-              <path d="M12 18v-4" />
-            </svg>
-          </div>
-          <div className="flex flex-col justify-center">
-            <span className="font-serif font-bold text-lg text-[#2D6A4F] leading-none">GU</span>
-            <span className="text-[9px] font-semibold text-[#4B5563] tracking-wider uppercase leading-tight mt-0.5">
-              Gestion Universitaire
-            </span>
-          </div>
-        </div>
-
-        {/* Centre : Liens de navigation (cachés sur mobile) */}
-        <nav className="hidden md:flex items-center gap-8">
-          {[
-            { label: 'Fonctionnalités', id: 'fonctionnalites' },
-            { label: 'Tarifs', id: 'tarifs' },
-            { label: 'Témoignages', id: 'temoignages' },
-            { label: 'Contact', id: 'contact' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollVersSection(item.id)}
-              className="text-sm font-semibold text-gray-600 hover:text-[#2D6A4F] transition-colors cursor-pointer"
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Droite : Actions */}
-        <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={() => navigate('/login')}
-            className="btn btn-ghost btn-sm text-[#2D6A4F] font-bold cursor-pointer"
-          >
-            Se connecter
-          </button>
-          <button
-            onClick={() => navigate('/login?mode=inscription&plan=standard')}
-            className="btn btn-sm bg-[#2D6A4F] text-white hover:bg-[#1F4D38] border-none font-bold cursor-pointer"
-          >
-            Essai gratuit
-          </button>
-        </div>
-
-        {/* Hamburger Mobile */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-gray-600 focus:outline-none cursor-pointer"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {mobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </header>
-
-      {/* Menu Mobile Panel */}
-      {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg py-6 px-8 flex flex-col gap-4 md:hidden z-40">
-          {[
-            { label: 'Fonctionnalités', id: 'fonctionnalites' },
-            { label: 'Tarifs', id: 'tarifs' },
-            { label: 'Témoignages', id: 'temoignages' },
-            { label: 'Contact', id: 'contact' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollVersSection(item.id)}
-              className="text-left text-sm font-semibold text-gray-600 hover:text-[#2D6A4F] py-1"
-            >
-              {item.label}
-            </button>
-          ))}
-          <div className="h-px bg-gray-100 my-2" />
-          <button
-            onClick={() => navigate('/login')}
-            className="btn btn-outline border-[#2D6A4F] text-[#2D6A4F] w-full btn-sm font-bold"
-          >
-            Se connecter
-          </button>
-          <button
-            onClick={() => navigate('/login?mode=inscription&plan=standard')}
-            className="btn bg-[#2D6A4F] text-white hover:bg-[#1F4D38] border-none w-full btn-sm font-bold"
-          >
-            Essai gratuit
-          </button>
-        </div>
-      )}
-
-      {/* ── SECTION 2 — HERO ── */}
-      <section className="bg-white py-20 relative">
-        <div className="max-w-6xl mx-auto px-8 text-center">
-          {/* Badge Pill */}
-          <div className="inline-block bg-[#F0FDF4] text-[#2D6A4F] border border-green-200 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide uppercase mb-6 animate-pulse">
-            Propulsé par l'IA · Nouvelle génération académique
-          </div>
-
-          {/* Titre */}
-          <h1 className="font-serif text-5xl md:text-6xl font-bold text-[#041710] tracking-tight leading-tight max-w-4xl mx-auto text-center">
-            Sans friction. Sans limite.
-          </h1>
-
-          {/* Sous-titre */}
-          <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto mt-4 leading-relaxed text-center">
-            La première plateforme SaaS multi-tenant conçue pour moderniser l'administration académique — inscriptions, notes, finances, e-learning en un seul espace.
-          </p>
-
-          {/* CTAs */}
-          <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <button
-              onClick={() => navigate('/login?mode=inscription&plan=standard')}
-              className="btn btn-md bg-[#2D6A4F] text-white hover:bg-[#1F4D38] border-none px-6 font-bold shadow-md cursor-pointer"
-            >
-              Démarrer gratuitement →
-            </button>
-            <button
-              onClick={() => scrollVersSection('temoignages')}
-              className="btn btn-md btn-outline border-[#2D6A4F] text-[#2D6A4F] hover:bg-[#2D6A4F] hover:text-white px-6 font-bold cursor-pointer"
-            >
-              Voir la démo
-            </button>
-          </div>
-
-          {/* Mockup Dashboard */}
-          <div className="mt-16 max-w-4xl mx-auto shadow-2xl rounded-2xl overflow-hidden border border-gray-200 reveal-on-scroll opacity-0 translate-y-8 transition duration-700 ease-out">
-            {/* Barre macOS */}
-            <div className="bg-slate-100 px-4 py-3 flex items-center justify-between border-b border-gray-200">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-                <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-                <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-              </div>
-              <span className="text-xs font-semibold text-gray-400">
-                Tableau de bord · Université Demo
-              </span>
-              <div className="w-12" /> {/* Espaceur */}
-            </div>
-
-            {/* Corps Mockup sombre */}
-            <div className="bg-[#041710] p-6 text-left">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { label: 'Inscriptions', val: '2 847', unit: 'Étudiants' },
-                  { label: 'Corps enseignant', val: '143', unit: 'Professeurs' },
-                  { label: 'Trésorerie', val: '94.2M', unit: 'FCFA' },
-                  { label: 'Réussite', val: '312', unit: 'Admis' }
-                ].map((stat, idx) => (
-                  <div key={idx} className="bg-[#10231C] p-4 rounded-xl border border-white/5">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
-                      {stat.label}
-                    </span>
-                    <span className="text-2xl font-bold text-[#95D4B3] block mt-1">
-                      {stat.val}
-                    </span>
-                    <span className="text-[10px] text-gray-500 block">
-                      {stat.unit}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Graphique barres CSS */}
-              <div className="bg-[#10231C] p-4 rounded-xl mt-4 border border-white/5">
-                <span className="text-xs font-bold text-gray-300 block mb-4">
-                  Activité Académique & Progression de l'Année
-                </span>
-                <div className="flex items-end justify-between h-24 px-4 pt-2">
-                  {[35, 50, 45, 68, 62, 85, 95].map((h, i) => (
-                    <div key={i} className="flex flex-col items-center flex-1">
-                      <div 
-                        style={{ height: `${h}%` }} 
-                        className={`w-4/5 rounded-t-sm transition-all duration-500 ${
-                          i === 6 ? 'bg-[#EEC058]' : 'bg-[#2D6A4F]'
-                        }`}
-                      />
-                      <span className="text-[9px] text-gray-500 mt-1.5 font-bold">
-                        P{i + 1}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 3 — BANDE STATS ── */}
-      <section className="bg-[#F1F5F9] py-12 border-y border-gray-100">
-        <div className="max-w-6xl mx-auto px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { count: '50+', label: 'Établissements' },
-            { count: '120K', label: 'Étudiants gérés' },
-            { count: '99.9%', label: 'Disponibilité' },
-            { count: '< 48h', label: 'Délai d\'intégration' }
-          ].map((item, idx) => (
-            <div key={idx} className="reveal-on-scroll opacity-0 translate-y-8 transition duration-700 ease-out">
-              <div className="text-3xl font-bold text-[#041710] font-sans">
-                {item.count}
-              </div>
-              <div className="text-sm text-gray-600 mt-1 font-medium">
-                {item.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <HeroSection />
 
       {/* ── SECTION 4 — FONCTIONNALITÉS ── */}
       <section id="fonctionnalites" className="bg-white py-20">
