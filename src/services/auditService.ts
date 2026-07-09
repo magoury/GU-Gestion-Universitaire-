@@ -13,7 +13,7 @@
 // Toute modification de signature doit être validée contre :
 //   studentService.ts, teacherService.ts, gradeService.ts, paymentService.ts,
 //   notificationService.ts, superAdminService.ts, authService.ts,
-//   accessCodeService.ts, academicYearService.js, rgpdService.js
+//   accessCodeService.ts, academicYearService.ts, rgpdService.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
@@ -107,7 +107,7 @@ interface FiltresAuditLog {
  *
  * Appelé par : studentService, teacherService, gradeService, paymentService,
  *              notificationService, authService, accessCodeService,
- *              academicYearService (js), rgpdService (js)
+ *              academicYearService, rgpdService
  *
  * @param universityId - Identifiant du tenant (université) — requis
  * @param log          - Données du log (sans id ni timestamp)

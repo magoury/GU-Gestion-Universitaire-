@@ -38,6 +38,8 @@ export type AuditAction =
   | 'ANNEE_CLOTUREE'
   // RGPD
   | 'EXPORT_RGPD'
+  | 'EXPORT_RGPD_REFUSE'
+  | 'ANONYMISATION_REFUSEE'
   // Comptes
   | 'COMPTE_CREE'
   | 'CONNEXION'
