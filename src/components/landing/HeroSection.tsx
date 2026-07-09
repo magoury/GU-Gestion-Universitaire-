@@ -1,7 +1,7 @@
 // src/components/landing/HeroSection.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero Section — Landing Page du SaaS GU - Gestion Universitaire.
-// Version avec Image de Fond Plein Écran + Carte Glassmorphic Flottante Raffinée.
+// Version avec Image de Fond Plein Écran + Carte Glassmorphic Flottante Corrigée.
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,14 +31,16 @@ export default function HeroSection() {
       {/* 3. Conteneur principal du contenu */}
       <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pt-28 pb-16 min-h-screen">
         
-        {/* Panneau gauche : Carte Glassmorphic Flottante Raffinée (occupant 7 colonnes en desktop) */}
+        {/* Panneau gauche : Carte Glassmorphic Flottante (occupant 7 colonnes en desktop) */}
         <div 
-          className="lg:col-span-7 flex flex-col justify-center items-start text-left p-8 sm:p-12 lg:p-14 rounded-xl bg-arbor-surface-low/55 backdrop-blur-2xl border-t border-t-white/25 border-x border-x-white/15 border-b border-b-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-fade-in"
+          className="relative lg:col-span-7 flex flex-col justify-center items-start text-left p-8 sm:p-12 lg:p-14 rounded-xl bg-arbor-surface-low/55 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.4)] animate-fade-in"
           style={{
             boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.5)'
           }}
         >
-          
+          {/* Liseré supérieur lumineux en dégradé pour remplacer l'ancienne bordure asymétrique (corrige le bug de l'arrondi droit) */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/35 to-transparent rounded-t-xl pointer-events-none" />
+
           {/* Badge Pilule "Propulsé par IA" */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-arbor-surface-low/60 backdrop-blur-md border border-arbor-primary/30 text-arbor-primary text-xs font-arbor-mono tracking-wider mb-6">
             <span className="relative flex h-2 w-2">
@@ -48,23 +50,29 @@ export default function HeroSection() {
             PROPULSÉ PAR IA
           </div>
 
-          {/* Titre Principal H1 — Hanken Grotesk, resserré, contrasté */}
-          <h1 className="font-arbor-display text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6">
+          {/* Titre Principal H1 — Forcé en Hanken Grotesk sans-serif par style en ligne */}
+          <h1 
+            className="font-arbor-display text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6"
+            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+          >
             Gerez votre universite.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-arbor-primary via-arbor-secondary to-emerald-400 font-extrabold">
               Sans friction. Sans limite.
             </span>
           </h1>
 
-          {/* Sous-titre — Inter, hautement lisible */}
-          <p className="font-arbor-body text-sm sm:text-base lg:text-lg text-arbor-on-surface-variant max-w-xl mb-10 leading-relaxed">
+          {/* Sous-titre — Forcé en Inter sans-serif par style en ligne */}
+          <p 
+            className="font-arbor-body text-sm sm:text-base lg:text-lg text-arbor-on-surface-variant max-w-xl mb-10 leading-relaxed"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             La première plateforme SaaS multi-tenant conçue pour moderniser l'administration académique. Inscriptions, notes, finances, e-learning et traçabilité d'audit RGPD unifiés en un seul espace sécurisé.
           </p>
 
           {/* CTAs d'action */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            {/* CTA Primaire : Démarrer un essai gratuit (Raffiné avec effet scale et icône interactive) */}
-            <button className="group w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-primary-container rounded-lg shadow-[0_0_20px_rgba(87,241,219,0.20)] hover:shadow-[0_0_35px_rgba(87,241,219,0.60)] transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+            {/* CTA Primaire (Raffiné avec border-none et outline-none pour supprimer le contour blanc parasite) */}
+            <button className="group w-full sm:w-auto px-8 py-4 text-base font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-primary-container border-none outline-none rounded-lg shadow-[0_0_20px_rgba(87,241,219,0.20)] hover:shadow-[0_0_35px_rgba(87,241,219,0.60)] transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
               <span>Demarrer un essai gratuit</span>
               <svg 
                 className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
@@ -77,8 +85,8 @@ export default function HeroSection() {
               </svg>
             </button>
 
-            {/* CTA Secondaire : Demander une démo (Raffiné en ghost avec backdrop-blur et hover blanc translucide) */}
-            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center">
+            {/* CTA Secondaire (Ghost style avec border-white/20, border-none au repos écrasé) */}
+            <button className="w-full sm:w-auto px-8 py-4 text-base font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 outline-none rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-1 active:scale-95 cursor-pointer flex items-center justify-center">
               Demander une demo
             </button>
           </div>
