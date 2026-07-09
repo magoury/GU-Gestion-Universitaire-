@@ -43,6 +43,7 @@ export type AuditAction =
   // Comptes
   | 'COMPTE_CREE'
   | 'CONNEXION'
+  | 'CONNEXION_REFUSEE'
   // Codes d'accès [NOUVEAU]
   | 'CODE_ACCES_GENERE'
   | 'CODE_ACCES_UTILISE'
