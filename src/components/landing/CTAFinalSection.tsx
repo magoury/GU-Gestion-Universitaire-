@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useNavigate } from 'react-router-dom';
+import forest4 from '../../assets/landing/forest-4.jpg.jpeg';
 
 export default function CTAFinalSection() {
   const navigate = useNavigate();
@@ -21,10 +22,20 @@ export default function CTAFinalSection() {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-arbor-surface-low to-arbor-bg text-arbor-on-surface py-24 px-6 lg:px-20 overflow-hidden font-arbor-body border-t border-white/5">
+    <section id="cta-final" className="relative bg-gradient-to-b from-arbor-surface-low to-arbor-bg text-arbor-on-surface py-24 px-6 lg:px-20 overflow-hidden font-arbor-body border-t border-white/5">
+      {/* Image de forêt en arrière-plan à 100% d'opacité */}
+      <img
+        src={forest4}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0"
+        loading="lazy"
+      />
+      {/* Overlay dégradé identique à la section Hero pour la transition (from-arbor-bg/65 to-arbor-bg z-10) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-arbor-bg/65 to-arbor-bg z-10 pointer-events-none" />
+
       {/* Grille technique de fond avec estompage graduel par le bas (mask-image) */}
       <div 
-        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none"
+        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none z-10"
         style={{
           maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)',
           WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)'
@@ -32,9 +43,10 @@ export default function CTAFinalSection() {
       />
 
       {/* Halo lumineux d'arrière-plan */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-arbor-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-arbor-primary/5 rounded-full blur-[100px] pointer-events-none z-10" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto text-center flex flex-col items-center">
+      {/* Conteneur principal avec z-20 pour surmonter l'overlay */}
+      <div className="relative z-20 w-full max-w-[1440px] mx-auto text-center flex flex-col items-center">
         <h2 className="font-arbor-display text-2xl lg:text-3xl font-extrabold text-white tracking-tight max-w-3xl mx-auto mb-8">
           Votre université mérite mieux qu’un tableur Excel
         </h2>

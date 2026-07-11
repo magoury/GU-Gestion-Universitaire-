@@ -10,7 +10,7 @@ import Navbar from './Navbar';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-arbor-bg text-arbor-on-surface flex flex-col justify-between overflow-hidden font-arbor-body">
+    <section id="hero" className="relative min-h-screen bg-arbor-bg text-arbor-on-surface flex flex-col justify-between overflow-hidden font-arbor-body">
       
       {/* Navbar intégrée (fixe en haut, z-30) */}
       <Navbar />
@@ -32,7 +32,7 @@ export default function HeroSection() {
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-arbor-primary/5 rounded-full blur-[100px] z-10 pointer-events-none" />
 
       {/* 3. Contenu du Hero (Texte flottant directement sur l'image - Version compacte) */}
-      <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 flex-grow flex flex-col justify-center items-start pt-24 pb-8">
+      <div className="relative z-20 w-full max-w-[1440px] mx-auto px-6 lg:px-20 flex-grow flex flex-col justify-center items-start pt-16 pb-16">
         
         <div className="max-w-4xl flex flex-col items-start text-left">
           
@@ -83,38 +83,6 @@ export default function HeroSection() {
         </div>
 
       </div>
-
-      {/* 4. Barre de statistiques épurée et minimaliste tout en bas (Padding vertical réduit de py-8 à py-5) */}
-      <div className="relative z-20 border-t border-white/5 bg-arbor-bg/40 backdrop-blur-sm py-5">
-        <div className="max-w-[1440px] mx-auto px-6 lg:px-20 grid grid-cols-2 md:grid-cols-4 gap-6 text-left font-arbor-body">
-          <div className="space-y-0.5">
-            <div className="text-xl lg:text-2xl font-extrabold text-white font-arbor-display tracking-tight">50+</div>
-            <div className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono">UNIVERSITÉS PARTENAIRES</div>
-          </div>
-          <div className="space-y-0.5">
-            <div className="text-xl lg:text-2xl font-extrabold text-white font-arbor-display tracking-tight">120K+</div>
-            <div className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono">ÉTUDIANTS INSCRITS</div>
-          </div>
-          <div className="space-y-0.5">
-            <div className="text-xl lg:text-2xl font-extrabold text-white font-arbor-display tracking-tight">99.99%</div>
-            <div className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono">UPTIME DE LA PLATEFORME</div>
-          </div>
-          <div className="space-y-0.5">
-            <div className="text-xl lg:text-2xl font-extrabold text-white font-arbor-display tracking-tight">&lt; 48h</div>
-            <div className="text-[10px] text-arbor-on-surface-variant/80 font-arbor-mono">DÉPLOIEMENT MULTI-TENANT</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Garde le marqueur "tech" (indicateur diamant de défilement vertical) */}
-      <div className="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 flex-col items-center gap-4 z-40">
-        <div className="w-1.5 h-1.5 rotate-45 bg-arbor-primary shadow-[0_0_8px_#57f1db]"></div>
-        <div className="w-[1px] h-12 bg-white/20"></div>
-        <div className="w-1.5 h-1.5 rotate-45 border border-white/40 hover:bg-white/20 transition-all cursor-pointer"></div>
-        <div className="w-1.5 h-1.5 rotate-45 border border-white/40 hover:bg-white/20 transition-all cursor-pointer"></div>
-        <div className="w-1.5 h-1.5 rotate-45 border border-white/40 hover:bg-white/20 transition-all cursor-pointer"></div>
-      </div>
-      
     </section>
   );
 }

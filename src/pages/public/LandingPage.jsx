@@ -15,6 +15,8 @@ import TestimonialsSection from '../../components/landing/TestimonialsSection';
 import FAQSection from '../../components/landing/FAQSection';
 import CTAFinalSection from '../../components/landing/CTAFinalSection';
 import Footer from '../../components/landing/Footer';
+import ScrollIndicator from '../../components/landing/ScrollIndicator';
+import StatsBar from '../../components/landing/StatsBar';
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -44,7 +46,11 @@ function LandingPage() {
   return (
     <div className="bg-gradient-to-b from-[#0b1326] to-[#040914] min-h-screen text-slate-200 font-body relative overflow-x-hidden">
       
+      <ScrollIndicator />
+
       <HeroSection />
+
+      <StatsBar />
 
       <FeaturesGrid />
 

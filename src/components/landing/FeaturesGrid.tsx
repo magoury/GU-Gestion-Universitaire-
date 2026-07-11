@@ -6,6 +6,7 @@
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
+import forest2 from '../../assets/landing/forest-2.jpg.jpeg';
 import { 
   BuildingIcon, 
   TeacherIcon, 
@@ -124,14 +125,24 @@ const PROFILES_DATA: ProfileGroup[] = [
 export default function FeaturesGrid() {
   return (
     <section id="features" className="relative bg-arbor-surface-low text-arbor-on-surface py-20 px-6 lg:px-20 overflow-hidden font-arbor-body border-t border-white/5">
-      
+      {/* Image de forêt en arrière-plan à 100% d'opacité */}
+      <img
+        src={forest2}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0"
+        loading="lazy"
+      />
+      {/* Overlay sombre identique à la section Hero (bg-arbor-bg/65 z-10) */}
+      <div className="absolute inset-0 bg-arbor-bg/65 z-10 pointer-events-none" />
+
       {/* Grille de fond "Tech" subtile */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none z-10" />
 
       {/* Halo lumineux vert en arrière-plan */}
-      <div className="absolute top-1/2 left-2/3 w-[300px] h-[300px] bg-arbor-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-2/3 w-[300px] h-[300px] bg-arbor-primary/5 rounded-full blur-[100px] pointer-events-none z-10" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto">
+      {/* Conteneur principal avec z-20 pour surmonter l'overlay */}
+      <div className="relative z-20 w-full max-w-[1440px] mx-auto">
         
         {/* En-tête de section */}
         <div className="text-center max-w-2xl mx-auto mb-16">

@@ -19,7 +19,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 px-4">
+    <div className="relative z-30 w-full px-4 pt-6">
       {/* Conteneur principal en format pilule flottante */}
       <div
         className={`max-w-5xl mx-auto transition-all duration-300 bg-arbor-surface/70 backdrop-blur-xl border border-white/10 shadow-xl shadow-black/30 ${

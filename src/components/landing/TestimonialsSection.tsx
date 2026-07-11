@@ -6,6 +6,8 @@
 // Style compact, moderne et conforme au design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
+import forest3 from '../../assets/landing/forest-3.jpg.jpeg';
+
 interface Testimonial {
   id: string;
   name: string;
@@ -53,13 +55,24 @@ const TESTIMONIALS_DATA: Testimonial[] = [
 export default function TestimonialsSection() {
   return (
     <section id="testimonials" className="relative bg-arbor-surface-low text-arbor-on-surface py-16 px-6 lg:px-20 overflow-hidden font-arbor-body border-t border-white/5">
+      {/* Image de forêt en arrière-plan à 100% d'opacité */}
+      <img
+        src={forest3}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none z-0"
+        loading="lazy"
+      />
+      {/* Overlay sombre identique à la section Hero (bg-arbor-bg/65 z-10) */}
+      <div className="absolute inset-0 bg-arbor-bg/65 z-10 pointer-events-none" />
+
       {/* Grille technique de fond subtile */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none z-10" />
 
       {/* Halo lumineux d'arrière-plan */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-arbor-primary/5 rounded-full blur-[110px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-arbor-primary/5 rounded-full blur-[110px] pointer-events-none z-10" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto">
+      {/* Conteneur principal avec z-20 pour surmonter l'overlay */}
+      <div className="relative z-20 w-full max-w-[1440px] mx-auto">
         {/* En-tête de section */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arbor-bg/60 border border-arbor-primary/30 text-arbor-primary text-[10px] font-arbor-mono tracking-widest uppercase mb-3">
