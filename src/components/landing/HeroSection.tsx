@@ -5,10 +5,20 @@
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useNavigate } from 'react-router-dom';
 import forest1 from '../../assets/landing/forest-1.jpg.jpeg';
 import Navbar from './Navbar';
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
+  const handleScrollToContact = () => {
+    const el = document.getElementById('contact');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="hero" className="relative min-h-screen bg-arbor-bg text-arbor-on-surface flex flex-col justify-between overflow-hidden font-arbor-body">
       
@@ -61,7 +71,10 @@ export default function HeroSection() {
           {/* CTAs d'action — Padding px-6 py-3 et texte text-sm, avec effet de survol vert foncé */}
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto font-arbor-body">
             {/* CTA Primaire : Démarrer un essai gratuit (Survol vert foncé : hover:bg-arbor-secondary-container hover:text-white) */}
-            <button className="group w-full sm:w-auto px-6 py-3 text-sm font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-secondary-container hover:text-white border-none outline-none rounded-lg shadow-[0_0_15px_rgba(87,241,219,0.15)] hover:shadow-[0_0_25px_rgba(20,79,75,0.40)] transition-all duration-300 ease-out transform hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+            <button
+              onClick={() => navigate('/onboarding?plan=standard')}
+              className="group w-full sm:w-auto px-6 py-3 text-sm font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-secondary-container hover:text-white border-none outline-none rounded-lg shadow-[0_0_15px_rgba(87,241,219,0.15)] hover:shadow-[0_0_25px_rgba(20,79,75,0.40)] transition-all duration-300 ease-out transform hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            >
               <span>Demarrer un essai gratuit</span>
               <svg 
                 className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" 
@@ -75,7 +88,10 @@ export default function HeroSection() {
             </button>
 
             {/* CTA Secondaire : Demander une démo (Survol vert foncé translucide : hover:bg-arbor-secondary-container/20) */}
-            <button className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-white/10 hover:bg-arbor-secondary-container/20 border border-white/20 hover:border-arbor-primary/30 outline-none rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center justify-center">
+            <button
+              onClick={handleScrollToContact}
+              className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-white/10 hover:bg-arbor-secondary-container/20 border border-white/20 hover:border-arbor-primary/30 outline-none rounded-lg backdrop-blur-sm transition-all duration-300 ease-out transform hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center justify-center"
+            >
               Demander une demo
             </button>
           </div>

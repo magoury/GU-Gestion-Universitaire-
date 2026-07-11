@@ -1,14 +1,9 @@
-// src/components/landing/Navbar.tsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Navbar — Barre de navigation réutilisable en format pilule flottante.
-// Comporte un menu mobile interactif dépliable en hauteur (accordéon vertical).
-// Conforme au design system "Arbor Tech" (glassmorphism, accent teal).
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleScrollTo = (id: string) => {
     setIsOpen(false);
@@ -74,12 +69,18 @@ export default function Navbar() {
           {/* BOUTONS D'ACTION (Droite - Desktop) */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             {/* Se connecter (texte simple) */}
-            <button className="px-3 py-1 text-xs text-arbor-on-surface-variant hover:text-arbor-primary font-medium transition-all duration-200 cursor-pointer">
+            <button
+              onClick={() => navigate('/login')}
+              className="px-3 py-1 text-xs text-arbor-on-surface-variant hover:text-arbor-primary font-medium transition-all duration-200 cursor-pointer"
+            >
               Se connecter
             </button>
 
             {/* Essai gratuit (bouton teal pilule) */}
-            <button className="px-3.5 py-1.5 text-xs font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-secondary-container hover:text-white rounded-full shadow-md shadow-arbor-primary/10 transition-all duration-200 active:scale-95 cursor-pointer">
+            <button
+              onClick={() => navigate('/onboarding?plan=standard')}
+              className="px-3.5 py-1.5 text-xs font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-secondary-container hover:text-white rounded-full shadow-md shadow-arbor-primary/10 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
               Essai gratuit
             </button>
           </div>
@@ -147,13 +148,19 @@ export default function Navbar() {
             
             <div className="flex flex-col gap-2 pt-1">
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/login');
+                }}
                 className="w-full py-2 text-xs text-arbor-on-surface-variant hover:text-arbor-primary font-medium text-left transition-colors duration-200 cursor-pointer"
               >
                 Se connecter
               </button>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/onboarding?plan=standard');
+                }}
                 className="w-full py-2 text-xs font-semibold text-arbor-on-primary bg-arbor-primary hover:bg-arbor-secondary-container hover:text-white rounded-full shadow-md text-center transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 Essai gratuit

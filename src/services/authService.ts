@@ -20,6 +20,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   type User as FirebaseUser,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth'
 import { ref, set, get } from 'firebase/database'
 import { auth, database } from '@fb'
@@ -73,6 +75,10 @@ export function traduireErreurFirebase(code: string): string {
       return "Impossible de contacter le serveur d'authentification. Vérifiez votre connexion Internet."
     case 'auth/requires-recent-login':
       return 'Cette action nécessite une réauthentification récente. Veuillez vous reconnecter puis réessayer.'
+    case 'auth/popup-closed-by-user':
+      return "La fenêtre de connexion Google a été fermée avant la fin de l'authentification."
+    case 'auth/account-exists-with-different-credential':
+      return "Un compte existe déjà avec cette adresse email mais utilise une autre méthode de connexion (ex: mot de passe)."
     default:
       return "Une erreur d'authentification est survenue. Veuillez réessayer."
   }
@@ -285,6 +291,124 @@ export async function resetPassword(email: string): Promise<void> {
   }
 }
 
+// ── Google Sign-In ────────────────────────────────────────────────────────────
+
+export type GoogleAuthResult =
+  | UserProfile
+  | {
+      isNewUser: true
+      email: string
+      uid: string
+      displayName: string | null
+      photoURL: string | null
+    }
+
+/**
+ * Connecte ou inscrit un utilisateur via Google Sign-In (Popup).
+ * Applique des règles de validation strictes :
+ *   1. Si onboarding (isRegistration=true) : vérifie si un profil existe déjà pour
+ *      éviter d'écraser un tenant existant (si oui, retourne le profil existant).
+ *   2. Si connexion (isRegistration=false) :
+ *      - Rejette immédiatement (signOut) si le rôle est student, teacher ou parent
+ *        (connexion Google réservée aux admins).
+ *      - Rejette si l'université de l'utilisateur est suspendue.
+ *      - Rejette si aucun compte n'est associé à cette adresse Google.
+ *
+ * @param isRegistration - Indique si l'action est menée dans le tunnel d'onboarding
+ */
+export async function signInWithGooglePopup(
+  isRegistration: boolean = false
+): Promise<GoogleAuthResult> {
+  const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+
+  try {
+    const userCredential = await signInWithPopup(auth, provider)
+    const user = userCredential.user
+    const uid = user.uid
+
+    // Vérifier l'existence du profil dans la base de données
+    const profileRef = ref(database, `users/${uid}`)
+    const snapshot = await get(profileRef)
+
+    if (snapshot.exists()) {
+      const profileData = snapshot.val() as Record<string, unknown>
+      const role = profileData.role as Role
+      const universityId = (profileData.universityId as string) || null
+
+      if (!isRegistration) {
+        // Garde 2 : Restriction de rôle sur le LOGIN
+        const rolesInterdits: Role[] = ['student', 'teacher', 'parent']
+        if (rolesInterdits.includes(role)) {
+          await signOut(auth)
+
+          if (universityId) {
+            await ecrireAuditLog(universityId, {
+              acteurId: uid,
+              acteurNom: `${profileData.prenom} ${profileData.nom}`,
+              acteurRole: role,
+              action: 'CONNEXION_REFUSEE',
+              cible: uid,
+              detail: `Tentative de connexion via Google par un ${role} (Google réservé aux administrateurs).`,
+            })
+          }
+
+          throw new Error(
+            'Connexion Google non autorisée pour votre rôle. Veuillez utiliser la connexion standard avec vos identifiants.'
+          )
+        }
+
+        // Vérifier si l'université de l'admin est suspendue
+        if (universityId) {
+          const statusSnapshot = await get(ref(database, `saas_admin/universites/${universityId}/statut`))
+          if (statusSnapshot.exists() && statusSnapshot.val() === 'suspendu') {
+            await signOut(auth)
+            throw new Error(
+              'Accès refusé. Cette université a été temporairement suspendue par la plateforme.'
+            )
+          }
+        }
+      }
+
+      // Retourner le profil complet existant
+      return {
+        uid,
+        email: user.email,
+        role,
+        universityId,
+        nom: (profileData.nom as string) || '',
+        prenom: (profileData.prenom as string) || '',
+        photoURL: (profileData.photoURL as string) || null,
+      }
+    } else {
+      // Le profil n'existe pas en base de données
+
+      // Garde 3 :LoginPage et aucun profil existant
+      if (!isRegistration) {
+        await signOut(auth)
+        throw new Error(
+          "Aucun compte associé à cette adresse Google. Utilisez le tunnel d'inscription si vous souhaitez inscrire une nouvelle université."
+        )
+      }
+
+      // Cas 1 : Onboarding et nouveau compte
+      return {
+        isNewUser: true,
+        email: user.email || '',
+        uid,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+      }
+    }
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string }
+    if (firebaseError.code) {
+      throw new Error(traduireErreurFirebase(firebaseError.code))
+    }
+    throw error
+  }
+}
+
 // ── Export default (compatibilité composants .jsx existants) ──────────────────
 // Les 7 fichiers .jsx qui importent depuis 'authService.js' utilisent
 // soit les named exports ci-dessus, soit le default export ci-dessous.
@@ -295,5 +419,6 @@ export default {
   getCurrentUser,
   createUserWithRole,
   resetPassword,
+  signInWithGooglePopup,
   traduireErreurFirebase,
 }
