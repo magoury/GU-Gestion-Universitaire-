@@ -19,7 +19,6 @@ import PrivateRoute from './routes/PrivateRoute';
 import RoleRoute from './routes/RoleRoute';
 import TenantRoute from './routes/TenantRoute';
 import SuspendedTenantPage from './pages/SuspendedTenantPage';
-import FeaturesGrid from './components/landing/FeaturesGrid';
 
 // Pages publiques
 import LandingPage from './pages/public/LandingPage.jsx';
@@ -52,7 +51,6 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/test-features" element={<FeaturesGrid />} />
 
             {/* ── Page accès non autorisé ── */}
             <Route
