@@ -1,16 +1,21 @@
-// src/components/teacher/TeacherHeader.jsx
+// src/components/teacher/TeacherHeader.tsx
 // ──────────────────────────────────────────────────────────────
-// En-tête de l'espace Enseignant.
+// En-tête de l'espace Enseignant — version TSX.
 // Sticky, barre de recherche et compteur de notifications non lues.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useMemo } from 'react';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { useAuth } from '../../hooks/useAuth.js';
-import { useFirebaseData } from '../../hooks/useFirebaseData.js';
+import { useAuth } from '../../hooks/useAuth';
+import { useFirebaseData } from '../../hooks/useFirebaseData';
 import { BellIcon, SearchIcon } from '../icons/Icons.jsx';
+import type { Notification } from '@/types';
 
-function TeacherHeader({ title = 'Enseignant' }) {
+interface TeacherHeaderProps {
+  title?: string;
+}
+
+function TeacherHeader({ title = 'Enseignant' }: TeacherHeaderProps): React.JSX.Element {
   const { universityId } = useTenant();
   const { user } = useAuth();
 
@@ -20,7 +25,7 @@ function TeacherHeader({ title = 'Enseignant' }) {
   // Filtrer les notifications pour cet enseignant
   const nbNonLues = useMemo(() => {
     if (!notifsData) return 0;
-    const items = Object.values(notifsData);
+    const items = Object.values(notifsData) as Notification[];
     return items.filter(
       (n) =>
         !n.lue &&
@@ -70,3 +75,4 @@ function TeacherHeader({ title = 'Enseignant' }) {
 }
 
 export default TeacherHeader;
+export { TeacherHeader };

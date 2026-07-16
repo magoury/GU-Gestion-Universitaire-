@@ -1,16 +1,36 @@
-// src/components/teacher/sections/ResourcesSection.jsx
+// src/components/teacher/sections/ResourcesSection.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de dépôt de ressources pédagogiques pour les étudiants.
+// Section de dépôt de ressources pédagogiques pour les étudiants — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
 import { ref, push, set } from 'firebase/database';
 import { database } from '@fb';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
-import { AlertIcon, CheckIcon, PlusIcon, FileIcon, BookIcon } from '../../icons/Icons.jsx';
+import { AlertIcon, CheckIcon, PlusIcon, BookIcon } from '../../icons/Icons.jsx';
+
+interface CourseConfig {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+interface PedagogicResource {
+  id: string;
+  titre: string;
+  type: string;
+  courseId: string;
+  url: string;
+  enseignantId: string;
+  timestamp: number;
+}
 
 const TYPES_RESSOURCE = [
   { value: 'PDF', label: 'Document PDF' },
@@ -19,7 +39,7 @@ const TYPES_RESSOURCE = [
   { value: 'Présentation', label: 'Support de Cours (PPTX)' },
 ];
 
-function ResourcesSection() {
+function ResourcesSection(): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -28,16 +48,15 @@ function ResourcesSection() {
   const { data: resourcesData, loading: loadingResources } = useFirebaseData('library/resources', universityId);
 
   // Liste des cours de l'enseignant connecté
-  const coursList = useMemo(() => {
+  const coursList = useMemo<CourseConfig[]>(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as CourseConfig[];
   }, [teacherData]);
 
   // Liste des ressources pédagogiques créées par cet enseignant (ou affectées à ses cours)
-  const resourcesList = useMemo(() => {
+  const resourcesList = useMemo<PedagogicResource[]>(() => {
     if (!resourcesData) return [];
-    const list = Object.values(resourcesData);
-    // Filtrer par cours de l'enseignant
+    const list = Object.values(resourcesData) as PedagogicResource[];
     return list.filter((r) => coursList.some((c) => c.id === r.courseId));
   }, [resourcesData, coursList]);
 
@@ -54,8 +73,9 @@ function ResourcesSection() {
   const [loadingAdd, setLoadingAdd] = useState(false);
 
   // Ajouter une ressource
-  const handleAjouterRessource = async (e) => {
+  const handleAjouterRessource = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -86,7 +106,7 @@ function ResourcesSection() {
       setSelectedCourse('');
       setUrl('');
       setModalOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de l\'ajout de la ressource.');
     } finally {
       setLoadingAdd(false);
@@ -96,14 +116,14 @@ function ResourcesSection() {
   if (loadingTeacher || loadingResources) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement des ressources...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* Barre d'action */}
       <div className="flex justify-between items-center">
@@ -124,13 +144,13 @@ function ResourcesSection() {
 
       {/* Feedback Alerts */}
       {erreur && (
-        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <AlertIcon className="w-4 h-4 shrink-0" />
           <span>{erreur}</span>
         </div>
       )}
       {success && (
-        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <CheckIcon className="w-4 h-4 shrink-0" />
           <span>{success}</span>
         </div>
@@ -142,7 +162,7 @@ function ResourcesSection() {
           Aucune ressource pédagogique partagée pour le moment.
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {resourcesList.map((res) => {
             const coursName = coursList.find((c) => c.id === res.courseId)?.nom || res.courseId;
 
@@ -186,7 +206,7 @@ function ResourcesSection() {
 
       {/* ── MODAL : AJOUTER UNE RESSOURCE ── */}
       {modalOuverte && (
-        <div className="modal modal-open">
+        <div className="modal modal-open animate-scale-up">
           <div className="modal-box glass-card border border-white/10 rounded-lg p-6 max-w-lg">
             <h3 className="font-bold text-sm text-accent uppercase tracking-wider font-display mb-4">
               Ajouter une ressource pédagogique
@@ -282,3 +302,4 @@ function ResourcesSection() {
 }
 
 export default ResourcesSection;
+export { ResourcesSection };

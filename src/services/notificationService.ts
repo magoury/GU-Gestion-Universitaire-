@@ -76,7 +76,7 @@ export async function envoyerNotification(universityId: string, data: EnvoyerNot
   if (userRole !== 'system' && userRole !== 'super_admin_plateforme' && userRole !== 'admin_universite') {
     let autorise = false;
     if (userRole === 'teacher') {
-      autorise = ['rdv_parent', 'message_parent', 'absence'].includes(data.type);
+      autorise = ['rdv_parent', 'message_parent', 'absence', 'message_cours'].includes(data.type);
     }
 
     if (!autorise) {

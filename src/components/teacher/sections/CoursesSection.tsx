@@ -1,15 +1,30 @@
-// src/components/teacher/sections/CoursesSection.jsx
+// src/components/teacher/sections/CoursesSection.tsx
 // ──────────────────────────────────────────────────────────────
-// Section d'affichage des cours et de consultation des étudiants.
+// Section d'affichage des cours et de consultation des étudiants — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { BookIcon, StudentsIcon, NotesIcon } from '../../icons/Icons.jsx';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { StudentsIcon } from '../../icons/Icons.jsx';
+import type { Student } from '@/types';
 
-function CoursesSection({ onNavigateToGrades }) {
+interface Course {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+interface CoursesSectionProps {
+  onNavigateToGrades: (courseId: string) => void;
+}
+
+function CoursesSection({ onNavigateToGrades }: CoursesSectionProps): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -18,19 +33,19 @@ function CoursesSection({ onNavigateToGrades }) {
   const { data: allStudents, loading: loadingStudents } = useFirebaseData('students', universityId);
 
   // Liste des cours
-  const coursList = useMemo(() => {
+  const coursList = useMemo<Course[]>(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as Course[];
   }, [teacherData]);
 
   // Modal Étudiants
   const [modalOuverte, setModalOuverte] = useState(false);
-  const [coursSelect, setCoursSelect] = useState(null);
+  const [coursSelect, setCoursSelect] = useState<Course | null>(null);
 
   // Filtrer les étudiants pour un cours donné
-  const getStudentsForCourse = (cours) => {
+  const getStudentsForCourse = (cours: Course | null) => {
     if (!allStudents || !cours) return [];
-    const list = Object.values(allStudents);
+    const list = Object.values(allStudents) as Student[];
     return list.filter(
       (s) =>
         (!cours.filiere || s.filiere === cours.filiere) &&
@@ -38,12 +53,12 @@ function CoursesSection({ onNavigateToGrades }) {
     );
   };
 
-  const handleVoirEtudiants = (cours) => {
+  const handleVoirEtudiants = (cours: Course) => {
     setCoursSelect(cours);
     setModalOuverte(true);
   };
 
-  const etudiantsAffiches = useMemo(() => {
+  const etudiantsAffiches = useMemo<Student[]>(() => {
     return getStudentsForCourse(coursSelect);
   }, [allStudents, coursSelect]);
 
@@ -57,7 +72,7 @@ function CoursesSection({ onNavigateToGrades }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       <h2 className="text-sm font-semibold uppercase tracking-wider text-accent font-display">Mes Enseignements</h2>
 
@@ -66,7 +81,7 @@ function CoursesSection({ onNavigateToGrades }) {
           Aucun cours ne vous a été assigné pour le moment.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {coursList.map((cours) => {
             const etudiantsCount = getStudentsForCourse(cours).length;
 
@@ -152,7 +167,7 @@ function CoursesSection({ onNavigateToGrades }) {
                 <tbody>
                   {etudiantsAffiches.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-6 text-on-surface-muted italic">
+                      <td colSpan={4} className="text-center py-6 text-on-surface-muted italic">
                         Aucun étudiant inscrit dans ce cours.
                       </td>
                     </tr>
@@ -190,3 +205,4 @@ function CoursesSection({ onNavigateToGrades }) {
 }
 
 export default CoursesSection;
+export { CoursesSection };

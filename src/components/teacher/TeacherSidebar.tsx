@@ -1,14 +1,14 @@
-// src/components/teacher/TeacherSidebar.jsx
+// src/components/teacher/TeacherSidebar.tsx
 // ──────────────────────────────────────────────────────────────
-// Sidebar pour l'espace Enseignant.
+// Sidebar pour l'espace Enseignant — version TSX.
 // Navigation et informations de profil.
 // ──────────────────────────────────────────────────────────────
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
+import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { logout } from '../../services/authService.js';
+import { logout } from '../../services/authService';
 import LogoGU from '../ui/LogoGU.jsx';
 import {
   HomeIcon,
@@ -20,6 +20,11 @@ import {
   LogoutIcon
 } from '../icons/Icons.jsx';
 
+interface TeacherSidebarProps {
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
+}
+
 const MENU_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', Icon: HomeIcon },
   { id: 'courses', label: 'Mes Cours', Icon: BookIcon },
@@ -29,7 +34,7 @@ const MENU_ITEMS = [
   { id: 'messages', label: 'Messages', Icon: BellIcon },
 ];
 
-function TeacherSidebar({ activeSection = 'dashboard', onSectionChange }) {
+function TeacherSidebar({ activeSection = 'dashboard', onSectionChange }: TeacherSidebarProps): React.JSX.Element {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { universityConfig } = useTenant();
@@ -106,3 +111,4 @@ function TeacherSidebar({ activeSection = 'dashboard', onSectionChange }) {
 }
 
 export default TeacherSidebar;
+export { TeacherSidebar };

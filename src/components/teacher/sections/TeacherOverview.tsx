@@ -1,17 +1,28 @@
-// src/components/teacher/sections/TeacherOverview.jsx
+// src/components/teacher/sections/TeacherOverview.tsx
 // ──────────────────────────────────────────────────────────────
-// Vue d'ensemble (Dashboard) pour l'enseignant connecté.
+// Vue d'ensemble (Dashboard) pour l'enseignant connecté — version TSX.
 // Affiche des indicateurs clés (KPIs) et ses cours en temps réel.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
 import { BookIcon, StudentsIcon, NotesIcon, FileIcon } from '../../icons/Icons.jsx';
+import type { Grade, Student, Assignment } from '@/types';
 
-function TeacherOverview({ onNavigate, onNavigateToGrades }) {
+interface TeacherOverviewProps {
+  onNavigateToGrades: (courseId: string) => void;
+}
+
+interface ActivityItem {
+  id: string;
+  texte: string;
+  date: number;
+}
+
+function TeacherOverview({ onNavigateToGrades }: TeacherOverviewProps): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -24,18 +35,16 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
   // 1. Liste des cours
   const coursList = useMemo(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as any[];
   }, [teacherData]);
 
   // 2. Calcul du nombre d'étudiants uniques inscrits dans ses cours
-  // (Pour l'exemple, les cours ont un niveau/filière et on compte les étudiants qui y correspondent)
   const totalEtudiants = useMemo(() => {
     if (!allStudents || coursList.length === 0) return 0;
-    const students = Object.values(allStudents);
-    const setEtudiants = new Set();
+    const students = Object.values(allStudents) as Student[];
+    const setEtudiants = new Set<string>();
 
     students.forEach((student) => {
-      // Si l'étudiant fait partie d'une filière et d'un niveau d'un des cours de l'enseignant
       const match = coursList.some(
         (c) =>
           (!c.filiere || c.filiere === student.filiere) &&
@@ -52,7 +61,7 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
   // 3. Notes saisies ce mois-ci par cet enseignant
   const notesSaisiesCeMois = useMemo(() => {
     if (!allGrades) return 0;
-    const grades = Object.values(allGrades);
+    const grades = Object.values(allGrades) as Grade[];
     const debutMois = new Date();
     debutMois.setDate(1);
     debutMois.setHours(0, 0, 0, 0);
@@ -65,24 +74,21 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
   // 4. Devoirs publiés en cours
   const devoirsEnAttente = useMemo(() => {
     if (!allAssignments) return 0;
-    const list = Object.values(allAssignments);
-    // Filtrer les devoirs créés pour les cours de cet enseignant
+    const list = Object.values(allAssignments) as Assignment[];
     return list.filter((a) => coursList.some((c) => c.id === a.courseId)).length;
   }, [allAssignments, coursList]);
 
   // 5. Activité récente (5 dernières notes saisies par cet enseignant)
-  const activiteRecente = useMemo(() => {
+  const activiteRecente = useMemo<ActivityItem[]>(() => {
     if (!allGrades || !allStudents) return [];
-    const grades = Object.values(allGrades).filter((g) => g.enseignantId === user?.uid);
-    const studentsMap = allStudents || {};
+    const grades = (Object.values(allGrades) as Grade[]).filter((g) => g.enseignantId === user?.uid);
+    const studentsMap = allStudents as Record<string, Student>;
 
-    // Trier par date décroissante
     const triees = grades.sort((a, b) => b.dateSaisie - a.dateSaisie).slice(0, 5);
 
     return triees.map((g) => {
-      const etudiant = studentsMap[g.studentId]
-        ? `${studentsMap[g.studentId].prenom} ${studentsMap[g.studentId].nom}`
-        : g.studentId;
+      const infoStu = studentsMap[g.studentId];
+      const etudiant = infoStu ? `${infoStu.prenom} ${infoStu.nom}` : g.studentId;
       return {
         id: g.id,
         texte: `Note de ${g.note}/20 saisie pour ${etudiant} en ${g.courseId || g.matiereId}`,
@@ -104,7 +110,7 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
     <div className="flex flex-col gap-6 font-body text-on-surface">
       
       {/* ── KPI CARDS ── */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* Mes Cours */}
         <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
@@ -153,10 +159,10 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
       </div>
 
       {/* ── DOUBLE GRILLE CENTRALISÉE ── */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Mes Cours (Gauche) */}
-        <div className="col-span-2 flex flex-col gap-3">
+        <div className="lg:col-span-2 flex flex-col gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-accent font-display">Mes Cours Actifs</h2>
           
           {coursList.length === 0 ? (
@@ -164,11 +170,10 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
               Aucun cours ne vous a encore été affecté par l'administration.
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {coursList.map((cours) => {
-                // Trouver la dernière note pour ce cours
                 const notesCours = allGrades
-                  ? Object.values(allGrades).filter((g) => g.courseId === cours.id && g.enseignantId === user?.uid)
+                  ? (Object.values(allGrades) as Grade[]).filter((g) => g.courseId === cours.id && g.enseignantId === user?.uid)
                   : [];
                 const derniereNote = notesCours.sort((a, b) => b.dateSaisie - a.dateSaisie)[0];
 
@@ -232,3 +237,4 @@ function TeacherOverview({ onNavigate, onNavigateToGrades }) {
 }
 
 export default TeacherOverview;
+export { TeacherOverview };

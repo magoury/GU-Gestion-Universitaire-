@@ -1,17 +1,28 @@
-// src/components/teacher/sections/MessagesSection.jsx
+// src/components/teacher/sections/MessagesSection.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de messagerie et de publication d'annonces aux étudiants.
+// Section de messagerie et de publication d'annonces aux étudiants — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { envoyerNotification } from '../../../services/notificationService.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { envoyerNotification } from '../../../services/notificationService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, BellIcon } from '../../icons/Icons.jsx';
+import type { Notification } from '@/types';
 
-function MessagesSection() {
+interface CourseConfig {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+function MessagesSection(): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -20,15 +31,15 @@ function MessagesSection() {
   const { data: teacherData, loading: loadingTeacher } = useFirebaseData(`teachers/${user?.uid}`, universityId);
 
   // Liste des cours de l'enseignant
-  const coursList = useMemo(() => {
+  const coursList = useMemo<CourseConfig[]>(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as CourseConfig[];
   }, [teacherData]);
 
   // Notifications reçues (qui lui sont adressées ou globales pour tous / enseignants)
-  const notificationsRecues = useMemo(() => {
+  const notificationsRecues = useMemo<Notification[]>(() => {
     if (!allNotifs) return [];
-    const list = Object.values(allNotifs);
+    const list = Object.values(allNotifs) as Notification[];
     return list
       .filter(
         (n) =>
@@ -51,8 +62,9 @@ function MessagesSection() {
   const [loadingSend, setLoadingSend] = useState(false);
 
   // Envoyer une annonce
-  const handleEnvoyerAnnonce = async (e) => {
+  const handleEnvoyerAnnonce = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -63,12 +75,12 @@ function MessagesSection() {
 
     setLoadingSend(true);
     try {
-      // Envoyer via le service de notification multi-tenant
+      // M8 - Utiliser le nouveau type de notification 'message_cours' au lieu de 'info'
       await envoyerNotification(universityId, {
-        destinataireId: selectedCourse, // 'students' ou ID spécifique du cours
+        destinataireId: selectedCourse, // 'students' ou ID spécifique du cours (ex: 'course-GL12')
         titre,
         message,
-        type: 'info',
+        type: 'message_cours',
         lien: '',
       });
 
@@ -77,7 +89,7 @@ function MessagesSection() {
       setMessage('');
       setSelectedCourse('students');
       setModalOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de l\'envoi de l\'annonce.');
     } finally {
       setLoadingSend(false);
@@ -87,14 +99,14 @@ function MessagesSection() {
   if (loadingNotifs || loadingTeacher) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de la messagerie...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* Barre d'action */}
       <div className="flex justify-between items-center">
@@ -155,7 +167,7 @@ function MessagesSection() {
 
       {/* ── MODAL : ENVOYER UNE ANNONCE ── */}
       {modalOuverte && (
-        <div className="modal modal-open">
+        <div className="modal modal-open animate-scale-up">
           <div className="modal-box glass-card border border-white/10 rounded-lg p-6 max-w-lg">
             <h3 className="font-bold text-sm text-accent uppercase tracking-wider font-display mb-4">
               Créer et diffuser une annonce
@@ -200,7 +212,7 @@ function MessagesSection() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Contenu de votre message aux étudiants..."
-                  rows="4"
+                  rows={4}
                   className="bg-surface border border-white/10 rounded px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-accent"
                   required
                 />
@@ -234,3 +246,4 @@ function MessagesSection() {
 }
 
 export default MessagesSection;
+export { MessagesSection };

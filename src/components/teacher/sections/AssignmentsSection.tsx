@@ -1,18 +1,29 @@
-// src/components/teacher/sections/AssignmentsSection.jsx
+// src/components/teacher/sections/AssignmentsSection.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de publication et suivi des devoirs.
+// Section de publication et suivi des devoirs — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
 import { ref, push, set } from 'firebase/database';
 import { database } from '@fb';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, FileIcon } from '../../icons/Icons.jsx';
+import type { Assignment } from '@/types';
 
-function AssignmentsSection() {
+interface CourseConfig {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+function AssignmentsSection(): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -21,16 +32,15 @@ function AssignmentsSection() {
   const { data: assignmentsData, loading: loadingAssignments } = useFirebaseData('assignments', universityId);
 
   // Liste des cours de l'enseignant connecté
-  const coursList = useMemo(() => {
+  const coursList = useMemo<CourseConfig[]>(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as CourseConfig[];
   }, [teacherData]);
 
   // Liste des devoirs publiés par cet enseignant (ou pour ses cours)
-  const assignmentsList = useMemo(() => {
+  const assignmentsList = useMemo<Assignment[]>(() => {
     if (!assignmentsData) return [];
-    const list = Object.values(assignmentsData);
-    // Filtrer pour ne garder que ceux qui concernent les cours de cet enseignant
+    const list = Object.values(assignmentsData) as Assignment[];
     return list.filter((a) => coursList.some((c) => c.id === a.courseId));
   }, [assignmentsData, coursList]);
 
@@ -48,8 +58,9 @@ function AssignmentsSection() {
   const [loadingPublish, setLoadingPublish] = useState(false);
 
   // Publier un devoir
-  const handlePublierDevoir = async (e) => {
+  const handlePublierDevoir = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -72,7 +83,7 @@ function AssignmentsSection() {
         dateLimite: new Date(dateLimite).getTime(),
         lienJoint,
         enseignantId: user?.uid,
-        nbRendus: 0, // Compteur par défaut
+        nbRendus: 0,
         timestamp: Date.now(),
       });
 
@@ -83,7 +94,7 @@ function AssignmentsSection() {
       setDateLimite('');
       setLienJoint('');
       setModalOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la publication du devoir.');
     } finally {
       setLoadingPublish(false);
@@ -93,14 +104,14 @@ function AssignmentsSection() {
   if (loadingTeacher || loadingAssignments) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement des devoirs...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* Barre d'action */}
       <div className="flex justify-between items-center">
@@ -121,13 +132,13 @@ function AssignmentsSection() {
 
       {/* Feedback Alerts */}
       {erreur && (
-        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <AlertIcon className="w-4 h-4 shrink-0" />
           <span>{erreur}</span>
         </div>
       )}
       {success && (
-        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <CheckIcon className="w-4 h-4 shrink-0" />
           <span>{success}</span>
         </div>
@@ -139,10 +150,9 @@ function AssignmentsSection() {
           Aucun devoir publié pour le moment.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {assignmentsList.map((asg) => {
             const dateDepassee = Date.now() > asg.dateLimite;
-            const coursName = coursList.find((c) => c.id === asg.courseId)?.nom || asg.courseId;
 
             return (
               <div key={asg.id} className="glass-card p-4 border border-white/5 rounded-lg flex flex-col justify-between gap-3">
@@ -194,7 +204,7 @@ function AssignmentsSection() {
 
       {/* ── MODAL : PUBLIER UN DEVOIR ── */}
       {modalOuverte && (
-        <div className="modal modal-open">
+        <div className="modal modal-open animate-scale-up">
           <div className="modal-box glass-card border border-white/10 rounded-lg p-6 max-w-lg">
             <h3 className="font-bold text-sm text-accent uppercase tracking-wider font-display mb-4">
               Publier un nouveau devoir
@@ -239,7 +249,7 @@ function AssignmentsSection() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Sujet, consignes de remise..."
-                  rows="3"
+                  rows={3}
                   className="bg-surface border border-white/10 rounded px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-accent"
                 />
               </div>
@@ -296,3 +306,4 @@ function AssignmentsSection() {
 }
 
 export default AssignmentsSection;
+export { AssignmentsSection };

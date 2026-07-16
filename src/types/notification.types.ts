@@ -25,6 +25,7 @@ export type NotificationType =
   | 'direction'
   | 'rdv_parent'
   | 'message_parent'
+  | 'message_cours'
 
 // ── Notification ─────────────────────────────────────────────────────────────
 

@@ -42,6 +42,7 @@ export type {
   AcademicYearStatus,
   AcademicYear,
   Course,
+  Assignment,
 } from './academic.types'
 
 export type {

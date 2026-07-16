@@ -1,25 +1,52 @@
-// src/components/teacher/sections/GradeEntrySection.jsx
+// src/components/teacher/sections/GradeEntrySection.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de Saisie des Notes.
+// Section de Saisie des Notes — version TSX.
 // Gère la saisie individuelle, en masse et l'import de notes CSV.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { saisirNote } from '../../../services/gradeService.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { saisirNote } from '../../../services/gradeService';
 import Papa from 'papaparse';
 import { AlertIcon, CheckIcon, FileIcon } from '../../icons/Icons.jsx';
+import type { Student, GradeType } from '@/types';
 
-const TYPES_EVALUATION = [
+interface TypesEvaluation {
+  value: GradeType;
+  label: string;
+  coefficient: number;
+}
+
+const TYPES_EVALUATION: TypesEvaluation[] = [
   { value: 'devoir', label: 'Devoir (Coeff 1.0)', coefficient: 1 },
   { value: 'examen', label: 'Examen (Coeff 2.0)', coefficient: 2 },
   { value: 'projet', label: 'Projet (Coeff 1.5)', coefficient: 1.5 },
   { value: 'participation', label: 'Participation (Coeff 0.5)', coefficient: 0.5 },
 ];
 
-function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
+interface CourseConfig {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+interface NotesMasseItem {
+  note: string;
+  commentaire: string;
+}
+
+interface GradeEntrySectionProps {
+  preselectedCourseId?: string | null;
+  onClearPreselected?: () => void;
+}
+
+function GradeEntrySection({ preselectedCourseId, onClearPreselected }: GradeEntrySectionProps): React.JSX.Element {
   const { user } = useAuth();
   const { universityId, universityConfig } = useTenant();
 
@@ -28,9 +55,9 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   const { data: allStudents, loading: loadingStudents } = useFirebaseData('students', universityId);
 
   // Liste des cours de l'enseignant
-  const coursList = useMemo(() => {
+  const coursList = useMemo<CourseConfig[]>(() => {
     if (!teacherData || !teacherData.cours) return [];
-    return Object.values(teacherData.cours);
+    return Object.values(teacherData.cours) as CourseConfig[];
   }, [teacherData]);
 
   // Cours sélectionné
@@ -42,7 +69,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
     } else if (coursList.length > 0 && !selectedCourse) {
       setSelectedCourse(coursList[0].id);
     }
-  }, [preselectedCourseId, coursList]);
+  }, [preselectedCourseId, coursList, selectedCourse, onClearPreselected]);
 
   // Récupérer le cours actif en détail
   const currentCourseInfo = useMemo(() => {
@@ -50,10 +77,9 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   }, [coursList, selectedCourse]);
 
   // Liste des étudiants inscrits dans le cours sélectionné
-  const studentsOfCourse = useMemo(() => {
+  const studentsOfCourse = useMemo<Student[]>(() => {
     if (!allStudents || !currentCourseInfo) return [];
-    const list = Object.values(allStudents);
-    // Filtrer les étudiants ayant la même filière et le même niveau que le cours
+    const list = Object.values(allStudents) as Student[];
     return list.filter(
       (s) =>
         (!currentCourseInfo.filiere || s.filiere === currentCourseInfo.filiere) &&
@@ -63,7 +89,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 
   // États du mode et des formulaires
   const [modeMasse, setModeMasse] = useState(false);
-  const [typeEval, setTypeEval] = useState('devoir');
+  const [typeEval, setTypeEval] = useState<GradeType>('devoir');
   
   // États Saisie Individuelle
   const [studentId, setStudentId] = useState('');
@@ -71,7 +97,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   const [commentaire, setCommentaire] = useState('');
 
   // États Saisie en Masse
-  const [notesMasse, setNotesMasse] = useState({}); // { studentId: { note: '', commentaire: '' } }
+  const [notesMasse, setNotesMasse] = useState<Record<string, NotesMasseItem>>({});
 
   // États Feedback
   const [erreur, setErreur] = useState('');
@@ -87,7 +113,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   // Initialiser l'état de saisie en masse quand le cours ou les étudiants changent
   useEffect(() => {
     if (studentsOfCourse.length > 0) {
-      const initNotes = {};
+      const initNotes: Record<string, NotesMasseItem> = {};
       studentsOfCourse.forEach((s) => {
         initNotes[s.id] = { note: '', commentaire: '' };
       });
@@ -96,15 +122,16 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   }, [studentsOfCourse]);
 
   // Validation de note individuelle en temps réel
-  const estNoteValide = (val) => {
+  const estNoteValide = (val: string) => {
     if (val === '') return true;
     const n = Number(val);
     return !isNaN(n) && n >= 0 && n <= 20;
   };
 
   // Soumission Saisie Individuelle
-  const handleSaisieIndividuelle = async (e) => {
+  const handleSaisieIndividuelle = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -134,7 +161,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
       setSuccess('Note enregistrée et auditée avec succès.');
       setValeurNote('');
       setCommentaire('');
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la saisie de la note.');
     } finally {
       setLoadingAction(false);
@@ -143,10 +170,10 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 
   // Soumission Saisie en Masse
   const handleSaisieEnMasse = async () => {
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
-    // Vérifier les notes
     const entries = Object.entries(notesMasse);
     const notesAEnregistrer = entries.filter(([_, v]) => v.note !== '');
 
@@ -155,7 +182,6 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
       return;
     }
 
-    // Valider toutes les notes saisies
     const notesInvalides = notesAEnregistrer.some(([_, v]) => !estNoteValide(v.note));
     if (notesInvalides) {
       setErreur('Certaines notes saisies sont invalides (hors de [0-20]).');
@@ -181,13 +207,12 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 
       setSuccess(`${successCount} note(s) enregistrée(s) et auditée(s) avec succès.`);
       
-      // Réinitialiser la grille
-      const cleanNotes = {};
+      const cleanNotes: Record<string, NotesMasseItem> = {};
       studentsOfCourse.forEach((s) => {
         cleanNotes[s.id] = { note: '', commentaire: '' };
       });
       setNotesMasse(cleanNotes);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Une erreur est survenue lors de la saisie en masse.');
     } finally {
       setLoadingAction(false);
@@ -195,7 +220,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   };
 
   // Gestion de l'import CSV
-  const handleImportCSV = (e) => {
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -205,13 +230,13 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+      complete: (results: Papa.ParseResult<any>) => {
         const importData = results.data;
         const updatedNotes = { ...notesMasse };
         let importes = 0;
         let ignores = 0;
 
-        importData.forEach((row) => {
+        importData.forEach((row: any) => {
           const matricule = row.matricule?.trim();
           const noteStr = row.note?.trim();
           const comment = row.commentaire?.trim() || '';
@@ -221,7 +246,6 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
             return;
           }
 
-          // Trouver l'étudiant correspondant par son matricule
           const student = studentsOfCourse.find((s) => s.matricule === matricule);
           if (student && estNoteValide(noteStr)) {
             updatedNotes[student.id] = { note: noteStr, commentaire: comment };
@@ -233,10 +257,9 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 
         setNotesMasse(updatedNotes);
         setSuccess(`CSV parsé : ${importes} notes importées dans la grille, ${ignores} lignes ignorées.`);
-        // Reset l'input file
-        e.target.value = null;
+        e.target.value = '';
       },
-      error: (err) => {
+      error: (err: any) => {
         setErreur(`Erreur de lecture CSV : ${err.message}`);
       },
     });
@@ -245,18 +268,18 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
   if (loadingTeacher || loadingStudents) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de la console de notes...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* ── BARRE D'ENTÊTE ET DE SELECTION DE COURS ── */}
       <div className="glass-card p-4 border border-white/5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <div className="flex flex-col gap-1">
             <span className="text-[10px] text-on-surface-muted uppercase font-bold">Sélectionner un Cours</span>
             <select
@@ -276,7 +299,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
             <span className="text-[10px] text-on-surface-muted uppercase font-bold">Évaluation / Coeff</span>
             <select
               value={typeEval}
-              onChange={(e) => setTypeEval(e.target.value)}
+              onChange={(e) => setTypeEval(e.target.value as GradeType)}
               className="bg-surface border border-white/10 rounded px-2.5 py-1 text-xs text-on-surface focus:outline-none focus:border-accent"
             >
               {TYPES_EVALUATION.map((t) => (
@@ -311,13 +334,13 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 
       {/* ── FEEDBACK ALERTS ── */}
       {erreur && (
-        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <AlertIcon className="w-4 h-4 shrink-0" />
           <span>{erreur}</span>
         </div>
       )}
       {success && (
-        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <CheckIcon className="w-4 h-4 shrink-0" />
           <span>{success}</span>
         </div>
@@ -378,7 +401,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
                 value={commentaire}
                 onChange={(e) => setCommentaire(e.target.value)}
                 placeholder="Remarques pédagogiques..."
-                rows="3"
+                rows={3}
                 className="bg-surface border border-white/10 rounded px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-accent"
               />
             </div>
@@ -434,7 +457,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
               <tbody>
                 {studentsOfCourse.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-6 text-on-surface-muted italic">
+                    <td colSpan={4} className="text-center py-6 text-on-surface-muted italic">
                       Aucun étudiant inscrit dans ce cours.
                     </td>
                   </tr>
@@ -509,3 +532,4 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }) {
 }
 
 export default GradeEntrySection;
+export { GradeEntrySection };

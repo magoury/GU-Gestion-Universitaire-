@@ -1,23 +1,22 @@
-// src/pages/teacher/TeacherDashboard.jsx
+// src/pages/teacher/TeacherDashboard.tsx
 // ──────────────────────────────────────────────────────────────
-// Page principale de l'espace Enseignant.
-// Gère la navigation et l'affichage des sections pédagogiques.
+// Page principale de l'espace Enseignant — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
 import ForestBackground from '../../components/layout/ForestBackground.jsx';
-import TeacherSidebar from '../../components/teacher/TeacherSidebar.jsx';
-import TeacherHeader from '../../components/teacher/TeacherHeader.jsx';
+import TeacherSidebar from '../../components/teacher/TeacherSidebar';
+import TeacherHeader from '../../components/teacher/TeacherHeader';
 
 // Sections
-import TeacherOverview from '../../components/teacher/sections/TeacherOverview.jsx';
-import CoursesSection from '../../components/teacher/sections/CoursesSection.jsx';
-import GradeEntrySection from '../../components/teacher/sections/GradeEntrySection.jsx';
-import AssignmentsSection from '../../components/teacher/sections/AssignmentsSection.jsx';
-import ResourcesSection from '../../components/teacher/sections/ResourcesSection.jsx';
-import MessagesSection from '../../components/teacher/sections/MessagesSection.jsx';
+import TeacherOverview from '../../components/teacher/sections/TeacherOverview';
+import CoursesSection from '../../components/teacher/sections/CoursesSection';
+import GradeEntrySection from '../../components/teacher/sections/GradeEntrySection';
+import AssignmentsSection from '../../components/teacher/sections/AssignmentsSection';
+import ResourcesSection from '../../components/teacher/sections/ResourcesSection';
+import MessagesSection from '../../components/teacher/sections/MessagesSection';
 
-const SECTION_TITLES = {
+const SECTION_TITLES: Record<string, string> = {
   dashboard: 'Tableau de Bord Enseignant',
   courses: 'Mes Cours Assignés',
   notes: 'Saisie des Notes & Bulletins',
@@ -26,11 +25,11 @@ const SECTION_TITLES = {
   messages: 'Communications & Annonces',
 };
 
-function TeacherDashboard() {
+function TeacherDashboard(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [selectedCourseId, setSelectedCourseId] = useState(null); // Utile pour présélectionner un cours dans GradeEntry
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
 
-  const handleNavigateToGrades = (courseId) => {
+  const handleNavigateToGrades = (courseId: string) => {
     setSelectedCourseId(courseId);
     setActiveSection('notes');
   };
@@ -38,7 +37,7 @@ function TeacherDashboard() {
   const renderSection = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <TeacherOverview onNavigate={setActiveSection} onNavigateToGrades={handleNavigateToGrades} />;
+        return <TeacherOverview onNavigateToGrades={handleNavigateToGrades} />;
       case 'courses':
         return <CoursesSection onNavigateToGrades={handleNavigateToGrades} />;
       case 'notes':
@@ -50,7 +49,7 @@ function TeacherDashboard() {
       case 'messages':
         return <MessagesSection />;
       default:
-        return <TeacherOverview onNavigate={setActiveSection} onNavigateToGrades={handleNavigateToGrades} />;
+        return <TeacherOverview onNavigateToGrades={handleNavigateToGrades} />;
     }
   };
 
@@ -77,3 +76,4 @@ function TeacherDashboard() {
 }
 
 export default TeacherDashboard;
+export { TeacherDashboard };

@@ -339,3 +339,19 @@ export interface Course {
   /** Niveau concerné */
   niveau?: NiveauEtude | string
 }
+
+/**
+ * Représentation d'un devoir / évaluation publié.
+ * Stocké sous /universities/$id/assignments/$id.
+ */
+export interface Assignment {
+  id: string
+  titre: string
+  description?: string
+  courseId: string
+  dateLimite: number
+  lienJoint?: string
+  enseignantId: string
+  nbRendus?: number
+  timestamp: number
+}
