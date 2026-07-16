@@ -1,19 +1,34 @@
-// src/components/student/sections/StudentGrades.jsx
+// src/components/student/sections/StudentGrades.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de consultation des notes et bulletins de l'étudiant.
+// Section de consultation des notes et bulletins de l'étudiant — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { genererBulletin } from '../../../services/gradeService.js';
-import { formatDate } from '../../../lib/utils.js';
-import { FileIcon, AlertIcon } from '../../icons/Icons.jsx';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { genererBulletin } from '../../../services/gradeService';
+import { FileIcon } from '../../icons/Icons.jsx';
+import type { Student, Grade } from '@/types';
 
-function StudentGrades() {
+interface CourseAverage {
+  id: string;
+  devoir: number[];
+  examen: number[];
+  projet: number[];
+  participation: number[];
+  ects: number;
+  devAvg: number | null;
+  exAvg: number | null;
+  projAvg: number | null;
+  partAvg: number | null;
+  moyenne: number;
+  valide: boolean;
+}
+
+function StudentGrades(): React.JSX.Element {
   const { user } = useAuth();
-  const { universityId, universityConfig } = useTenant();
+  const { universityId } = useTenant();
 
   const [anneeSelectionnee, setAnneeSelectionnee] = useState('2025-2026');
 
@@ -22,16 +37,17 @@ function StudentGrades() {
   const { data: allStudents, loading: loadingStudents } = useFirebaseData('students', universityId);
 
   // Notes filtrées de cet étudiant pour l'année sélectionnée
-  const myGrades = useMemo(() => {
+  const myGrades = useMemo<Grade[]>(() => {
     if (!allGrades || !user) return [];
-    return Object.values(allGrades).filter(
+    const list = Object.values(allGrades) as Grade[];
+    return list.filter(
       (g) => g.studentId === user.uid && g.anneeAcademique === anneeSelectionnee
     );
   }, [allGrades, user, anneeSelectionnee]);
 
   // Regrouper les notes par matière et par type
-  const gradesByCourse = useMemo(() => {
-    const courses = {};
+  const gradesByCourse = useMemo<CourseAverage[]>(() => {
+    const courses: Record<string, { id: string; devoir: number[]; examen: number[]; projet: number[]; participation: number[]; ects: number }> = {};
 
     myGrades.forEach((g) => {
       const mat = g.courseId || g.matiereId;
@@ -45,7 +61,7 @@ function StudentGrades() {
           ects: 6, // ECTS par défaut
         };
       }
-      if (courses[mat][g.type]) {
+      if (g.type === 'devoir' || g.type === 'examen' || g.type === 'projet' || g.type === 'participation') {
         courses[mat][g.type].push(g.note);
       }
     });
@@ -115,17 +131,18 @@ function StudentGrades() {
   const classementText = useMemo(() => {
     if (!allStudents || !allGrades || gradesByCourse.length === 0) return 'Non classé';
 
-    const studentsList = Object.values(allStudents);
-    const scores = [];
+    const studentsList = Object.values(allStudents) as Student[];
+    const gradesList = Object.values(allGrades) as Grade[];
+    const scores: { studentId: string; mga: number }[] = [];
 
     studentsList.forEach((s) => {
-      const studentGrades = Object.values(allGrades).filter(
+      const studentGrades = gradesList.filter(
         (g) => g.studentId === s.id && g.anneeAcademique === anneeSelectionnee
       );
       if (studentGrades.length === 0) return;
 
       // Calculer sa moyenne générale
-      const coursScores = {};
+      const coursScores: Record<string, number[]> = {};
       studentGrades.forEach((g) => {
         const mat = g.courseId || g.matiereId;
         if (!coursScores[mat]) coursScores[mat] = [];
@@ -148,8 +165,9 @@ function StudentGrades() {
 
   // Exporter le bulletin au format JSON téléchargeable
   const handleTelechargerBulletin = async () => {
+    if (!universityId || !user?.uid) return;
     try {
-      const bulletin = await genererBulletin(universityId, user?.uid, anneeSelectionnee);
+      const bulletin = await genererBulletin(universityId, user.uid, anneeSelectionnee);
 
       // Création du Blob
       const blob = new Blob([JSON.stringify(bulletin, null, 2)], { type: 'application/json' });
@@ -157,7 +175,7 @@ function StudentGrades() {
 
       const link = document.createElement('a');
       link.href = url;
-      link.download = `bulletin_${anneeSelectionnee}_${user?.uid}.json`;
+      link.download = `bulletin_${anneeSelectionnee}_${user.uid}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -170,14 +188,14 @@ function StudentGrades() {
   if (loadingGrades || loadingStudents) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de vos notes...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* ── EN-TÊTE ET FILTRES ── */}
       <div className="glass-card p-4 border border-white/5 rounded-lg flex justify-between items-center">
@@ -238,7 +256,7 @@ function StudentGrades() {
             <tbody>
               {gradesByCourse.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8 text-on-surface-muted italic">
+                  <td colSpan={8} className="text-center py-8 text-on-surface-muted italic">
                     Aucune note n'a été saisie pour l'année académique {anneeSelectionnee}.
                   </td>
                 </tr>
@@ -272,7 +290,7 @@ function StudentGrades() {
 
         {/* Pied de tableau récapitulatif */}
         {gradesByCourse.length > 0 && (
-          <div className="bg-surface/30 p-4 border-t border-white/10 grid grid-cols-4 gap-4 text-xs font-semibold text-on-surface">
+          <div className="bg-surface/30 p-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-semibold text-on-surface">
             <div>
               Moyenne Générale : <strong className="text-accent">{academicSummary.mga}/20</strong>
             </div>
@@ -294,3 +312,4 @@ function StudentGrades() {
 }
 
 export default StudentGrades;
+export { StudentGrades };

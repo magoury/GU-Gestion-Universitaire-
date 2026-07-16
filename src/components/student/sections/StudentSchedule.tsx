@@ -1,47 +1,63 @@
-// src/components/student/sections/StudentSchedule.jsx
+// src/components/student/sections/StudentSchedule.tsx
 // ──────────────────────────────────────────────────────────────
-// Section Emploi du Temps pour l'étudiant.
+// Section Emploi du Temps pour l'étudiant — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { ChevronIcon } from '../../icons/Icons.jsx';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const CRENEAUX_HORAIRES = [
   '08:00 - 10:00',
   '10:00 - 12:00',
-  '12:00 - 14:00', // Pause midi possible
+  '12:00 - 14:00',
   '14:00 - 16:00',
   '16:00 - 18:00',
 ];
 
-function StudentSchedule() {
-  const { user, userProfile } = useAuth();
+interface ScheduleSlot {
+  id: string;
+  jour: string;
+  horaire: string;
+  courseId: string;
+  courseName?: string;
+  teacherName: string;
+  salle: string;
+  filiere: string;
+  niveau: string;
+  semestre: number;
+}
+
+import type { Student } from '@/types';
+
+interface StudentScheduleProps {
+  studentProfile: Student;
+}
+
+function StudentSchedule({ studentProfile }: StudentScheduleProps): React.JSX.Element {
   const { universityId } = useTenant();
 
-  const [semestreActuel, setSemestreActuel] = useState(1);
+  const [semestreActuel, setSemestreActuel] = useState<number>(1);
 
   // Charger les données de l'emploi du temps
   const { data: scheduleData, loading } = useFirebaseData('schedule', universityId);
 
   // Filtrer les créneaux de cours correspondant à la filière/niveau de l'étudiant
-  const slotsList = useMemo(() => {
-    if (!scheduleData || !userProfile) return [];
-    const list = Object.values(scheduleData);
+  const slotsList = useMemo<ScheduleSlot[]>(() => {
+    if (!scheduleData || !studentProfile) return [];
+    const list = Object.values(scheduleData) as ScheduleSlot[];
     return list.filter(
       (s) =>
-        s.filiere === userProfile.filiere &&
-        s.niveau === userProfile.niveau &&
+        s.filiere === studentProfile.filiere &&
+        s.niveau === studentProfile.niveau &&
         s.semestre === semestreActuel
     );
-  }, [scheduleData, userProfile, semestreActuel]);
+  }, [scheduleData, studentProfile, semestreActuel]);
 
   // Modéliser les créneaux sous forme de matrice pour la grille
-  const gridMatrix = useMemo(() => {
-    const matrix = {};
+  const gridMatrix = useMemo<Record<string, Record<string, ScheduleSlot | null>>>(() => {
+    const matrix: Record<string, Record<string, ScheduleSlot | null>> = {};
     JOURS.forEach((j) => {
       matrix[j] = {};
       CRENEAUX_HORAIRES.forEach((h) => {
@@ -61,14 +77,14 @@ function StudentSchedule() {
   if (loading) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de votre emploi du temps...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* Sélecteur de Semestre */}
       <div className="glass-card p-4 border border-white/5 rounded-lg flex justify-between items-center">
@@ -95,7 +111,7 @@ function StudentSchedule() {
         </div>
 
         <span className="text-[10px] text-on-surface-muted font-medium">
-          Classe : <strong className="text-on-surface">{userProfile?.filiere} ({userProfile?.niveau})</strong>
+          Classe : <strong className="text-on-surface">{studentProfile?.filiere} ({studentProfile?.niveau})</strong>
         </span>
       </div>
 
@@ -134,7 +150,7 @@ function StudentSchedule() {
                   return (
                     <div key={horaire} className="h-16 relative">
                       {slot ? (
-                        <div className="absolute inset-0 bg-primary-container/80 border-l-2 border-accent rounded p-2 flex flex-col justify-between overflow-hidden shadow-sm">
+                        <div className="absolute inset-0 bg-primary-container/80 border-l-2 border-accent rounded p-2 flex flex-col justify-between overflow-hidden shadow-sm animate-scale-up">
                           <div className="text-[10px] font-bold text-on-surface truncate leading-tight">
                             {slot.courseName || slot.courseId}
                           </div>
@@ -165,3 +181,4 @@ function StudentSchedule() {
 }
 
 export default StudentSchedule;
+export { StudentSchedule };

@@ -1,18 +1,33 @@
-// src/components/student/sections/StudentOverview.jsx
+// src/components/student/sections/StudentOverview.tsx
 // ──────────────────────────────────────────────────────────────
-// Section Overview pour l'espace Étudiant.
+// Section Overview pour l'espace Étudiant — version TSX.
 // Affiche la moyenne, les crédits ECTS, et les dernières ressources.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { formatDate } from '../../../lib/utils.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { BookIcon, NotesIcon, ClockIcon, LibraryIcon, FileIcon } from '../../icons/Icons.jsx';
+import type { Grade, Teacher, Notification, Student } from '@/types';
 
-function StudentOverview({ onNavigate }) {
-  const { user, userProfile } = useAuth();
+interface StudentOverviewProps {
+  onNavigate: (section: string) => void;
+  studentProfile: Student;
+}
+
+interface LibraryResource {
+  id: string;
+  titre: string;
+  type: string;
+  courseId: string;
+  url: string;
+  enseignantId: string;
+  timestamp: number;
+}
+
+function StudentOverview({ onNavigate, studentProfile }: StudentOverviewProps): React.JSX.Element {
+  const { user } = useAuth();
   const { universityId } = useTenant();
 
   // Données en temps réel
@@ -22,16 +37,17 @@ function StudentOverview({ onNavigate }) {
   const { data: allNotifs } = useFirebaseData('notifications', universityId);
 
   // Filtre des notes de cet étudiant
-  const myGrades = useMemo(() => {
+  const myGrades = useMemo<Grade[]>(() => {
     if (!allGrades || !user) return [];
-    return Object.values(allGrades).filter((g) => g.studentId === user.uid);
+    const list = Object.values(allGrades) as Grade[];
+    return list.filter((g) => g.studentId === user.uid);
   }, [allGrades, user]);
 
   // Regrouper les notes par matière pour calculer la moyenne générale
   const academicCalculations = useMemo(() => {
     if (myGrades.length === 0) return { mga: '0.00', mention: 'Aucune note', admis: false, ectsObtenus: 0 };
 
-    const notesParMatiere = {};
+    const notesParMatiere: Record<string, { notes: number[]; coeffs: number[] }> = {};
     myGrades.forEach((g) => {
       const mat = g.courseId || g.matiereId;
       if (!notesParMatiere[mat]) {
@@ -83,30 +99,32 @@ function StudentOverview({ onNavigate }) {
   // Calculer le taux de présence basé sur les notifications d'absence
   const tauxPresence = useMemo(() => {
     if (!allNotifs || !user) return 100;
-    const list = Object.values(allNotifs).filter(
+    const list = Object.values(allNotifs) as Notification[];
+    const absences = list.filter(
       (n) => n.destinataireId === user.uid && n.titre?.toLowerCase().includes('absence')
     );
     // Chaque absence retire 2%
-    return Math.max(100 - list.length * 2, 0);
+    return Math.max(100 - absences.length * 2, 0);
   }, [allNotifs, user]);
 
   // Ressources partagées pour sa filière
-  const lastResources = useMemo(() => {
-    if (!allResources || !userProfile) return [];
-    const list = Object.values(allResources);
+  const lastResources = useMemo<LibraryResource[]>(() => {
+    if (!allResources || !studentProfile) return [];
+    const list = Object.values(allResources) as LibraryResource[];
     
     // Filtrer par filière
-    const filtrees = list.filter((r) => !r.courseId || r.courseId.includes(userProfile.filiere || 'Génie'));
+    const filtrees = list.filter((r) => !r.courseId || r.courseId.includes(studentProfile.filiere || 'Génie'));
     
     // Trier par date
     return filtrees.sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
-  }, [allResources, userProfile]);
+  }, [allResources, studentProfile]);
 
   // Dictionnaire des enseignants pour afficher le nom complet
-  const teachersMap = useMemo(() => {
+  const teachersMap = useMemo<Record<string, string>>(() => {
     if (!allTeachers) return {};
-    const map = {};
-    Object.values(allTeachers).forEach((t) => {
+    const map: Record<string, string> = {};
+    const list = Object.values(allTeachers) as Teacher[];
+    list.forEach((t) => {
       map[t.id] = `${t.prenom} ${t.nom}`;
     });
     return map;
@@ -115,17 +133,17 @@ function StudentOverview({ onNavigate }) {
   if (loadingGrades) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de vos indicateurs...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* ── KPI CARDS ── */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* Moyenne Générale (MGA) */}
         <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
@@ -189,7 +207,7 @@ function StudentOverview({ onNavigate }) {
       </div>
 
       {/* ── GRILLE DOUBLE ── */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Notes récentes (Gauche) */}
         <div className="col-span-2 flex flex-col gap-3">
@@ -218,7 +236,7 @@ function StudentOverview({ onNavigate }) {
                 <tbody>
                   {myGrades.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-center py-6 text-on-surface-muted italic">
+                      <td colSpan={5} className="text-center py-6 text-on-surface-muted italic">
                         Aucune note n'a encore été enregistrée pour ce semestre.
                       </td>
                     </tr>
@@ -294,3 +312,4 @@ function StudentOverview({ onNavigate }) {
 }
 
 export default StudentOverview;
+export { StudentOverview };

@@ -36,7 +36,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 
 // Pages protégées — Étudiant
-import StudentDashboard from './pages/student/StudentDashboard.jsx';
+import StudentDashboard from './pages/student/StudentDashboard';
 
 // Pages protégées — Parent
 import ParentDashboard from './pages/parent/ParentDashboard.jsx';

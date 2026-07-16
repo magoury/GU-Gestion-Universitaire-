@@ -1,16 +1,16 @@
-// src/components/student/sections/StudentRGPD.jsx
+// src/components/student/sections/StudentRGPD.tsx
 // ──────────────────────────────────────────────────────────────
-// Section RGPD pour l'espace Étudiant.
+// Section RGPD pour l'espace Étudiant — version TSX.
 // Permet d'exporter ses données personnelles au format JSON-LD.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { exporterDonneesEtudiant } from '../../../services/rgpdService.js';
+import { exporterDonneesEtudiant } from '../../../services/rgpdService';
 import { AlertIcon, CheckIcon, ShieldIcon, FileIcon } from '../../icons/Icons.jsx';
 
-function StudentRGPD() {
+function StudentRGPD(): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -19,14 +19,15 @@ function StudentRGPD() {
   const [loading, setLoading] = useState(false);
 
   const handleExportRGPD = async () => {
+    if (!universityId || !user?.uid) return;
     setErreur('');
     setSuccess('');
     setLoading(true);
 
     try {
-      await exporterDonneesEtudiant(universityId, user?.uid);
+      await exporterDonneesEtudiant(universityId, user.uid);
       setSuccess('Le téléchargement de votre archive de données personnelles a débuté. Un log d\'audit a été enregistré.');
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de l\'exportation de vos données.');
     } finally {
       setLoading(false);
@@ -34,7 +35,7 @@ function StudentRGPD() {
   };
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface max-w-3xl mx-auto w-full">
+    <div className="flex flex-col gap-6 font-body text-on-surface max-w-3xl mx-auto w-full animate-fade-in">
       
       {/* ── CARD INFORMATION RGPD ── */}
       <div className="glass-card p-6 border border-white/5 rounded-lg flex flex-col gap-4">
@@ -60,13 +61,13 @@ function StudentRGPD() {
 
       {/* ── ALERTS FEEDBACK ── */}
       {erreur && (
-        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-error bg-red-500/10 border-red-500/20 text-red-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <AlertIcon className="w-4 h-4 shrink-0" />
           <span>{erreur}</span>
         </div>
       )}
       {success && (
-        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs">
+        <div className="alert alert-success bg-green-500/10 border-green-500/20 text-green-400 p-3 rounded flex items-center gap-2.5 text-xs animate-fade-in">
           <CheckIcon className="w-4 h-4 shrink-0" />
           <span>{success}</span>
         </div>
@@ -76,7 +77,7 @@ function StudentRGPD() {
       <div className="glass-card p-6 border border-white/5 rounded-lg flex flex-col gap-4">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-accent font-display">Données incluses dans votre export</h3>
         
-        <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="bg-surface/40 border border-white/5 rounded p-3 flex flex-col gap-1">
             <span className="font-bold text-on-surface">1. Profil Personnel & Identité</span>
             <span className="text-[10px] text-on-surface-muted">Matricule, nom, prénom, email, téléphone, filière et niveau.</span>
@@ -132,3 +133,4 @@ function StudentRGPD() {
 }
 
 export default StudentRGPD;
+export { StudentRGPD };

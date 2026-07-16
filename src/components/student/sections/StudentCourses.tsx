@@ -1,16 +1,33 @@
-// src/components/student/sections/StudentCourses.jsx
+// src/components/student/sections/StudentCourses.tsx
 // ──────────────────────────────────────────────────────────────
-// Section affichant les cours suivis par l'étudiant.
+// Section affichant les cours suivis par l'étudiant — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { BookIcon, LibraryIcon } from '../../icons/Icons.jsx';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import { LibraryIcon } from '../../icons/Icons.jsx';
+import type { Teacher, Grade, Student } from '@/types';
 
-function StudentCourses({ onNavigateToLibrary }) {
-  const { user, userProfile } = useAuth();
+interface StudentCoursesProps {
+  onNavigateToLibrary: (courseId: string) => void;
+  studentProfile: Student;
+}
+
+interface CourseWithTeacher {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+  enseignantNom: string;
+}
+
+function StudentCourses({ onNavigateToLibrary, studentProfile }: StudentCoursesProps): React.JSX.Element {
+  const { user } = useAuth();
   const { universityId } = useTenant();
 
   // Charger les données de test/Firebase
@@ -18,22 +35,30 @@ function StudentCourses({ onNavigateToLibrary }) {
   const { data: allGrades, loading: loadingGrades } = useFirebaseData('grades', universityId);
 
   // Reconstruire les cours de sa filière / niveau
-  const myCourses = useMemo(() => {
-    if (!allTeachers || !userProfile) return [];
+  const myCourses = useMemo<CourseWithTeacher[]>(() => {
+    if (!allTeachers || !studentProfile) return [];
     
-    const courses = [];
-    Object.values(allTeachers).forEach((teacher) => {
+    const courses: CourseWithTeacher[] = [];
+    const teachersList = Object.values(allTeachers) as Teacher[];
+    
+    teachersList.forEach((teacher) => {
       if (!teacher.cours) return;
       Object.values(teacher.cours).forEach((c) => {
         // Le cours doit correspondre à la filière et au niveau de l'étudiant
         if (
-          (!c.filiere || c.filiere === userProfile.filiere) &&
-          (!c.niveau || c.niveau === userProfile.niveau)
+          (!c.filiere || c.filiere === studentProfile.filiere) &&
+          (!c.niveau || c.niveau === studentProfile.niveau)
         ) {
           // Éviter les doublons de cours
           if (!courses.some((item) => item.id === c.id)) {
             courses.push({
-              ...c,
+              id: c.id,
+              nom: c.nom,
+              ects: c.ects,
+              heures: c.heures,
+              syllabus: c.syllabus,
+              filiere: c.filiere,
+              niveau: c.niveau,
               enseignantNom: `${teacher.prenom} ${teacher.nom}`,
             });
           }
@@ -42,21 +67,22 @@ function StudentCourses({ onNavigateToLibrary }) {
     });
 
     return courses;
-  }, [allTeachers, userProfile]);
+  }, [allTeachers, studentProfile]);
 
   // Moyennes par matière
-  const averagesMap = useMemo(() => {
+  const averagesMap = useMemo<Record<string, string>>(() => {
     if (!allGrades || !user) return {};
-    const grades = Object.values(allGrades).filter((g) => g.studentId === user.uid);
-    const courseGrades = {};
+    const gradesList = Object.values(allGrades) as Grade[];
+    const studentGrades = gradesList.filter((g) => g.studentId === user.uid);
+    const courseGrades: Record<string, number[]> = {};
 
-    grades.forEach((g) => {
+    studentGrades.forEach((g) => {
       const mat = g.courseId || g.matiereId;
       if (!courseGrades[mat]) courseGrades[mat] = [];
       courseGrades[mat].push(g.note);
     });
 
-    const map = {};
+    const map: Record<string, string> = {};
     Object.entries(courseGrades).forEach(([courseId, notes]) => {
       const avg = notes.reduce((a, b) => a + b, 0) / notes.length;
       map[courseId] = avg.toFixed(2);
@@ -68,23 +94,23 @@ function StudentCourses({ onNavigateToLibrary }) {
   if (loadingTeachers || loadingGrades) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de vos cours...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       <h2 className="text-sm font-semibold uppercase tracking-wider text-accent font-display">Mes Inscriptions Pédagogiques</h2>
 
       {myCourses.length === 0 ? (
         <div className="glass-card p-8 border border-white/5 text-center text-on-surface-muted rounded-lg">
-          Aucun cours n'est actuellement configuré pour votre classe ({userProfile?.filiere} - {userProfile?.niveau}).
+          Aucun cours n'est actuellement configuré pour votre classe ({studentProfile?.filiere} - {studentProfile?.niveau}).
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {myCourses.map((cours) => {
             const moyenne = averagesMap[cours.id];
             const hasMoyenne = moyenne !== undefined;
@@ -143,3 +169,4 @@ function StudentCourses({ onNavigateToLibrary }) {
 }
 
 export default StudentCourses;
+export { StudentCourses };

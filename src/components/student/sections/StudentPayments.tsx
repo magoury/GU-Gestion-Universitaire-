@@ -1,21 +1,28 @@
-// src/components/student/sections/StudentPayments.jsx
+// src/components/student/sections/StudentPayments.tsx
 // ──────────────────────────────────────────────────────────────
-// Section de consultation de l'état financier et des reçus.
+// Section de consultation de l'état financier et des reçus — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { listerPaiementsEtudiant, verifierStatutFinancier } from '../../../services/paymentService.js';
+import { listerPaiementsEtudiant, verifierStatutFinancier } from '../../../services/paymentService';
 import { formatDate, formatMontant } from '../../../lib/utils.js';
 import { FileIcon, MoneyIcon } from '../../icons/Icons.jsx';
+import type { Payment } from '@/types';
 
-function StudentPayments() {
+interface FinanceSummary {
+  statut: string;
+  montantRestant: number;
+  prochainEcheance: string | number | null;
+}
+
+function StudentPayments(): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
-  const [financeSummary, setFinanceSummary] = useState({ statut: 'a_jour', montantRestant: 0, prochainEcheance: null });
-  const [paiements, setPaiements] = useState([]);
+  const [financeSummary, setFinanceSummary] = useState<FinanceSummary>({ statut: 'a_jour', montantRestant: 0, prochainEcheance: null });
+  const [paiements, setPaiements] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Charger les données financières
@@ -28,7 +35,7 @@ function StudentPayments() {
       ])
         .then(([summary, history]) => {
           setFinanceSummary(summary);
-          setPaiements(history);
+          setPaiements(history as Payment[]);
         })
         .catch((err) => console.error('Erreur chargement données financières:', err))
         .finally(() => setLoading(false));
@@ -49,7 +56,7 @@ function StudentPayments() {
   const countdownText = useMemo(() => {
     if (!financeSummary.prochainEcheance) return 'Aucune échéance à venir';
     
-    const diffTime = new Date(financeSummary.prochainEcheance) - new Date();
+    const diffTime = new Date(financeSummary.prochainEcheance).getTime() - new Date().getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) return `En retard de ${Math.abs(diffDays)} jour(s)`;
@@ -58,7 +65,7 @@ function StudentPayments() {
   }, [financeSummary]);
 
   // Exporter le reçu en JSON
-  const handleTelechargerRecu = (paiement) => {
+  const handleTelechargerRecu = (paiement: Payment) => {
     const reçu = {
       description: "Reçu de paiement de frais de scolarité GU",
       dateEdition: new Date().toISOString(),
@@ -86,17 +93,17 @@ function StudentPayments() {
   if (loading) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de vos paiements...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* ── BILAN COMPTABLE CARD ── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Total Dû */}
         <div className="glass-card p-4 border border-white/5 rounded-lg flex items-center justify-between">
@@ -167,7 +174,7 @@ function StudentPayments() {
               <tbody>
                 {paiements.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-6 text-on-surface-muted italic">
+                    <td colSpan={6} className="text-center py-6 text-on-surface-muted italic">
                       Aucun versement n'a encore été enregistré pour cette année.
                     </td>
                   </tr>
@@ -202,3 +209,4 @@ function StudentPayments() {
 }
 
 export default StudentPayments;
+export { StudentPayments };

@@ -1,22 +1,50 @@
-// src/components/student/sections/StudentLibrary.jsx
+// src/components/student/sections/StudentLibrary.tsx
 // ──────────────────────────────────────────────────────────────
-// Section Bibliothèque et Supports de Cours.
+// Section Bibliothèque et Supports de Cours — version TSX.
 // Permet de consulter les ressources et de suivre sa progression.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { ref, set } from 'firebase/database';
 import { database } from '@fb';
-import { useAuth } from '../../../hooks/useAuth.js';
+import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
+import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
-import { LibraryIcon, BookIcon, CheckIcon } from '../../icons/Icons.jsx';
+import { BookIcon, CheckIcon } from '../../icons/Icons.jsx';
 
 const TYPES_RESSOURCE = ['PDF', 'Vidéo', 'Lien', 'Présentation'];
 
-function StudentLibrary({ preselectedCourseId, onClearFilter }) {
-  const { user, userProfile } = useAuth();
+interface CourseInfo {
+  id: string;
+  nom: string;
+  ects?: number;
+  heures?: number;
+  syllabus?: string;
+  filiere?: string;
+  niveau?: string;
+}
+
+interface LibraryResource {
+  id: string;
+  titre: string;
+  type: string;
+  courseId: string;
+  url: string;
+  enseignantId: string;
+  timestamp: number;
+}
+
+import type { Teacher, Student } from '@/types';
+
+interface StudentLibraryProps {
+  preselectedCourseId?: string | null;
+  onClearFilter?: () => void;
+  studentProfile: Student;
+}
+
+function StudentLibrary({ preselectedCourseId, onClearFilter, studentProfile }: StudentLibraryProps): React.JSX.Element {
+  const { user } = useAuth();
   const { universityId } = useTenant();
 
   // Données Firebase
@@ -33,18 +61,20 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
       setFiliereSelectionnee(preselectedCourseId);
       onClearFilter?.();
     }
-  }, [preselectedCourseId]);
+  }, [preselectedCourseId, onClearFilter]);
 
   // Recueillir la liste complète des cours pour le select de filtrage
-  const availableCourses = useMemo(() => {
-    if (!allTeachers || !userProfile) return [];
-    const list = [];
-    Object.values(allTeachers).forEach((teacher) => {
+  const availableCourses = useMemo<CourseInfo[]>(() => {
+    if (!allTeachers || !studentProfile) return [];
+    const list: CourseInfo[] = [];
+    const teachersList = Object.values(allTeachers) as Teacher[];
+    
+    teachersList.forEach((teacher) => {
       if (!teacher.cours) return;
       Object.values(teacher.cours).forEach((c) => {
         if (
-          (!c.filiere || c.filiere === userProfile.filiere) &&
-          (!c.niveau || c.niveau === userProfile.niveau)
+          (!c.filiere || c.filiere === studentProfile.filiere) &&
+          (!c.niveau || c.niveau === studentProfile.niveau)
         ) {
           if (!list.some((x) => x.id === c.id)) {
             list.push(c);
@@ -53,12 +83,12 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
       });
     });
     return list;
-  }, [allTeachers, userProfile]);
+  }, [allTeachers, studentProfile]);
 
   // Filtrer les ressources
-  const filteredResources = useMemo(() => {
+  const filteredResources = useMemo<LibraryResource[]>(() => {
     if (!allResources) return [];
-    let list = Object.values(allResources);
+    let list = Object.values(allResources) as LibraryResource[];
 
     // Filtrer par défaut pour n'afficher que les ressources de sa filière
     list = list.filter((r) => {
@@ -77,8 +107,8 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
   }, [allResources, filiereSelectionnee, typeSelectionne, availableCourses]);
 
   // Marquer une ressource comme vue
-  const handleMarquerVue = async (resourceId) => {
-    if (!user) return;
+  const handleMarquerVue = async (resourceId: string) => {
+    if (!user || !universityId) return;
     try {
       const progressRef = ref(database, `universities/${universityId}/progress/${user.uid}/${resourceId}`);
       await set(progressRef, {
@@ -90,17 +120,19 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
     }
   };
 
+  const progressRecord = progressData as Record<string, { vue: boolean; timestamp: number }> | null;
+
   if (loadingResources) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
+        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
         <span className="text-on-surface-muted text-xs">Chargement de la bibliothèque...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-body text-on-surface">
+    <div className="flex flex-col gap-6 font-body text-on-surface animate-fade-in">
       
       {/* ── BARRE DE FILTRES ── */}
       <div className="glass-card p-4 border border-white/5 rounded-lg flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
@@ -153,9 +185,9 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
           Aucun support de cours ne correspond à vos critères.
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {filteredResources.map((res) => {
-            const estVue = progressData?.[res.id]?.vue || false;
+            const estVue = progressRecord?.[res.id]?.vue || false;
 
             return (
               <div key={res.id} className="glass-card p-4 border border-white/5 rounded-lg flex flex-col justify-between gap-3.5 hover:border-accent/20 transition-all">
@@ -215,3 +247,4 @@ function StudentLibrary({ preselectedCourseId, onClearFilter }) {
 }
 
 export default StudentLibrary;
+export { StudentLibrary };

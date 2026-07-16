@@ -1,18 +1,23 @@
-// src/components/student/StudentHeader.jsx
+// src/components/student/StudentHeader.tsx
 // ──────────────────────────────────────────────────────────────
-// En-tête de l'espace Étudiant.
+// En-tête de l'espace Étudiant — version TSX.
 // Affiche le statut financier en temps réel et les notifications.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/useAuth.js';
+import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { useFirebaseData } from '../../hooks/useFirebaseData.js';
-import { verifierStatutFinancier } from '../../services/paymentService.js';
+import { useFirebaseData } from '../../hooks/useFirebaseData';
+import { verifierStatutFinancier } from '../../services/paymentService';
 import { formatMontant } from '../../lib/utils.js';
 import { BellIcon } from '../icons/Icons.jsx';
+import type { Notification } from '@/types';
 
-function StudentHeader({ title = 'Tableau de Bord' }) {
+interface StudentHeaderProps {
+  title?: string;
+}
+
+function StudentHeader({ title = 'Tableau de Bord' }: StudentHeaderProps): React.JSX.Element {
   const { user } = useAuth();
   const { universityId } = useTenant();
 
@@ -32,7 +37,7 @@ function StudentHeader({ title = 'Tableau de Bord' }) {
 
   const nbNonLues = useMemo(() => {
     if (!notifsData) return 0;
-    const list = Object.values(notifsData);
+    const list = Object.values(notifsData) as Notification[];
     return list.filter(
       (n) =>
         !n.lue &&
@@ -82,3 +87,4 @@ function StudentHeader({ title = 'Tableau de Bord' }) {
 }
 
 export default StudentHeader;
+export { StudentHeader };

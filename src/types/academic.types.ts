@@ -135,6 +135,18 @@ export interface TeacherCours {
 
   /** Volume horaire (heures) */
   heures: number
+
+  /** Filière concernée */
+  filiere?: string
+
+  /** Niveau d'études */
+  niveau?: string
+
+  /** Crédits ECTS */
+  ects?: number
+
+  /** Syllabus / Descriptif */
+  syllabus?: string
 }
 
 // ── Enseignant ────────────────────────────────────────────────────────────────

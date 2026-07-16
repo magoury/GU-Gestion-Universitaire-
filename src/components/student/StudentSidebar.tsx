@@ -1,14 +1,14 @@
-// src/components/student/StudentSidebar.jsx
+// src/components/student/StudentSidebar.tsx
 // ──────────────────────────────────────────────────────────────
-// Sidebar pour l'espace Étudiant.
+// Sidebar pour l'espace Étudiant — version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
+import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { logout } from '../../services/authService.js';
-import LogoGU from '../ui/LogoGU.jsx';
+import { logout } from '../../services/authService';
+import LogoGU from '../ui/LogoGU';
 import {
   HomeIcon,
   BookIcon,
@@ -20,7 +20,15 @@ import {
   LogoutIcon
 } from '../icons/Icons.jsx';
 
-const MENU_ITEMS = [
+import type { Student } from '@/types';
+
+interface MenuItem {
+  id: string;
+  label: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}
+
+const MENU_ITEMS: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', Icon: HomeIcon },
   { id: 'courses', label: 'Mes Cours', Icon: BookIcon },
   { id: 'notes', label: 'Notes & Bulletins', Icon: NotesIcon },
@@ -30,7 +38,13 @@ const MENU_ITEMS = [
   { id: 'rgpd', label: 'Mes Données (RGPD)', Icon: ShieldIcon },
 ];
 
-function StudentSidebar({ activeSection = 'dashboard', onSectionChange }) {
+interface StudentSidebarProps {
+  activeSection?: string;
+  onSectionChange?: (section: any) => void;
+  studentProfile: Student;
+}
+
+function StudentSidebar({ activeSection = 'dashboard', onSectionChange, studentProfile }: StudentSidebarProps): React.JSX.Element {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { universityConfig } = useTenant();
@@ -45,12 +59,12 @@ function StudentSidebar({ activeSection = 'dashboard', onSectionChange }) {
   };
 
   const nomEtudiant = userProfile ? `${userProfile.prenom} ${userProfile.nom}` : 'Chargement...';
-  const matricule = userProfile?.matricule || 'N/A';
+  const matricule = studentProfile?.matricule || 'N/A';
   const initiales = userProfile ? `${userProfile.prenom.charAt(0)}${userProfile.nom.charAt(0)}`.toUpperCase() : 'S';
   const nomUniv = universityConfig?.nom || 'Mon Établissement';
 
   return (
-    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30">
+    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30 font-body">
       
       {/* En-tête : Logo & Nom Université */}
       <div className="p-4 border-b border-white/10 flex flex-col items-center gap-1">
@@ -108,3 +122,4 @@ function StudentSidebar({ activeSection = 'dashboard', onSectionChange }) {
 }
 
 export default StudentSidebar;
+export { StudentSidebar };
