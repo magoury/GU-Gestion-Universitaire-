@@ -373,3 +373,129 @@ export async function lireRevenusMensuels(): Promise<RevenuMensuel[]> {
 
   return result
 }
+
+// ── lireUtilisateursGlobaux ────────────────────────────────────────────────────
+
+/**
+ * Vue agrégée de tous les utilisateurs à travers tous les tenants.
+ *
+ * 🔐 Garde : `super_admin_plateforme` requis.
+ * 📍 Chemin Firebase : /users (flat — chaque user a son universityId en champ)
+ *
+ * Note architecture : /users n'est PAS structuré par tenant. Chaque document
+ * user contient universityId. Cette lecture transversale est légale uniquement
+ * pour le Super Admin et documentée comme exception dans ce fichier.
+ *
+ * @returns Tableau d'utilisateurs avec uid, role, universityId, nom, prenom, actif
+ * @throws  {Error} Si rôle insuffisant ou erreur Firebase
+ */
+export interface UtilisateurGlobal {
+  uid: string
+  nom: string
+  prenom: string
+  email: string
+  role: string
+  universityId: string | null
+  actif: boolean
+  dateCreation: number
+}
+
+export async function lireUtilisateursGlobaux(): Promise<UtilisateurGlobal[]> {
+  await verifierRoleSuperAdmin()
+
+  const usersRef = ref(database, 'users')
+  const snapshot = await get(usersRef)
+
+  if (!snapshot.exists()) return []
+
+  const result: UtilisateurGlobal[] = []
+
+  snapshot.forEach((child) => {
+    const d = child.val() as Partial<UtilisateurGlobal>
+    // Exclure le super_admin_plateforme de la liste (pas de tenant)
+    if (d.role === 'super_admin_plateforme') return
+    result.push({
+      uid: child.key as string,
+      nom: d.nom ?? '',
+      prenom: d.prenom ?? '',
+      email: d.email ?? '',
+      role: d.role ?? 'student',
+      universityId: d.universityId ?? null,
+      actif: d.actif !== false,
+      dateCreation: Number(d.dateCreation ?? 0),
+    })
+  })
+
+  return result
+}
+
+// ── Config plateforme ─────────────────────────────────────────────────────────
+
+/**
+ * Paramètres globaux de la plateforme stockés dans /saas_admin/config.
+ * Ces valeurs s'appliquent à toutes les universités.
+ */
+export interface ConfigPlateforme {
+  /** Durée de la période d'essai gratuit en jours (défaut : 30) */
+  dureeEssaiJours: number
+  /** Seuil déclenchant une alerte si un tenant dépasse ce nombre d'étudiants (défaut : 500) */
+  seuilAlerteEtudiants: number
+  /** Seuil MRR minimum (FCFA) en dessous duquel une alerte est levée (défaut : 100_000) */
+  seuilAlerteMRR: number
+}
+
+const CONFIG_DEFAUT: ConfigPlateforme = {
+  dureeEssaiJours: 30,
+  seuilAlerteEtudiants: 500,
+  seuilAlerteMRR: 100_000,
+}
+
+/**
+ * Lit la configuration globale de la plateforme.
+ *
+ * 🔐 Garde : `super_admin_plateforme` requis.
+ * 📍 Chemin Firebase : /saas_admin/config
+ *
+ * Si le nœud n'existe pas encore (première installation), retourne CONFIG_DEFAUT
+ * sans écriture — l'écriture se fait via sauvegarderConfigPlateforme().
+ *
+ * @returns ConfigPlateforme avec valeurs Firebase ou valeurs par défaut
+ */
+export async function lireConfigPlateforme(): Promise<ConfigPlateforme> {
+  await verifierRoleSuperAdmin()
+
+  const configRef = ref(database, 'saas_admin/config')
+  const snapshot = await get(configRef)
+
+  if (!snapshot.exists()) return { ...CONFIG_DEFAUT }
+
+  const data = snapshot.val() as Partial<ConfigPlateforme>
+  return {
+    dureeEssaiJours: Number(data.dureeEssaiJours ?? CONFIG_DEFAUT.dureeEssaiJours),
+    seuilAlerteEtudiants: Number(data.seuilAlerteEtudiants ?? CONFIG_DEFAUT.seuilAlerteEtudiants),
+    seuilAlerteMRR: Number(data.seuilAlerteMRR ?? CONFIG_DEFAUT.seuilAlerteMRR),
+  }
+}
+
+/**
+ * Sauvegarde la configuration globale dans /saas_admin/config.
+ *
+ * 🔐 Garde : `super_admin_plateforme` requis.
+ * Écrit un audit log après chaque modification.
+ *
+ * @param config - Nouvelles valeurs de configuration
+ */
+export async function sauvegarderConfigPlateforme(
+  config: ConfigPlateforme
+): Promise<void> {
+  const acteurId = await verifierRoleSuperAdmin()
+
+  const configRef = ref(database, 'saas_admin/config')
+  await set(configRef, config)
+
+  await ecrireAuditLogGlobal(acteurId, {
+    action: 'CONFIG_MODIFIEE',
+    detail: `Paramètres plateforme mis à jour : essai=${config.dureeEssaiJours}j, alerteEtu=${config.seuilAlerteEtudiants}, alerteMRR=${config.seuilAlerteMRR}F`,
+  })
+}
+
