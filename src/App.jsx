@@ -23,10 +23,10 @@ import SuspendedTenantPage from './pages/SuspendedTenantPage';
 // Pages publiques
 import LandingPage from './pages/public/LandingPage.jsx';
 import LoginPage from './pages/auth/LoginPage.jsx';
-import OnboardingPage from './pages/public/OnboardingPage.jsx';
+import OnboardingPage from './pages/public/OnboardingPage.tsx';
 
 // Pages protégées — Super Admin
-import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard.jsx';
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import UniversityDetailView from './pages/superadmin/UniversityDetailView.jsx';
 
 // Pages protégées — Admin Université

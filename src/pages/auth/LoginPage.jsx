@@ -126,7 +126,7 @@ function LoginPage() {
   const [afficherMdp, setAfficherMdp] = useState(false);
   
   // Champs spécifiques Inscription
-  const [nomNouvelleUniv, setNomNouvelleUniv] = useState('');
+  // NOTE: nomNouvelleUniv supprimé — la création d'université passe uniquement par /onboarding
   const [emailEtudiantLier, setEmailEtudiantLier] = useState('');
   const [filiere, setFiliere] = useState('');
   const [niveau, setNiveau] = useState('L1');
@@ -343,33 +343,20 @@ function LoginPage() {
       return;
     }
 
-    // Si nouveau tenant (Admin Université crée son université)
-    let finalUniversityId = null;
-    let nomUnivCreation = '';
-
+    // La création d'université pour admin_universite est UNIQUEMENT via /onboarding
+    // (tunnel sécurisé avec transaction Firebase et rollback — OnboardingPage.tsx)
     if (roleSelectionne === 'admin_universite') {
-      if (!nomNouvelleUniv.trim()) {
-        setErreur('Veuillez saisir le nom de votre nouvelle université.');
-        return;
-      }
-      nomUnivCreation = nomNouvelleUniv.trim();
-      
-      // Générer le slug de la nouvelle université
-      const nomNormalise = nomUnivCreation
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Enlever les accents
-        .replace(/[^a-z0-9]+/g, '-') // Remplacer par des tirets
-        .replace(/(^-|-$)+/g, ''); // Supprimer tirets début/fin
-      const aleatoire = Math.floor(1000 + Math.random() * 9000);
-      finalUniversityId = `${nomNormalise}-${aleatoire}`;
-    } else {
-      if (!univSelectionnee) {
-        setErreur('Veuillez sélectionner votre université.');
-        return;
-      }
-      finalUniversityId = univSelectionnee.id;
+      navigate('/onboarding');
+      return;
     }
+
+    // Pour les autres rôles : sélection d'université existante obligatoire
+    let finalUniversityId = null;
+    if (!univSelectionnee) {
+      setErreur('Veuillez sélectionner votre université.');
+      return;
+    }
+    finalUniversityId = univSelectionnee.id;
 
     // Si rôle Parent : recherche et liaison de l'étudiant
     let linkedStudentId = null;
@@ -419,28 +406,8 @@ function LoginPage() {
 
     try {
       // 1. Créer le compte utilisateur
+      // NOTE: admin_universite redirigé vers /onboarding avant d'arriver ici
       const { uid } = await createUserWithRole(email, password, roleSelectionne, finalUniversityId, nom, prenom, null);
-
-      // 2. Si Admin d'université : Initialiser l'université
-      if (roleSelectionne === 'admin_universite') {
-        // Enregistrer la configuration de base de l'université
-        await set(ref(database, `universities/${finalUniversityId}/config`), {
-          nom: nomUnivCreation,
-          slug: finalUniversityId,
-          dateCreation: Date.now(),
-          devise: 'FCFA',
-          actif: true
-        });
-
-        // Enregistrer l'université dans la liste publique d'autocomplétion
-        await set(ref(database, `saas_admin/universites/${finalUniversityId}`), {
-          id: finalUniversityId,
-          nom: nomUnivCreation,
-          slug: finalUniversityId,
-          ville: 'Abidjan', // valeur par défaut
-          logo: null
-        });
-      }
 
       // 3. Si Étudiant : Enregistrer sa fiche académique complète dans le tenant
       if (roleSelectionne === 'student') {
@@ -746,30 +713,43 @@ function LoginPage() {
           {(!reconnexionRapide || estInscription) && (
             <div style={{ position: 'relative' }}>
               <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, marginBottom: '6px', color: 'var(--color-on-surface-muted)' }}>
-                {estInscription && roleSelectionne === 'admin_universite' ? 'Nom de la nouvelle université' : 'Université'}
+                Université
               </label>
 
+              {/* Bannière de redirection pour admin_universite en mode inscription */}
               {estInscription && roleSelectionne === 'admin_universite' ? (
-                <input
-                  type="text"
-                  placeholder="Ex: Université de l'Atlantique"
-                  value={nomNouvelleUniv}
-                  onChange={(e) => setNomNouvelleUniv(e.target.value)}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--glass-border)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'var(--color-on-surface)',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontSize: '0.9rem',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
-                  onBlur={(e) => e.target.style.borderColor = 'var(--glass-border)'}
-                />
+                <div style={{
+                  padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid rgba(149, 212, 179, 0.4)',
+                  backgroundColor: 'rgba(45, 106, 79, 0.15)',
+                  fontSize: '0.8rem',
+                  color: 'var(--color-on-surface)',
+                  lineHeight: 1.5,
+                }}
+                >
+                  <strong style={{ color: 'var(--color-accent)', display: 'block', marginBottom: '6px' }}>Créer une nouvelle université ?</strong>
+                  Pour inscrire votre université sur la plateforme, utilisez notre tunnel d'inscription sécurisé.
+                  <button
+                    type="button"
+                    onClick={() => navigate('/onboarding')}
+                    style={{
+                      display: 'block',
+                      marginTop: '10px',
+                      width: '100%',
+                      padding: '9px',
+                      borderRadius: 'var(--radius-md)',
+                      border: 'none',
+                      backgroundColor: 'var(--color-accent)',
+                      color: 'var(--color-bg)',
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Accéder au tunnel d'inscription →
+                  </button>
+                </div>
               ) : (
                 <>
                   <input

@@ -44,6 +44,7 @@ export type AuditAction =
   | 'COMPTE_CREE'
   | 'CONNEXION'
   | 'CONNEXION_REFUSEE'
+  | 'GOOGLE_LOGIN_ROLE_REFUSE'
   // Codes d'accès [NOUVEAU]
   | 'CODE_ACCES_GENERE'
   | 'CODE_ACCES_UTILISE'

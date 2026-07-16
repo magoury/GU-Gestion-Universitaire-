@@ -293,119 +293,135 @@ export async function resetPassword(email: string): Promise<void> {
 
 // ── Google Sign-In ────────────────────────────────────────────────────────────
 
-export type GoogleAuthResult =
-  | UserProfile
-  | {
-      isNewUser: true
-      email: string
-      uid: string
-      displayName: string | null
-      photoURL: string | null
-    }
-
 /**
- * Connecte ou inscrit un utilisateur via Google Sign-In (Popup).
- * Applique des règles de validation strictes :
- *   1. Si onboarding (isRegistration=true) : vérifie si un profil existe déjà pour
- *      éviter d'écraser un tenant existant (si oui, retourne le profil existant).
- *   2. Si connexion (isRegistration=false) :
- *      - Rejette immédiatement (signOut) si le rôle est student, teacher ou parent
- *        (connexion Google réservée aux admins).
- *      - Rejette si l'université de l'utilisateur est suspendue.
- *      - Rejette si aucun compte n'est associé à cette adresse Google.
+ * Lance le flux d'authentification Google via une fenêtre pop-up.
+ * Traduit automatiquement les codes d'erreur de l'API Firebase.
  *
- * @param isRegistration - Indique si l'action est menée dans le tunnel d'onboarding
+ * Garde de sécurité : Cette fonction effectue uniquement l'authentification OAuth Google.
+ * Le contrôle d'autorisation et d'existence doit être chaîné via
+ * checkGoogleUserExists() ou validateGoogleLoginRole().
+ *
+ * @returns L'utilisateur Firebase authentifié (FirebaseUser)
+ * @throws {Error} Si l'authentification échoue ou est annulée
  */
-export async function signInWithGooglePopup(
-  isRegistration: boolean = false
-): Promise<GoogleAuthResult> {
+export async function signInWithGooglePopup(): Promise<FirebaseUser> {
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
 
   try {
     const userCredential = await signInWithPopup(auth, provider)
-    const user = userCredential.user
-    const uid = user.uid
-
-    // Vérifier l'existence du profil dans la base de données
-    const profileRef = ref(database, `users/${uid}`)
-    const snapshot = await get(profileRef)
-
-    if (snapshot.exists()) {
-      const profileData = snapshot.val() as Record<string, unknown>
-      const role = profileData.role as Role
-      const universityId = (profileData.universityId as string) || null
-
-      if (!isRegistration) {
-        // Garde 2 : Restriction de rôle sur le LOGIN
-        const rolesInterdits: Role[] = ['student', 'teacher', 'parent']
-        if (rolesInterdits.includes(role)) {
-          await signOut(auth)
-
-          if (universityId) {
-            await ecrireAuditLog(universityId, {
-              acteurId: uid,
-              acteurNom: `${profileData.prenom} ${profileData.nom}`,
-              acteurRole: role,
-              action: 'CONNEXION_REFUSEE',
-              cible: uid,
-              detail: `Tentative de connexion via Google par un ${role} (Google réservé aux administrateurs).`,
-            })
-          }
-
-          throw new Error(
-            'Connexion Google non autorisée pour votre rôle. Veuillez utiliser la connexion standard avec vos identifiants.'
-          )
-        }
-
-        // Vérifier si l'université de l'admin est suspendue
-        if (universityId) {
-          const statusSnapshot = await get(ref(database, `saas_admin/universites/${universityId}/statut`))
-          if (statusSnapshot.exists() && statusSnapshot.val() === 'suspendu') {
-            await signOut(auth)
-            throw new Error(
-              'Accès refusé. Cette université a été temporairement suspendue par la plateforme.'
-            )
-          }
-        }
-      }
-
-      // Retourner le profil complet existant
-      return {
-        uid,
-        email: user.email,
-        role,
-        universityId,
-        nom: (profileData.nom as string) || '',
-        prenom: (profileData.prenom as string) || '',
-        photoURL: (profileData.photoURL as string) || null,
-      }
-    } else {
-      // Le profil n'existe pas en base de données
-
-      // Garde 3 :LoginPage et aucun profil existant
-      if (!isRegistration) {
-        await signOut(auth)
-        throw new Error(
-          "Aucun compte associé à cette adresse Google. Utilisez le tunnel d'inscription si vous souhaitez inscrire une nouvelle université."
-        )
-      }
-
-      // Cas 1 : Onboarding et nouveau compte
-      return {
-        isNewUser: true,
-        email: user.email || '',
-        uid,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-      }
-    }
+    return userCredential.user
   } catch (error: unknown) {
     const firebaseError = error as { code?: string }
     if (firebaseError.code) {
       throw new Error(traduireErreurFirebase(firebaseError.code))
     }
     throw error
+  }
+}
+
+/**
+ * Vérifie si un profil utilisateur existe déjà pour le UID Google spécifié.
+ * Utile pour l'onboarding afin d'éviter d'écraser un compte ou tenant existant.
+ *
+ * @param uid - L'identifiant utilisateur unique Google
+ * @returns Le profil utilisateur complet si existant, ou null
+ */
+export async function checkGoogleUserExists(uid: string): Promise<UserProfile | null> {
+  if (!uid) {
+    throw new Error('Identifiant UID requis.')
+  }
+
+  const profileRef = ref(database, `users/${uid}`)
+  const snapshot = await get(profileRef)
+
+  if (snapshot.exists()) {
+    const profileData = snapshot.val() as Record<string, unknown>
+    return {
+      uid,
+      email: (profileData.email as string) || '',
+      role: profileData.role as Role,
+      universityId: (profileData.universityId as string) || null,
+      nom: (profileData.nom as string) || '',
+      prenom: (profileData.prenom as string) || '',
+      photoURL: (profileData.photoURL as string) || null,
+    }
+  }
+
+  return null
+}
+
+/**
+ * Valide les autorisations et le rôle d'un compte Google lors de la connexion.
+ * Garantit les règles de sécurité suivantes (Garde 2 et Garde 3) :
+ *   1. Si aucun profil n'existe : Déconnexion immédiate + rejet.
+ *   2. Si rôle student, teacher ou parent : Déconnexion + log d'audit 'GOOGLE_LOGIN_ROLE_REFUSE' + rejet.
+ *   3. Si l'université associée est suspendue : Déconnexion + rejet.
+ *
+ * @param uid - L'identifiant utilisateur unique Google
+ * @returns Le profil utilisateur validé si toutes les gardes sont passées
+ * @throws {Error} Si l'accès est refusé ou si le profil est invalide
+ */
+export async function validateGoogleLoginRole(uid: string): Promise<UserProfile> {
+  if (!uid) {
+    throw new Error('Identifiant UID requis.')
+  }
+
+  const profileRef = ref(database, `users/${uid}`)
+  const snapshot = await get(profileRef)
+
+  if (!snapshot.exists()) {
+    // Garde 3 : Aucun profil existant en base
+    await signOut(auth)
+    throw new Error(
+      "Aucun compte associé à cette adresse Google. Utilisez le tunnel d'inscription si vous souhaitez inscrire une nouvelle université."
+    )
+  }
+
+  const profileData = snapshot.val() as Record<string, unknown>
+  const role = profileData.role as Role
+  const universityId = (profileData.universityId as string) || null
+
+  // Garde 2 : Rôle non autorisé pour Google Sign-In
+  const rolesInterdits: Role[] = ['student', 'teacher', 'parent']
+  if (rolesInterdits.includes(role)) {
+    await signOut(auth)
+
+    if (universityId) {
+      await ecrireAuditLog(universityId, {
+        acteurId: uid,
+        acteurNom: `${profileData.prenom} ${profileData.nom}`,
+        acteurRole: role,
+        action: 'GOOGLE_LOGIN_ROLE_REFUSE',
+        cible: uid,
+        detail: `Connexion Google refusée pour le rôle ${role}. Accès réservé aux administrateurs.`,
+      })
+    }
+
+    throw new Error(
+      'Connexion Google non autorisée pour votre rôle. Veuillez utiliser la connexion standard avec vos identifiants.'
+    )
+  }
+
+  // Garde additionnelle : Université suspendue
+  if (universityId) {
+    const statusSnapshot = await get(ref(database, `saas_admin/universites/${universityId}/statut`))
+    if (statusSnapshot.exists() && statusSnapshot.val() === 'suspendu') {
+      await signOut(auth)
+      throw new Error(
+        'Accès refusé. Cette université a été temporairement suspendue par la plateforme.'
+      )
+    }
+  }
+
+  return {
+    uid,
+    email: (profileData.email as string) || '',
+    role,
+    universityId,
+    nom: (profileData.nom as string) || '',
+    prenom: (profileData.prenom as string) || '',
+    photoURL: (profileData.photoURL as string) || null,
   }
 }
 
@@ -420,5 +436,7 @@ export default {
   createUserWithRole,
   resetPassword,
   signInWithGooglePopup,
+  checkGoogleUserExists,
+  validateGoogleLoginRole,
   traduireErreurFirebase,
 }
