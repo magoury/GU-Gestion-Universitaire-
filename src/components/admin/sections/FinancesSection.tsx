@@ -1,11 +1,17 @@
-import { useState, useMemo, useEffect } from 'react';
-import { ref, onValue, off } from 'firebase/database';
+// src/components/admin/sections/FinancesSection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section financière : tableau de bord, journal des paiements, configuration des frais.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useState, useMemo, useEffect } from 'react';
+import { ref, onValue } from 'firebase/database';
 import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { configurerFraisScolarite, enregistrerPaiement } from '../../../services/paymentService.js';
+import { configurerFraisScolarite, enregistrerPaiement } from '../../../services/paymentService';
 import { formatDate, formatMontant } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, MoneyIcon, SettingsIcon } from '../../icons/Icons.jsx';
+import type { Student, Payment, ModePaiement } from '@/types';
 
 // Filières par défaut (pour le select)
 const FILIERES = [
@@ -23,18 +29,22 @@ const MODES = [
   { value: 'cheque', label: 'Chèque' },
 ];
 
-function FinancesSection({ universityId: propUniversityId }) {
+interface FinancesSectionProps {
+  universityId?: string;
+}
+
+function FinancesSection({ universityId: propUniversityId }: FinancesSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId, universityConfig: contextUniversityConfig } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
-  const [localConfig, setLocalConfig] = useState(null);
+  const [localConfig, setLocalConfig] = useState<any>(null);
   useEffect(() => {
     if (propUniversityId) {
       const configRef = ref(database, `universities/${propUniversityId}/config`);
       const unsubscribe = onValue(configRef, (snapshot) => {
         setLocalConfig(snapshot.val());
       });
-      return () => off(configRef);
+      return () => unsubscribe();
     }
   }, [propUniversityId]);
 
@@ -46,8 +56,8 @@ function FinancesSection({ universityId: propUniversityId }) {
   const { data: fraisData } = useFirebaseData('frais', universityId);
 
   // Convertir en tableaux
-  const etudiantsList = useMemo(() => (studentsData ? Object.values(studentsData) : []), [studentsData]);
-  const paiementsList = useMemo(() => (paymentsData ? Object.values(paymentsData) : []), [paymentsData]);
+  const etudiantsList = useMemo<Student[]>(() => (studentsData ? Object.values(studentsData) as Student[] : []), [studentsData]);
+  const paiementsList = useMemo<Payment[]>(() => (paymentsData ? Object.values(paymentsData) as Payment[] : []), [paymentsData]);
 
   // États des modales
   const [modalPaiementOuverte, setModalPaiementOuverte] = useState(false);
@@ -56,7 +66,7 @@ function FinancesSection({ universityId: propUniversityId }) {
   // Formulaire Paiement
   const [pIdEtudiant, setPIdEtudiant] = useState('');
   const [pMontant, setPMontant] = useState('');
-  const [pMode, setPMode] = useState('mobile_money');
+  const [pMode, setPMode] = useState<ModePaiement>('mobile_money');
   const [pRef, setPRef] = useState('');
   const [pDesc, setPDesc] = useState('');
 
@@ -80,7 +90,7 @@ function FinancesSection({ universityId: propUniversityId }) {
     
     // Total attendu de tous les étudiants selon leur filière
     etudiantsList.forEach((st) => {
-      const config = fraisData?.[st.filiere];
+      const config = (fraisData as any)?.[st.filiere];
       if (config) {
         totalAttendu += Number(config.montantTotal || 0);
       }
@@ -95,12 +105,13 @@ function FinancesSection({ universityId: propUniversityId }) {
   }, [etudiantsList, paiementsList, fraisData]);
 
   // Soumettre Paiement
-  const handleEnregistrerPaiementSubmit = async (e) => {
+  const handleEnregistrerPaiementSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
-    if (!pIdEtudiant || !pMontant || isNaN(pMontant)) {
+    if (!pIdEtudiant || !pMontant || isNaN(Number(pMontant))) {
       setErreur("Veuillez sélectionner un étudiant et saisir un montant valide.");
       return;
     }
@@ -118,25 +129,26 @@ function FinancesSection({ universityId: propUniversityId }) {
       setPRef('');
       setPDesc('');
       setModalPaiementOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || "Erreur lors de l'enregistrement transactionnel.");
     }
   };
 
   // Soumettre Configuration des Frais
-  const handleConfigurerFraisSubmit = async (e) => {
+  const handleConfigurerFraisSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
-    if (!fMontantTotal || isNaN(fMontantTotal)) {
+    if (!fMontantTotal || isNaN(Number(fMontantTotal))) {
       setErreur("Veuillez saisir un montant total valide.");
       return;
     }
 
     // Filtrer et structurer les échéances
     const echeancesFiltrees = fEcheances
-      .filter((ech) => ech.date && ech.montant && !isNaN(ech.montant))
+      .filter((ech) => ech.date && ech.montant && !isNaN(Number(ech.montant)))
       .map((ech) => ({
         date: ech.date,
         montant: Number(ech.montant),
@@ -157,7 +169,7 @@ function FinancesSection({ universityId: propUniversityId }) {
         { date: '', montant: '' },
       ]);
       setModalFraisOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || "Erreur lors de la configuration.");
     }
   };
@@ -216,8 +228,8 @@ function FinancesSection({ universityId: propUniversityId }) {
       </div>
 
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Tableau historique */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
@@ -226,7 +238,7 @@ function FinancesSection({ universityId: propUniversityId }) {
         </div>
         {loadingPayments ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
           </div>
         ) : paiementsList.length > 0 ? (
           <div className="overflow-x-auto">
@@ -256,7 +268,7 @@ function FinancesSection({ universityId: propUniversityId }) {
                       </td>
                       <td className="text-xs">{formatDate(p.timestamp)}</td>
                       <td className="font-bold text-xs text-primary">{formatMontant(p.montant, 'FCFA')}</td>
-                      <td className="capitalize font-semibold text-xs">{p.modePaiement.replace('_', ' ')}</td>
+                      <td className="capitalize font-semibold text-xs">{(p.modePaiement || '').replace('_', ' ')}</td>
                       <td className="text-on-surface-muted truncate max-w-xs text-xs" title={p.description}>
                         {p.reference || '—'} {p.description ? `(${p.description})` : ''}
                       </td>
@@ -276,7 +288,7 @@ function FinancesSection({ universityId: propUniversityId }) {
       {/* ── MODAL ENREGISTRER PAIEMENT ── */}
       {modalPaiementOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalPaiementOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-lg text-on-surface border-b border-white/10 pb-2">
               Enregistrer un paiement de scolarité
@@ -314,7 +326,7 @@ function FinancesSection({ universityId: propUniversityId }) {
                 <label className="block text-xs font-bold text-on-surface-muted mb-1.5">Mode de règlement *</label>
                 <select
                   value={pMode}
-                  onChange={(e) => setPMode(e.target.value)}
+                  onChange={(e) => setPMode(e.target.value as ModePaiement)}
                   required
                   className="select select-bordered bg-surface w-full text-sm border-white/10"
                 >
@@ -356,7 +368,7 @@ function FinancesSection({ universityId: propUniversityId }) {
       {/* ── MODAL CONFIGURER FRAIS ── */}
       {modalFraisOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalFraisOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-lg text-on-surface border-b border-white/10 pb-2">
               Configurer les frais de scolarité par filière

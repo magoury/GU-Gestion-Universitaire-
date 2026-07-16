@@ -1,5 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
-import { ref, onValue, off } from 'firebase/database';
+// src/components/admin/sections/StudentsSection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section de gestion des étudiants : liste, filtres, ajout manuel, import CSV.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useState, useMemo, useEffect } from 'react';
+import { ref, onValue } from 'firebase/database';
 import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
@@ -7,7 +12,7 @@ import {
   creerEtudiant,
   mettreAJourEtudiant,
   changerStatutEtudiant,
-} from '../../../services/studentService.js';
+} from '../../../services/studentService';
 import Papa from 'papaparse';
 import {
   SearchIcon,
@@ -18,8 +23,8 @@ import {
   CheckIcon,
   ChevronIcon
 } from '../../icons/Icons.jsx';
+import type { Student, StatutEtudiant } from '@/types';
 
-// Niveaux et Filières par défaut (synchronisé avec LoginPage)
 const FILIERES = [
   'Génie Logiciel',
   'Réseaux & Télécommunications',
@@ -29,21 +34,24 @@ const FILIERES = [
 ];
 
 const NIVEAUX = ['L1', 'L2', 'L3', 'M1', 'M2'];
-
 const PAR_PAGE = 5;
 
-function StudentsSection({ universityId: propUniversityId }) {
+interface StudentsSectionProps {
+  universityId?: string;
+}
+
+function StudentsSection({ universityId: propUniversityId }: StudentsSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId, universityConfig: contextUniversityConfig } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
-  const [localConfig, setLocalConfig] = useState(null);
+  const [localConfig, setLocalConfig] = useState<any>(null);
   useEffect(() => {
     if (propUniversityId) {
       const configRef = ref(database, `universities/${propUniversityId}/config`);
       const unsubscribe = onValue(configRef, (snapshot) => {
         setLocalConfig(snapshot.val());
       });
-      return () => off(configRef);
+      return () => unsubscribe();
     }
   }, [propUniversityId]);
 
@@ -53,9 +61,9 @@ function StudentsSection({ universityId: propUniversityId }) {
   const { data: studentsData, loading } = useFirebaseData('students', universityId);
 
   // Liste des étudiants convertie en tableau
-  const etudiantsList = useMemo(() => {
+  const etudiantsList = useMemo<Student[]>(() => {
     if (!studentsData) return [];
-    return Object.values(studentsData);
+    return Object.values(studentsData) as Student[];
   }, [studentsData]);
 
   // Filtres
@@ -76,10 +84,10 @@ function StudentsSection({ universityId: propUniversityId }) {
   const [formData, setFormData] = useState({ nom: '', prenom: '', email: '', filiere: '', niveau: 'L1', dateNaissance: '', telephone: '' });
   
   // Édition
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   // Import CSV
-  const [previewCsv, setPreviewCsv] = useState([]);
+  const [previewCsv, setPreviewCsv] = useState<any[]>([]);
   const [nomFichierCsv, setNomFichierCsv] = useState('');
   const [loadingImport, setLoadingImport] = useState(false);
 
@@ -90,7 +98,7 @@ function StudentsSection({ universityId: propUniversityId }) {
   // Liste des filières éditables réelles (provenant de la config si présente)
   const filieresDisponibles = useMemo(() => {
     if (universityConfig?.filieres) {
-      return Object.values(universityConfig.filieres).map(f => f.nom);
+      return Object.values(universityConfig.filieres).map((f: any) => f.nom);
     }
     return FILIERES;
   }, [universityConfig]);
@@ -108,7 +116,7 @@ function StudentsSection({ universityId: propUniversityId }) {
       if (filtreStatut && st.statut !== filtreStatut) return false;
       if (rechercheNom) {
         const nomComplet = `${st.prenom} ${st.nom}`.toLowerCase();
-        if (!nomComplet.includes(rechercheNom.toLowerCase()) && !st.matricule.toLowerCase().includes(rechercheNom.toLowerCase())) {
+        if (!nomComplet.includes(rechercheNom.toLowerCase()) && !(st.matricule || '').toLowerCase().includes(rechercheNom.toLowerCase())) {
           return false;
         }
       }
@@ -125,8 +133,9 @@ function StudentsSection({ universityId: propUniversityId }) {
   const totalPages = Math.ceil(etudiantsFiltrés.length / PAR_PAGE) || 1;
 
   // Soumission Ajout manuel
-  const handleAjoutEtudiant = async (e) => {
+  const handleAjoutEtudiant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -140,14 +149,14 @@ function StudentsSection({ universityId: propUniversityId }) {
       setSuccess('Étudiant inscrit avec succès !');
       setFormData({ nom: '', prenom: '', email: '', filiere: '', niveau: 'L1', dateNaissance: '', telephone: '' });
       setModalAjoutOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la création de la fiche.');
     }
   };
 
   // Parsing CSV
-  const handleFichierCsv = (e) => {
-    const file = e.target.files[0];
+  const handleFichierCsv = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setNomFichierCsv(file.name);
@@ -156,15 +165,14 @@ function StudentsSection({ universityId: propUniversityId }) {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+      complete: (results: Papa.ParseResult<any>) => {
         if (results.errors.length > 0) {
           setErreur('Erreur lors du traitement du fichier CSV.');
           return;
         }
-        // Vérifier les colonnes minimales requises
         const premieresLignes = results.data;
         if (premieresLignes.length > 0) {
-          const cles = Object.keys(premieresLignes[0]);
+          const cles = Object.keys(premieresLignes[0] as any);
           if (!cles.includes('nom') || !cles.includes('prenom') || !cles.includes('email') || !cles.includes('filiere') || !cles.includes('niveau')) {
             setErreur('Le fichier CSV doit contenir les colonnes : nom, prenom, email, filiere, niveau.');
             return;
@@ -179,7 +187,7 @@ function StudentsSection({ universityId: propUniversityId }) {
 
   // Valider et lancer l'importation massive
   const handleLancerImport = async () => {
-    if (previewCsv.length === 0) return;
+    if (!universityId || previewCsv.length === 0) return;
 
     setErreur('');
     setLoadingImport(true);
@@ -204,7 +212,7 @@ function StudentsSection({ universityId: propUniversityId }) {
       setPreviewCsv([]);
       setNomFichierCsv('');
       setModalCsvOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || "Erreur lors de l'importation de certaines lignes.");
     } finally {
       setLoadingImport(false);
@@ -212,27 +220,27 @@ function StudentsSection({ universityId: propUniversityId }) {
   };
 
   // Soumission Édition
-  const handleEditerEtudiant = async (e) => {
+  const handleEditerEtudiant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId || !selectedStudent) return;
     setErreur('');
     setSuccess('');
-
-    if (!selectedStudent) return;
 
     try {
       await mettreAJourEtudiant(universityId, selectedStudent.id, selectedStudent);
       setSuccess('Fiche étudiant mise à jour !');
       setModalEditOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la mise à jour.');
     }
   };
 
-  const handleChangerStatut = async (id, nouveauStatut) => {
+  const handleChangerStatut = async (id: string, nouveauStatut: StatutEtudiant) => {
+    if (!universityId) return;
     try {
       await changerStatutEtudiant(universityId, id, nouveauStatut);
       setSuccess(`Statut de l'étudiant mis à jour à: ${nouveauStatut}.`);
-    } catch (err) {
+    } catch {
       setErreur("Impossible de changer le statut.");
     }
   };
@@ -314,14 +322,14 @@ function StudentsSection({ universityId: propUniversityId }) {
       </div>
 
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Tableau des Étudiants */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
           </div>
         ) : etudiantsAffiches.length > 0 ? (
           <div className="overflow-x-auto">
@@ -372,10 +380,10 @@ function StudentsSection({ universityId: propUniversityId }) {
                             <li className="menu-title text-[8px] uppercase tracking-wider text-on-surface-muted mt-1.5 px-2">
                               Statut
                             </li>
-                            <li><button onClick={() => handleChangerStatut(st.id, 'actif')}>Actif</button></li>
-                            <li><button onClick={() => handleChangerStatut(st.id, 'suspendu')}>Suspendu</button></li>
-                            <li><button onClick={() => handleChangerStatut(st.id, 'diplome')}>Diplômé</button></li>
-                            <li><button onClick={() => handleChangerStatut(st.id, 'exclu')}>Exclu</button></li>
+                            <li><button onClick={() => void handleChangerStatut(st.id, 'actif')}>Actif</button></li>
+                            <li><button onClick={() => void handleChangerStatut(st.id, 'suspendu')}>Suspendu</button></li>
+                            <li><button onClick={() => void handleChangerStatut(st.id, 'diplome')}>Diplômé</button></li>
+                            <li><button onClick={() => void handleChangerStatut(st.id, 'exclu')}>Exclu</button></li>
                           </ul>
                         </div>
                       </td>
@@ -501,7 +509,7 @@ function StudentsSection({ universityId: propUniversityId }) {
       {/* ── MODAL IMPORT CSV ── */}
       {modalCsvOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-2xl p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-2xl p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => { setModalCsvOuverte(false); setPreviewCsv([]); setNomFichierCsv(''); }} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-xl text-on-surface border-b border-white/10 pb-2">
               Importation massive par fichier CSV
@@ -578,7 +586,7 @@ function StudentsSection({ universityId: propUniversityId }) {
       {/* ── MODAL MODIFICATION FICHE ── */}
       {modalEditOuverte && selectedStudent && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalEditOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-xl text-on-surface border-b border-white/10 pb-2">
               Modifier la fiche : {selectedStudent.matricule}

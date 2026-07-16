@@ -1,14 +1,24 @@
-import { useEffect, useState, useMemo } from 'react';
+// src/components/admin/sections/AuditSection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section des logs d'audit : liste filtrable et sécurisée.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { lireAuditLogs } from '../../../services/auditService.js';
+import { lireAuditLogs } from '../../../services/auditService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, RefreshIcon } from '../../icons/Icons.jsx';
+import type { AuditLog } from '@/types';
 
-function AuditSection({ universityId: propUniversityId }) {
+interface AuditSectionProps {
+  universityId?: string;
+}
+
+function AuditSection({ universityId: propUniversityId }: AuditSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [recherche, setRecherche] = useState('');
   const [filtreAction, setFiltreAction] = useState('');
@@ -19,7 +29,6 @@ function AuditSection({ universityId: propUniversityId }) {
       setLoading(true);
       lireAuditLogs(universityId, { limite: 100 })
         .then((data) => {
-          // Tri décroissant automatique sur le timestamp
           const sorted = data.sort((a, b) => b.timestamp - a.timestamp);
           setLogs(sorted);
         })
@@ -33,9 +42,9 @@ function AuditSection({ universityId: propUniversityId }) {
   }, [universityId]);
 
   // Liste des actions uniques pour le filtre
-  const actionsUniques = useMemo(() => {
+  const actionsUniques = useMemo<string[]>(() => {
     const list = logs.map((l) => l.action);
-    return [...new Set(list)];
+    return Array.from(new Set(list));
   }, [logs]);
 
   // Logs filtrés
@@ -43,11 +52,11 @@ function AuditSection({ universityId: propUniversityId }) {
     return logs.filter((l) => {
       if (filtreAction && l.action !== filtreAction) return false;
       if (recherche) {
-        const query = recherche.toLowerCase();
+        const queryStr = recherche.toLowerCase();
         const enNom = (l.acteurNom || '').toLowerCase();
         const enDetail = (l.detail || '').toLowerCase();
         const enAction = (l.action || '').toLowerCase();
-        if (!enNom.includes(query) && !enDetail.includes(query) && !enAction.includes(query)) {
+        if (!enNom.includes(queryStr) && !enDetail.includes(queryStr) && !enAction.includes(queryStr)) {
           return false;
         }
       }
@@ -89,7 +98,7 @@ function AuditSection({ universityId: propUniversityId }) {
       </div>
 
       {/* Règle RGPD informative */}
-      <div className="alert alert-warning text-xs p-2 flex items-start gap-2">
+      <div className="alert alert-warning text-xs p-2 flex items-start gap-2 animate-fade-in">
         <AlertIcon className="w-3.5 h-3.5 text-warning flex-shrink-0 mt-0.5" />
         <div>
           <strong>Sécurité & RGPD :</strong> Le journal d'audit est en écriture seule (Append-Only) pour le client. Toute suppression ou altération est strictement rejetée par les règles de sécurité Firebase.
@@ -100,10 +109,10 @@ function AuditSection({ universityId: propUniversityId }) {
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
           </div>
         ) : logsFiltrés.length > 0 ? (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto animate-fade-in">
             <table className="table table-zebra table-sm w-full text-on-surface text-xs">
               <thead>
                 <tr className="border-b border-white/10 text-on-surface-muted bg-surface-high/30 text-xs">
@@ -129,7 +138,7 @@ function AuditSection({ universityId: propUniversityId }) {
                       </td>
                       <td className="font-bold text-xs text-on-surface">{log.acteurNom}</td>
                       <td className="uppercase font-semibold tracking-wider text-[10px] text-primary">
-                        {log.acteurRole.replace('_', ' ')}
+                        {(log.acteurRole || '').replace('_', ' ')}
                       </td>
                       <td>
                         <span className={`badge ${actionBadge} badge-xs font-bold text-[9px]`}>

@@ -1,16 +1,21 @@
-// src/components/admin/sections/TeachersSection.jsx
+// src/components/admin/sections/TeachersSection.tsx
 // ──────────────────────────────────────────────────────────────
 // Section de gestion des enseignants.
 // Recrutement, affectation de cours et calcul des charges horaires.
 // ──────────────────────────────────────────────────────────────
 
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { creerEnseignant, affecterCours } from '../../../services/teacherService.js';
+import { creerEnseignant, affecterCours } from '../../../services/teacherService';
 import { PlusIcon, BookIcon, AlertIcon, CheckIcon } from '../../icons/Icons.jsx';
+import type { Teacher } from '@/types';
 
-function TeachersSection({ universityId: propUniversityId }) {
+interface TeachersSectionProps {
+  universityId?: string;
+}
+
+function TeachersSection({ universityId: propUniversityId }: TeachersSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
@@ -18,15 +23,15 @@ function TeachersSection({ universityId: propUniversityId }) {
   const { data: teachersData, loading } = useFirebaseData('teachers', universityId);
 
   // Convertir en tableau
-  const teachersList = useMemo(() => {
+  const teachersList = useMemo<Teacher[]>(() => {
     if (!teachersData) return [];
-    return Object.values(teachersData);
+    return Object.values(teachersData) as Teacher[];
   }, [teachersData]);
 
   // États des modales
   const [modalAjoutOuverte, setModalAjoutOuverte] = useState(false);
   const [modalAffecterOuverte, setModalAffecterOuverte] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
   // Formulaire d'ajout
   const [formData, setFormData] = useState({ nom: '', prenom: '', email: '', specialite: '', departement: '', telephone: '' });
@@ -34,15 +39,16 @@ function TeachersSection({ universityId: propUniversityId }) {
   // Formulaire d'affectation
   const [coursId, setCoursId] = useState('');
   const [coursNom, setCoursNom] = useState('');
-  const [coursHeures, setCoursHeures] = useState(15);
+  const [coursHeures, setCoursHeures] = useState<string | number>(15);
 
   // États de feedback
   const [erreur, setErreur] = useState('');
   const [success, setSuccess] = useState('');
 
   // Soumission Ajout
-  const handleRecruterEnseignant = async (e) => {
+  const handleRecruterEnseignant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -56,14 +62,15 @@ function TeachersSection({ universityId: propUniversityId }) {
       setSuccess('Enseignant recruté avec succès !');
       setFormData({ nom: '', prenom: '', email: '', specialite: '', departement: '', telephone: '' });
       setModalAjoutOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la création.');
     }
   };
 
   // Soumission Affectation de cours
-  const handleAffecterCoursSubmit = async (e) => {
+  const handleAffecterCoursSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -82,7 +89,7 @@ function TeachersSection({ universityId: propUniversityId }) {
       setCoursNom('');
       setCoursHeures(15);
       setModalAffecterOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || "Erreur lors de l'affectation du cours.");
     }
   };
@@ -104,14 +111,14 @@ function TeachersSection({ universityId: propUniversityId }) {
       </div>
 
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Tableau des Enseignants */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
           </div>
         ) : teachersList.length > 0 ? (
           <div className="overflow-x-auto">
@@ -127,7 +134,6 @@ function TeachersSection({ universityId: propUniversityId }) {
               </thead>
               <tbody>
                 {teachersList.map((t) => {
-                  // Calculer la charge horaire en temps réel côté client
                   const coursList = t.cours ? Object.values(t.cours) : [];
                   const chargeTotale = coursList.reduce((sum, c) => sum + Number(c.heures || 0), 0);
 
@@ -144,7 +150,7 @@ function TeachersSection({ universityId: propUniversityId }) {
                       <td>
                         {coursList.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {coursList.map((c) => (
+                            {coursList.map((c: any) => (
                               <span key={c.id} className="badge badge-primary badge-xs font-semibold">
                                 {c.nom} ({c.heures}h)
                               </span>
@@ -183,7 +189,7 @@ function TeachersSection({ universityId: propUniversityId }) {
       {/* ── MODAL RECRUTER ENSEIGNANT ── */}
       {modalAjoutOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-lg p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalAjoutOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-xl text-on-surface border-b border-white/10 pb-2">
               Recruter un enseignant
@@ -258,7 +264,7 @@ function TeachersSection({ universityId: propUniversityId }) {
       {/* ── MODAL AFFECTER UN COURS ── */}
       {modalAffecterOuverte && selectedTeacher && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalAffecterOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-lg text-on-surface border-b border-white/10 pb-2">
               Affecter un cours à {selectedTeacher.prenom} {selectedTeacher.nom}

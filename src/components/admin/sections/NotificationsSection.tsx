@@ -1,9 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
+// src/components/admin/sections/NotificationsSection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section de diffusion des annonces aux différents rôles de l'université.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useState, useMemo } from 'react';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { envoyerNotification } from '../../../services/notificationService.js';
+import { envoyerNotification } from '../../../services/notificationService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, BellIcon } from '../../icons/Icons.jsx';
+import type { Notification } from '@/types';
 
 const DESTINATAIRES = [
   { value: 'all', label: 'Toute l\'Université (Tous)' },
@@ -19,16 +25,20 @@ const TYPES = [
   { value: 'success', label: 'Succès / Félicitations (Vert)' },
 ];
 
-function NotificationsSection({ universityId: propUniversityId }) {
+interface NotificationsSectionProps {
+  universityId?: string;
+}
+
+function NotificationsSection({ universityId: propUniversityId }: NotificationsSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
   // Écoute des notifications en temps réel
   const { data: notificationsData, loading } = useFirebaseData('notifications', universityId);
 
-  const notificationsList = useMemo(() => {
+  const notificationsList = useMemo<Notification[]>(() => {
     if (!notificationsData) return [];
-    return Object.values(notificationsData).sort((a, b) => b.timestamp - a.timestamp);
+    return (Object.values(notificationsData) as Notification[]).sort((a, b) => b.timestamp - a.timestamp);
   }, [notificationsData]);
 
   // Modale
@@ -45,8 +55,9 @@ function NotificationsSection({ universityId: propUniversityId }) {
   const [erreur, setErreur] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handlePublierAnnonce = async (e) => {
+  const handlePublierAnnonce = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -60,7 +71,7 @@ function NotificationsSection({ universityId: propUniversityId }) {
         destinataireId: dest,
         titre,
         message,
-        type,
+        type: type as any,
         lien,
       });
 
@@ -69,7 +80,7 @@ function NotificationsSection({ universityId: propUniversityId }) {
       setMessage('');
       setLien('');
       setModalEnvoiOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Une erreur est survenue lors de l\'envoi.');
     }
   };
@@ -91,8 +102,8 @@ function NotificationsSection({ universityId: propUniversityId }) {
       </div>
 
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Historique des Annonces */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
@@ -101,26 +112,24 @@ function NotificationsSection({ universityId: propUniversityId }) {
         </div>
         {loading ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary"></span>
+            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
           </div>
         ) : notificationsList.length > 0 ? (
-          <div className="flex flex-col p-4 gap-3">
+          <div className="flex flex-col p-4 gap-3 animate-fade-in">
             {notificationsList.map((notif) => {
-              // Couleur du cadre selon type
               let borderClass = 'border-info/30 bg-info/5';
               let badgeColor = 'badge-info';
-              if (notif.type === 'warning') {
+              if ((notif.type as any) === 'warning') {
                 borderClass = 'border-warning/30 bg-warning/5';
                 badgeColor = 'badge-warning';
-              } else if (notif.type === 'urgent') {
+              } else if ((notif.type as any) === 'urgent') {
                 borderClass = 'border-error/30 bg-error/5';
                 badgeColor = 'badge-error';
-              } else if (notif.type === 'success') {
+              } else if ((notif.type as any) === 'success') {
                 borderClass = 'border-success/30 bg-success/5';
                 badgeColor = 'badge-success';
               }
 
-              // Label destinataire
               const lblDest = DESTINATAIRES.find(d => d.value === notif.destinataireId)?.label || `Utilisateur : ${notif.destinataireId}`;
 
               return (
@@ -160,7 +169,7 @@ function NotificationsSection({ universityId: propUniversityId }) {
       {/* ── MODAL PUBLIER ANNONCE ── */}
       {modalEnvoiOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalEnvoiOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-lg text-on-surface border-b border-white/10 pb-2">
               Diffuser une nouvelle annonce

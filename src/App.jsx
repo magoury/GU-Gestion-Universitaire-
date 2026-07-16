@@ -30,7 +30,7 @@ import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import UniversityDetailView from './pages/superadmin/UniversityDetailView.jsx';
 
 // Pages protégées — Admin Université
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Pages protégées — Enseignant
 import TeacherDashboard from './pages/teacher/TeacherDashboard.jsx';

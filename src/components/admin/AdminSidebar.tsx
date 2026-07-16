@@ -1,15 +1,15 @@
-// src/components/admin/AdminSidebar.jsx
+// src/components/admin/AdminSidebar.tsx
 // ──────────────────────────────────────────────────────────────
 // Sidebar pour l'espace d'administration de l'université.
-// Barre de navigation fixe 240px au look vert forêt et doré.
+// Barre de navigation fixe 208px (w-52) au look vert forêt et doré.
 // ──────────────────────────────────────────────────────────────
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoGU from '../ui/LogoGU.jsx';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { logout } from '../../services/authService.js';
+import { logout } from '../../services/authService';
 import {
   HomeIcon,
   StudentsIcon,
@@ -23,6 +23,11 @@ import {
   LogoutIcon
 } from '../icons/Icons.jsx';
 
+interface AdminSidebarProps {
+  activeSection: string;
+  onSectionChange: (section: string) => void;
+}
+
 const MENU_ITEMS = [
   { id: 'overview', label: "Vue d'ensemble", icon: HomeIcon },
   { id: 'students', label: 'Étudiants', icon: StudentsIcon },
@@ -35,16 +40,12 @@ const MENU_ITEMS = [
   { id: 'config', label: 'Configuration', icon: SettingsIcon },
 ];
 
-/**
- * @param {{ activeSection: string, onSectionChange: (sec: string) => void }} props
- */
-function AdminSidebar({ activeSection, onSectionChange }) {
+function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps): React.JSX.Element {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { universityConfig, universityId } = useTenant();
 
   const nomUniversite = universityConfig?.nom || universityId || 'Université';
-  const villeUniversite = universityConfig?.ville || 'Abidjan';
 
   const nomComplet = userProfile ? `${userProfile.prenom} ${userProfile.nom}` : '—';
   
@@ -65,7 +66,7 @@ function AdminSidebar({ activeSection, onSectionChange }) {
   };
 
   return (
-    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30">
+    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30 animate-slide-right">
       
       {/* En-tête : Logo & Infos Université */}
       <div className="p-4 border-b border-white/10 flex flex-col items-center gap-1.5">
@@ -102,8 +103,8 @@ function AdminSidebar({ activeSection, onSectionChange }) {
       {/* Pied : Infos Admin & Déconnexion */}
       <div className="p-3 border-t border-white/10 bg-surface-high/30 flex flex-col gap-2.5">
         <div className="flex items-center gap-2">
-          {/* Avatar DaisyUI */}
-          <div className="avatar placeholder">
+          {/* Avatar */}
+          <div className="avatar placeholder animate-scale-up">
             <div className="bg-primary-container text-on-surface w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">
               <span>{initiales}</span>
             </div>

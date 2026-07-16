@@ -1,26 +1,37 @@
-// src/pages/admin/AdminDashboard.jsx
+// src/pages/admin/AdminDashboard.tsx
 // ──────────────────────────────────────────────────────────────
 // Page maîtresse du Tableau de Bord de l'Administrateur Université.
 // Gère l'arrière-plan, la sidebar, le header et le routage des 9 sections.
 // ──────────────────────────────────────────────────────────────
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ForestBackground from '../../components/layout/ForestBackground.jsx';
-import AdminSidebar from '../../components/admin/AdminSidebar.jsx';
-import AdminHeader from '../../components/admin/AdminHeader.jsx';
+import AdminSidebar from '../../components/admin/AdminSidebar';
+import AdminHeader from '../../components/admin/AdminHeader';
 
 // Importation des 9 sections d'administration
-import OverviewSection from '../../components/admin/sections/OverviewSection.jsx';
-import StudentsSection from '../../components/admin/sections/StudentsSection.jsx';
-import TeachersSection from '../../components/admin/sections/TeachersSection.jsx';
-import NotesSection from '../../components/admin/sections/NotesSection.jsx';
-import FinancesSection from '../../components/admin/sections/FinancesSection.jsx';
-import LibrarySection from '../../components/admin/sections/LibrarySection.jsx';
-import NotificationsSection from '../../components/admin/sections/NotificationsSection.jsx';
-import AuditSection from '../../components/admin/sections/AuditSection.jsx';
-import ConfigSection from '../../components/admin/sections/ConfigSection.jsx';
+import OverviewSection from '../../components/admin/sections/OverviewSection';
+import StudentsSection from '../../components/admin/sections/StudentsSection';
+import TeachersSection from '../../components/admin/sections/TeachersSection';
+import NotesSection from '../../components/admin/sections/NotesSection';
+import FinancesSection from '../../components/admin/sections/FinancesSection';
+import LibrarySection from '../../components/admin/sections/LibrarySection';
+import NotificationsSection from '../../components/admin/sections/NotificationsSection';
+import AuditSection from '../../components/admin/sections/AuditSection';
+import ConfigSection from '../../components/admin/sections/ConfigSection';
 
-const SECTION_TITLES = {
+type AdminSection =
+  | 'overview'
+  | 'students'
+  | 'teachers'
+  | 'notes'
+  | 'finances'
+  | 'library'
+  | 'notifications'
+  | 'audit'
+  | 'config';
+
+const SECTION_TITLES: Record<AdminSection, string> = {
   overview: "Vue d'ensemble",
   students: "Gestion des Étudiants",
   teachers: "Gestion du Corps Enseignant",
@@ -32,14 +43,14 @@ const SECTION_TITLES = {
   config: "Configuration de l'Université",
 };
 
-function AdminDashboard() {
-  const [activeSection, setActiveSection] = useState('overview');
+function AdminDashboard(): React.JSX.Element {
+  const [activeSection, setActiveSection] = useState<AdminSection>('overview');
 
   // Rendu de la section active
   const renderSection = () => {
     switch (activeSection) {
       case 'overview':
-        return <OverviewSection onNavigate={setActiveSection} />;
+        return <OverviewSection onNavigate={(sec: string) => setActiveSection(sec as AdminSection)} />;
       case 'students':
         return <StudentsSection />;
       case 'teachers':
@@ -57,7 +68,7 @@ function AdminDashboard() {
       case 'config':
         return <ConfigSection />;
       default:
-        return <OverviewSection onNavigate={setActiveSection} />;
+        return <OverviewSection onNavigate={(sec: string) => setActiveSection(sec as AdminSection)} />;
     }
   };
 
@@ -68,7 +79,7 @@ function AdminDashboard() {
       <ForestBackground />
 
       {/* Barre Latérale Fixe (240px) */}
-      <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      <AdminSidebar activeSection={activeSection} onSectionChange={(sec: string) => setActiveSection(sec as AdminSection)} />
 
       {/* Zone principale de contenu (à droite de la Sidebar fixée) */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden ml-52 relative">

@@ -1,6 +1,6 @@
-// src/components/admin/AcademicYearClosure.jsx
+// src/components/admin/AcademicYearClosure.tsx
 // ──────────────────────────────────────────────────────────────
-// Composant de clôture d'année académique.
+// Composant de clôture d'année académique — Version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
@@ -9,10 +9,21 @@ import {
   verifierPrealables,
   calculerResultatsFinaux,
   cloturerAnneeAcademique
-} from '../../services/academicYearService.js';
-import { AlertIcon, CheckIcon } from '../icons/Icons.jsx';
+} from '../../services/academicYearService';
+import { AlertIcon } from '../icons/Icons.jsx';
 
-function AcademicYearClosure({ onFinished }) {
+interface AcademicYearClosureProps {
+  onFinished?: () => void;
+}
+
+interface BilanFinalType {
+  admis: number;
+  ajournes: number;
+  diplomes: number;
+  erreurs?: string[];
+}
+
+function AcademicYearClosure({ onFinished }: AcademicYearClosureProps): React.JSX.Element {
   const { universityId, universityConfig } = useTenant();
   const anneeCourante = universityConfig?.anneeAcademique || '2025-2026';
 
@@ -22,16 +33,17 @@ function AcademicYearClosure({ onFinished }) {
   
   // Données de vérification préalable
   const [peutCloturer, setPeutCloturer] = useState(true);
-  const [alertes, setAlertes] = useState([]);
+  const [alertes, setAlertes] = useState<string[]>([]);
   const [estimations, setEstimations] = useState({ admis: 0, ajournes: 0, diplomes: 0 });
 
   // Confirmation
   const [inputText, setInputText] = useState('');
   const [erreur, setErreur] = useState('');
-  const [bilanFinal, setBilanFinal] = useState(null);
+  const [bilanFinal, setBilanFinal] = useState<BilanFinalType | null>(null);
 
   // Lancer la première étape : Vérification
   const handleOuvrirModal = async () => {
+    if (!universityId) return;
     setModalOuvert(true);
     setEtape(1);
     setChargement(true);
@@ -54,7 +66,7 @@ function AcademicYearClosure({ onFinished }) {
       const diplomes = resFinaux.filter(r => r.admis && (r.niveau === 'L3' || r.niveau === 'M2')).length;
 
       setEstimations({ admis, ajournes, diplomes });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setErreur(err.message || "Impossible d'effectuer les vérifications préalables.");
     } finally {
@@ -64,6 +76,7 @@ function AcademicYearClosure({ onFinished }) {
 
   // Clôture définitive (Étape 2)
   const handleCloturerDefinitif = async () => {
+    if (!universityId) return;
     if (inputText !== anneeCourante) {
       setErreur(`La confirmation doit correspondre exactement à "${anneeCourante}".`);
       return;
@@ -77,7 +90,7 @@ function AcademicYearClosure({ onFinished }) {
       setBilanFinal(bilan);
       setEtape(3); // Étape succès
       onFinished?.();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setErreur(err.message || "Une erreur critique s'est produite lors de la clôture.");
     } finally {

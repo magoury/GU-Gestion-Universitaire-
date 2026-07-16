@@ -1,27 +1,45 @@
-import { useMemo } from 'react';
+// src/components/admin/AdminHeader.tsx
+// ──────────────────────────────────────────────────────────────
+// Header de section pour le tableau de bord Administrateur.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth.js';
 import { useTenant } from '../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../hooks/useFirebaseData.js';
 import { BellIcon, SearchIcon, HelpIcon } from '../icons/Icons.jsx';
 
-/**
- * @param {{ title: string }} props
- */
-function AdminHeader({ title }) {
+interface AdminHeaderProps {
+  title: string;
+}
+
+interface FirebaseNotification {
+  id: string;
+  destinataireId: string;
+  titre: string;
+  message: string;
+  lue: boolean;
+}
+
+function AdminHeader({ title }: AdminHeaderProps): React.JSX.Element {
   const { userProfile } = useAuth();
   const { universityId } = useTenant();
 
   // Écouter les notifications en temps réel pour le badge
   const { data: notificationsData } = useFirebaseData('notifications', universityId);
 
+  const notificationsList = useMemo<FirebaseNotification[]>(() => {
+    if (!notificationsData) return [];
+    return Object.values(notificationsData) as FirebaseNotification[];
+  }, [notificationsData]);
+
   const nbNonLues = useMemo(() => {
-    if (!notificationsData || !userProfile) return 0;
+    if (!notificationsList || !userProfile) return 0;
     
-    // Les notifications de la base sont sous forme d'objet dictionnaire
-    return Object.values(notificationsData).filter(
+    return notificationsList.filter(
       (notif) => (notif.destinataireId === userProfile.uid || notif.destinataireId === 'all') && !notif.lue
     ).length;
-  }, [notificationsData, userProfile]);
+  }, [notificationsList, userProfile]);
 
   return (
     <header className="sticky top-0 z-20 h-14 min-h-[56px] bg-bg/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-6 w-full gap-4">
@@ -59,9 +77,9 @@ function AdminHeader({ title }) {
           {/* Liste rapide de notifications en dropdown */}
           <div className="dropdown-content menu p-3 shadow-2xl bg-surface border border-white/10 rounded-xl w-80 mt-2 z-30">
             <h3 className="font-semibold text-xs mb-1.5 text-on-surface">Notifications Récentes</h3>
-            {notificationsData ? (
-              <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
-                {Object.values(notificationsData)
+            {notificationsList.length > 0 ? (
+              <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto animate-fade-in">
+                {notificationsList
                   .filter((n) => n.destinataireId === userProfile?.uid || n.destinataireId === 'all')
                   .slice(0, 5)
                   .map((n) => (

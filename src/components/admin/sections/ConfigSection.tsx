@@ -1,29 +1,39 @@
-// src/components/admin/sections/ConfigSection.jsx
+// src/components/admin/sections/ConfigSection.tsx
 // ──────────────────────────────────────────────────────────────
 // Section de Configuration de l'Université (Locataire / Tenant).
 // Permet d'ajuster le nom, le logo Base64, l'année scolaire,
 // la devise et les filières académiques (Coefficients & ECTS).
 // ──────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from 'react';
-import { ref, update, onValue, off } from 'firebase/database';
+import React, { useState, useEffect } from 'react';
+import { ref, update, onValue } from 'firebase/database';
 import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
-import { ecrireAuditLog } from '../../../services/auditService.js';
-import { AlertIcon, CheckIcon, SettingsIcon, PlusIcon } from '../../icons/Icons.jsx';
+import { ecrireAuditLog } from '../../../services/auditService';
+import { AlertIcon, CheckIcon, PlusIcon } from '../../icons/Icons.jsx';
 
-function ConfigSection({ universityId: propUniversityId }) {
+interface FiliereConfig {
+  nom: string;
+  ects: number;
+  coef: number;
+}
+
+interface ConfigSectionProps {
+  universityId?: string;
+}
+
+function ConfigSection({ universityId: propUniversityId }: ConfigSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId, universityConfig: contextUniversityConfig } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
-  const [localConfig, setLocalConfig] = useState(null);
+  const [localConfig, setLocalConfig] = useState<any>(null);
   useEffect(() => {
     if (propUniversityId) {
       const configRef = ref(database, `universities/${propUniversityId}/config`);
       const unsubscribe = onValue(configRef, (snapshot) => {
         setLocalConfig(snapshot.val());
       });
-      return () => off(configRef);
+      return () => unsubscribe();
     }
   }, [propUniversityId]);
 
@@ -36,7 +46,7 @@ function ConfigSection({ universityId: propUniversityId }) {
   const [devise, setDevise] = useState('FCFA');
   const [annee, setAnnee] = useState('2025-2026');
   const [logoBase64, setLogoBase64] = useState('');
-  const [filieres, setFilieres] = useState([]);
+  const [filieres, setFilieres] = useState<FiliereConfig[]>([]);
 
   // États de feedback
   const [erreur, setErreur] = useState('');
@@ -55,7 +65,7 @@ function ConfigSection({ universityId: propUniversityId }) {
       
       // Charger les filières
       if (universityConfig.filieres) {
-        setFilieres(Object.values(universityConfig.filieres));
+        setFilieres(Object.values(universityConfig.filieres) as FiliereConfig[]);
       } else {
         setFilieres([
           { nom: 'Génie Logiciel', ects: 60, coef: 2 },
@@ -66,8 +76,8 @@ function ConfigSection({ universityId: propUniversityId }) {
   }, [universityConfig]);
 
   // Convertir l'image logo en Base64
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 250000) {
@@ -77,7 +87,7 @@ function ConfigSection({ universityId: propUniversityId }) {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setLogoBase64(reader.result);
+      setLogoBase64(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -87,21 +97,25 @@ function ConfigSection({ universityId: propUniversityId }) {
     setFilieres([...filieres, { nom: '', ects: 60, coef: 1 }]);
   };
 
-  const handleSupprimerFiliere = (idx) => {
+  const handleSupprimerFiliere = (idx: number) => {
     const list = [...filieres];
     list.splice(idx, 1);
     setFilieres(list);
   };
 
-  const handleChangerFiliere = (idx, champ, valeur) => {
+  const handleChangerFiliere = (idx: number, champ: keyof FiliereConfig, valeur: any) => {
     const list = [...filieres];
-    list[idx][champ] = valeur;
+    list[idx] = {
+      ...list[idx],
+      [champ]: champ === 'nom' ? valeur : Number(valeur),
+    };
     setFilieres(list);
   };
 
   // Soumission
-  const handleSauvegarderConfiguration = async (e) => {
+  const handleSauvegarderConfiguration = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
     setLoading(true);
@@ -113,8 +127,7 @@ function ConfigSection({ universityId: propUniversityId }) {
     }
 
     try {
-      // Structurer les filières sous forme de dictionnaire pour Firebase
-      const filieresDict = {};
+      const filieresDict: Record<string, FiliereConfig> = {};
       filieres.forEach((f) => {
         if (f.nom) {
           filieresDict[f.nom.replace(/[.#$[\]]/g, '_')] = {
@@ -149,7 +162,7 @@ function ConfigSection({ universityId: propUniversityId }) {
       });
 
       setSuccess('Configuration globale mise à jour avec succès !');
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la sauvegarde.');
     } finally {
       setLoading(false);
@@ -160,8 +173,8 @@ function ConfigSection({ universityId: propUniversityId }) {
     <form onSubmit={handleSauvegarderConfiguration} className="flex flex-col gap-4 max-w-3xl">
       
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Identité de l'établissement */}
       <div className="card bg-surface border border-white/10 p-4 flex flex-col gap-3">

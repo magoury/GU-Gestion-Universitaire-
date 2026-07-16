@@ -67,6 +67,7 @@ export interface UniversityConfig {
 
   /** Année académique courante [NOUVEAU] */
   anneeAcademiqueActive?: string
+  anneeAcademique?: string
 
   /** Logo de l'université [NOUVEAU] */
   logo?: string | null

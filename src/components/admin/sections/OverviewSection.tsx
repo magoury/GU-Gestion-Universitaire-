@@ -1,9 +1,14 @@
-import { useEffect, useState, useMemo } from 'react';
-import { ref, onValue, off } from 'firebase/database';
+// src/components/admin/sections/OverviewSection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section d'accueil : indicateurs clés, alertes et logs d'activité.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useEffect, useState, useMemo } from 'react';
+import { ref, onValue } from 'firebase/database';
 import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
-import { lireAuditLogs } from '../../../services/auditService.js';
+import { lireAuditLogs } from '../../../services/auditService';
 import { formatDate } from '../../../lib/utils.js';
 import {
   StudentsIcon,
@@ -16,22 +21,32 @@ import {
   NotesIcon,
   BookIcon
 } from '../../icons/Icons.jsx';
+import type { Student, Payment, AuditLog } from '@/types';
 
-/**
- * @param {{ onNavigate: (sec: string) => void, universityId?: string }} props
- */
-function OverviewSection({ onNavigate, universityId: propUniversityId }) {
+interface OverviewSectionProps {
+  onNavigate: (section: string) => void;
+  universityId?: string;
+}
+
+interface AlerteFinanciere {
+  id: string;
+  nom: string;
+  matricule: string;
+  solde: number;
+}
+
+function OverviewSection({ onNavigate, universityId: propUniversityId }: OverviewSectionProps): React.JSX.Element {
   const { universityId: contextUniversityId, universityConfig: contextUniversityConfig } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
-  const [localConfig, setLocalConfig] = useState(null);
+  const [localConfig, setLocalConfig] = useState<any>(null);
   useEffect(() => {
     if (propUniversityId) {
       const configRef = ref(database, `universities/${propUniversityId}/config`);
       const unsubscribe = onValue(configRef, (snapshot) => {
         setLocalConfig(snapshot.val());
       });
-      return () => off(configRef);
+      return () => unsubscribe();
     }
   }, [propUniversityId]);
 
@@ -44,7 +59,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
   const { data: fraisData } = useFirebaseData('frais', universityId);
   const { data: gradesData } = useFirebaseData('grades', universityId);
 
-  const [auditLogs, setAuditLogs] = useState([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(true);
 
   // Charger les audit logs au montage / mise à jour
@@ -58,7 +73,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
         .catch((err) => console.error('Erreur chargement logs audit:', err))
         .finally(() => setLoadingAudit(false));
     }
-  }, [universityId, paymentsData, studentsData, gradesData]); // recharger si des données changent
+  }, [universityId, paymentsData, studentsData, gradesData]);
 
   // Compter les entités
   const nbStudents = useMemo(() => (studentsData ? Object.keys(studentsData).length : 0), [studentsData]);
@@ -72,12 +87,12 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
   const tauxPaiement = useMemo(() => {
     if (!studentsData || !fraisData) return 0;
     
-    const etudiantsList = Object.values(studentsData);
+    const etudiantsList = Object.values(studentsData) as Student[];
     let totalAttendu = 0;
 
     // Calculer le montant total attendu pour tous les étudiants inscrits
     etudiantsList.forEach((st) => {
-      const configFrais = fraisData[st.filiere];
+      const configFrais = (fraisData as any)[st.filiere];
       if (configFrais) {
         totalAttendu += Number(configFrais.montantTotal || 0);
       }
@@ -87,28 +102,28 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
 
     // Sommer tous les paiements enregistrés
     const totalPaye = paymentsData 
-      ? Object.values(paymentsData).reduce((sum, p) => sum + Number(p.montant || 0), 0)
+      ? (Object.values(paymentsData) as Payment[]).reduce((sum, p) => sum + Number(p.montant || 0), 0)
       : 0;
 
     return Math.min(Math.round((totalPaye / totalAttendu) * 100), 100);
   }, [studentsData, fraisData, paymentsData]);
 
   // Alertes financières : étudiants en retard (solde > 0)
-  const alertesFinancieres = useMemo(() => {
+  const alertesFinancieres = useMemo<AlerteFinanciere[]>(() => {
     if (!studentsData || !fraisData) return [];
     
-    const etudiantsList = Object.values(studentsData);
-    const retards = [];
+    const etudiantsList = Object.values(studentsData) as Student[];
+    const retards: AlerteFinanciere[] = [];
 
     etudiantsList.forEach((st) => {
-      const configFrais = fraisData[st.filiere];
+      const configFrais = (fraisData as any)[st.filiere];
       if (!configFrais) return;
 
       const totalDu = configFrais.montantTotal || 0;
       
       // Sommer les paiements de cet étudiant
       const paye = paymentsData
-        ? Object.values(paymentsData)
+        ? (Object.values(paymentsData) as Payment[])
             .filter((p) => p.studentId === st.id)
             .reduce((sum, p) => sum + Number(p.montant), 0)
         : 0;
@@ -118,34 +133,33 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
         retards.push({
           id: st.id,
           nom: `${st.prenom} ${st.nom}`,
-          matricule: st.matricule,
+          matricule: st.matricule || st.id,
           solde,
         });
       }
     });
 
-    // Trier par retard le plus élevé
     return retards.sort((a, b) => b.solde - a.solde).slice(0, 5);
   }, [studentsData, fraisData, paymentsData]);
 
   // Alertes pédagogiques : matières sans aucune note
-  const alertesPedagogiques = useMemo(() => {
+  const alertesPedagogiques = useMemo<string[]>(() => {
     if (!universityConfig?.filieres) return [];
 
-    const matieresSansNotes = [];
+    const matieresSansNotes: string[] = [];
     const matieresEvaluees = gradesData
-      ? new Set(Object.values(gradesData).map((g) => g.matiereId))
+      ? new Set((Object.values(gradesData) as any[]).map((g) => g.matiereId))
       : new Set();
 
     // Parcourir toutes les matières configurées dans les filières de l'université
-    Object.values(universityConfig.filieres).forEach((fil) => {
-      const nomMatiere = fil.nom; // Chaque filière a un nom de matière ou une liste de matières associée
+    Object.values(universityConfig.filieres).forEach((fil: any) => {
+      const nomMatiere = fil.nom;
       if (nomMatiere && !matieresEvaluees.has(nomMatiere)) {
         matieresSansNotes.push(nomMatiere);
       }
     });
 
-    return [...new Set(matieresSansNotes)].slice(0, 5);
+    return Array.from(new Set(matieresSansNotes)).slice(0, 5);
   }, [universityConfig, gradesData]);
 
   const loadingGlobal = loadingStudents || loadingTeachers || loadingPayments;
@@ -153,7 +167,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
   if (loadingGlobal) {
     return (
       <div className="flex items-center justify-center h-96">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <span className="loading loading-spinner loading-lg text-primary animate-spin"></span>
       </div>
     );
   }
@@ -223,7 +237,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
           <div>
             <div className="text-[10px] font-bold text-accent uppercase tracking-wider mb-2">Retards de Scolarité</div>
             {alertesFinancieres.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 animate-fade-in">
                 {alertesFinancieres.map((a) => (
                   <div
                     key={a.id}
@@ -249,7 +263,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
           <div>
             <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Matières sans Notes</div>
             {alertesPedagogiques.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 animate-fade-in">
                 {alertesPedagogiques.map((mat, idx) => (
                   <div
                     key={idx}
@@ -275,10 +289,10 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }) {
 
           {loadingAudit ? (
             <div className="flex justify-center py-6">
-              <span className="loading loading-spinner loading-md text-primary"></span>
+              <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
             </div>
           ) : auditLogs.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 animate-fade-in">
               {auditLogs.map((log) => {
                 let IconComponent = SettingsIcon;
                 if (log.action.includes('ETUDIANT')) IconComponent = StudentsIcon;

@@ -1,4 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+// src/components/admin/sections/LibrarySection.tsx
+// ──────────────────────────────────────────────────────────────
+// Section de la bibliothèque numérique : ressources, liens, livres.
+// ──────────────────────────────────────────────────────────────
+
+import React, { useState, useMemo } from 'react';
 import { ref, set, push } from 'firebase/database';
 import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
@@ -6,16 +11,30 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, BookIcon, FileIcon, HelpIcon, ChevronIcon } from '../../icons/Icons.jsx';
 
-function LibrarySection({ universityId: propUniversityId }) {
+interface LibraryResource {
+  id: string;
+  titre: string;
+  auteur: string;
+  categorie: string;
+  lien: string;
+  description: string;
+  timestamp: number;
+}
+
+interface LibrarySectionProps {
+  universityId?: string;
+}
+
+function LibrarySection({ universityId: propUniversityId }: LibrarySectionProps): React.JSX.Element {
   const { universityId: contextUniversityId } = useTenant();
   const universityId = propUniversityId || contextUniversityId;
 
   // Charger les ressources de la bibliothèque en temps réel
   const { data: libraryData, loading } = useFirebaseData('library', universityId);
 
-  const libraryList = useMemo(() => {
+  const libraryList = useMemo<LibraryResource[]>(() => {
     if (!libraryData) return [];
-    return Object.values(libraryData).sort((a, b) => b.timestamp - a.timestamp);
+    return (Object.values(libraryData) as LibraryResource[]).sort((a, b) => b.timestamp - a.timestamp);
   }, [libraryData]);
 
   // États de modales
@@ -28,8 +47,9 @@ function LibrarySection({ universityId: propUniversityId }) {
   const [erreur, setErreur] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleAjouterRessource = async (e) => {
+  const handleAjouterRessource = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!universityId) return;
     setErreur('');
     setSuccess('');
 
@@ -56,7 +76,7 @@ function LibrarySection({ universityId: propUniversityId }) {
       setSuccess('Ressource pédagogique ajoutée à la bibliothèque avec succès !');
       setFormData({ titre: '', auteur: '', categorie: 'Livre', lien: '', description: '' });
       setModalAjoutOuverte(false);
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de la publication de la ressource.');
     }
   };
@@ -78,16 +98,16 @@ function LibrarySection({ universityId: propUniversityId }) {
       </div>
 
       {/* Feedbacks */}
-      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
-      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
+      {erreur && <div className="alert alert-error text-xs p-2 flex items-center gap-2 animate-fade-in"><AlertIcon className="w-3.5 h-3.5 text-error" /> {erreur}</div>}
+      {success && <div className="alert alert-success text-xs p-2 flex items-center gap-2 animate-fade-in"><CheckIcon className="w-3.5 h-3.5 text-success" /> {success}</div>}
 
       {/* Grille des Ressources */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <span className="loading loading-spinner loading-md text-primary"></span>
+          <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
         </div>
       ) : libraryList.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
           {libraryList.map((res) => {
             let IconComponent = BookIcon;
             let iconColor = 'text-primary';
@@ -152,7 +172,7 @@ function LibrarySection({ universityId: propUniversityId }) {
       {/* ── MODAL AJOUT RESSOURCE ── */}
       {modalAjoutOuverte && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface">
+          <div className="glass-panel w-full max-w-md p-6 relative flex flex-col gap-4 text-on-surface animate-scale-up">
             <button onClick={() => setModalAjoutOuverte(false)} className="absolute top-4 right-4 text-lg">✕</button>
             <h3 className="font-display font-bold text-lg text-on-surface border-b border-white/10 pb-2">
               Référencer une nouvelle ressource d'étude
@@ -215,7 +235,7 @@ function LibrarySection({ universityId: propUniversityId }) {
                   placeholder="Contenu du manuel, chapitres importants..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="textarea textarea-bordered bg-surface w-full text-sm border-white/10 animate-none"
+                  className="textarea textarea-bordered bg-surface w-full text-sm border-white/10"
                 />
               </div>
 
