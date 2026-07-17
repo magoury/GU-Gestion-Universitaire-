@@ -9,6 +9,7 @@ import { lireAuditLogs } from '../../../services/auditService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, RefreshIcon } from '../../icons/Icons.jsx';
 import type { AuditLog } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface AuditSectionProps {
   universityId?: string;
@@ -108,9 +109,7 @@ function AuditSection({ universityId: propUniversityId }: AuditSectionProps): Re
       {/* Tableau historique d'audit */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des journaux d'audit..." />
         ) : logsFiltrés.length > 0 ? (
           <div className="overflow-x-auto animate-fade-in">
             <table className="table table-zebra table-sm w-full text-on-surface text-xs">

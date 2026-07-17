@@ -12,6 +12,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
 import { BookIcon, CheckIcon } from '../../icons/Icons.jsx';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 const TYPES_RESSOURCE = ['PDF', 'Vidéo', 'Lien', 'Présentation'];
 
@@ -124,10 +125,7 @@ function StudentLibrary({ preselectedCourseId, onClearFilter, studentProfile }: 
 
   if (loadingResources) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de la bibliothèque...</span>
-      </div>
+      <LoadingSpinner message="Chargement de la bibliothèque..." />
     );
   }
 

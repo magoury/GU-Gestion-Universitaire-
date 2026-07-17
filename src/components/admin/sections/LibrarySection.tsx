@@ -10,6 +10,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, BookIcon, FileIcon, HelpIcon, ChevronIcon } from '../../icons/Icons.jsx';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface LibraryResource {
   id: string;
@@ -103,9 +104,7 @@ function LibrarySection({ universityId: propUniversityId }: LibrarySectionProps)
 
       {/* Grille des Ressources */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-        </div>
+        <LoadingSpinner message="Chargement des ressources..." />
       ) : libraryList.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
           {libraryList.map((res) => {

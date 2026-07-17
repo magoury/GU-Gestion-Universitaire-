@@ -12,6 +12,7 @@ import { database } from '@fb';
 import ForestBackground from '../../components/layout/ForestBackground';
 import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
 import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 // Sections administratives universitaires réutilisées (sans extension pour robustesse)
 import OverviewSection from '../../components/admin/sections/OverviewSection';
@@ -126,10 +127,7 @@ export function UniversityDetailView() {
           {/* Section Active */}
           <main className="flex-1 overflow-y-auto p-6 sidebar-nav">
             {loading ? (
-              <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-                <span className="loading loading-spinner text-accent loading-md"></span>
-                <span className="text-on-surface-muted text-xs">Chargement du tenant...</span>
-              </div>
+              <LoadingSpinner message="Chargement du tenant..." />
             ) : (
               renderSection()
             )}

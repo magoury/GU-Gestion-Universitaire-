@@ -11,6 +11,10 @@ import { verifierStatutFinancier, listerPaiementsEtudiant } from '../../../servi
 import { formatMontant, formatDate } from '../../../lib/utils';
 import type { Student, Grade, Notification, Payment } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
 interface ParentOverviewProps {
   etudiantLie: Student;
   setActiveSection: (section: string) => void;
@@ -200,80 +204,64 @@ function ParentOverview({ etudiantLie, setActiveSection }: ParentOverviewProps):
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* KPI 1 : MOYENNE ACTUELLE */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg hover:border-accent/30 transition-all">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Moyenne Actuelle</span>
-            <span className="text-sm">🎓</span>
-          </div>
-          <div className="my-3">
-            <div className="text-xl font-bold text-accent font-display">
-              {academicCalculations.letter} <span className="text-xs text-on-surface font-sans">({academicCalculations.mga}/20)</span>
-            </div>
-          </div>
+        <KPICard
+          label="Moyenne Actuelle"
+          value={`${academicCalculations.letter} (${academicCalculations.mga}/20)`}
+          icon={<span>🎓</span>}
+          variant="accent"
+        >
           <button
             onClick={() => setActiveSection('results')}
             className="text-[10px] text-accent hover:underline text-left font-semibold"
           >
             Consulter les notes →
           </button>
-        </div>
+        </KPICard>
 
         {/* KPI 2 : ASSIDUITÉ */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg hover:border-accent/30 transition-all">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Taux de Présence</span>
-            <span className="text-sm">📅</span>
-          </div>
-          <div className="my-3">
-            <div className="text-xl font-bold text-on-surface font-display">
-              {tauxPresence}%
-            </div>
-          </div>
+        <KPICard
+          label="Taux de Présence"
+          value={`${tauxPresence}%`}
+          icon={<span>📅</span>}
+          variant="none"
+        >
           <button
             onClick={() => setActiveSection('absences')}
             className="text-[10px] text-accent hover:underline text-left font-semibold"
           >
             Détails des absences ({myAbsenceNotifs.length}) →
           </button>
-        </div>
+        </KPICard>
 
         {/* KPI 3 : FINANCES */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg hover:border-accent/30 transition-all">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Solde Scolarité</span>
-            <span className="text-sm">💰</span>
-          </div>
-          <div className="my-3">
-            <div className={`text-xl font-bold font-display ${financeSummary.statut === 'a_jour' ? 'text-green-400' : 'text-red-400'}`}>
-              {formatMontant(financeSummary.montantRestant)}
-            </div>
-          </div>
+        <KPICard
+          label="Solde Scolarité"
+          value={formatMontant(financeSummary.montantRestant)}
+          icon={<span>💰</span>}
+          variant={financeSummary.statut === 'a_jour' ? 'success' : 'error'}
+        >
           <button
             onClick={() => setActiveSection('payments')}
             className="text-[10px] text-accent hover:underline text-left font-semibold"
           >
             {financeSummary.statut === 'a_jour' ? 'Historique des reçus →' : 'Payer maintenant →'}
           </button>
-        </div>
+        </KPICard>
 
         {/* KPI 4 : NOTIFICATIONS */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg hover:border-accent/30 transition-all">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Messages École</span>
-            <span className="text-sm">🔔</span>
-          </div>
-          <div className="my-3">
-            <div className="text-xl font-bold text-on-surface font-display">
-              {nonLuesCount} <span className="text-[10px] text-on-surface-muted font-sans">non lu(s)</span>
-            </div>
-          </div>
+        <KPICard
+          label="Messages École"
+          value={`${nonLuesCount} non lu(s)`}
+          icon={<span>🔔</span>}
+          variant="none"
+        >
           <button
             onClick={() => setActiveSection('contact')}
             className="text-[10px] text-accent hover:underline text-left font-semibold"
           >
             Accéder à la messagerie →
           </button>
-        </div>
+        </KPICard>
 
       </div>
 
@@ -285,9 +273,7 @@ function ParentOverview({ etudiantLie, setActiveSection }: ParentOverviewProps):
           <h3 className="text-xs font-bold uppercase tracking-wider text-accent font-display">Dernières Évaluations</h3>
           
           {loadingGrades ? (
-            <div className="flex items-center justify-center py-12">
-              <span className="loading loading-spinner text-accent loading-sm animate-spin"></span>
-            </div>
+            <LoadingSpinner size="sm" message="Chargement des évaluations..." />
           ) : evaluationsRecentes.length === 0 ? (
             <div className="text-center py-12 text-on-surface-muted text-xs italic">
               Aucune note n'a été publiée pour le moment.

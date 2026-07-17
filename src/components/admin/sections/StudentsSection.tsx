@@ -24,6 +24,7 @@ import {
   ChevronIcon
 } from '../../icons/Icons.jsx';
 import type { Student, StatutEtudiant } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 const FILIERES = [
   'Génie Logiciel',
@@ -328,9 +329,7 @@ function StudentsSection({ universityId: propUniversityId }: StudentsSectionProp
       {/* Tableau des Étudiants */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des étudiants..." />
         ) : etudiantsAffiches.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="table table-zebra table-sm w-full text-on-surface">
@@ -572,7 +571,7 @@ function StudentsSection({ universityId: propUniversityId }: StudentsSectionProp
                   className="btn btn-primary w-full flex items-center justify-center gap-2"
                 >
                   {loadingImport ? (
-                    <span className="loading loading-spinner"></span>
+                    <LoadingSpinner size="xs" inline />
                   ) : (
                     <span>Valider et Importer {previewCsv.length} Étudiants</span>
                   )}

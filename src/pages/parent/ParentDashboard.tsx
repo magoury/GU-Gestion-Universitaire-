@@ -14,6 +14,7 @@ import ForestBackground from '../../components/layout/ForestBackground';
 import ParentSidebar from '../../components/parent/ParentSidebar';
 import ParentHeader from '../../components/parent/ParentHeader';
 import type { Student, ParentStudentLink } from '@/types';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 // Import des sections
 import ParentOverview from '../../components/parent/sections/ParentOverview';
@@ -150,8 +151,7 @@ function ParentDashboard(): React.JSX.Element {
     return (
       <div className="min-h-screen text-on-surface font-body flex items-center justify-center flex-col gap-2 relative">
         <ForestBackground />
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de votre espace parent...</span>
+        <LoadingSpinner message="Chargement de votre espace parent..." />
       </div>
     );
   }

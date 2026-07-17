@@ -11,6 +11,8 @@ import {
   cloturerAnneeAcademique
 } from '../../services/academicYearService';
 import { AlertIcon } from '../icons/Icons.jsx';
+import LoadingSpinner from '../ui/LoadingSpinner';
+import KPICard from '../ui/KPICard';
 
 interface AcademicYearClosureProps {
   onFinished?: () => void;
@@ -133,12 +135,10 @@ function AcademicYearClosure({ onFinished }: AcademicYearClosureProps): React.JS
             )}
 
             {chargement ? (
-              <div className="py-16 flex flex-col items-center justify-center gap-3">
-                <span className="loading loading-spinner loading-lg text-error"></span>
-                <span className="text-xs text-on-surface-muted">
-                  {etape === 1 ? 'Analyse et calcul académique...' : 'Exécution du traitement de clôture batch...'}
-                </span>
-              </div>
+              <LoadingSpinner
+                message={etape === 1 ? 'Analyse et calcul académique...' : 'Exécution du traitement de clôture batch...'}
+                textColor="text-error"
+              />
             ) : etape === 1 ? (
               /* ÉTAPE 1 — Analyse & Alertes */
               <div className="flex flex-col gap-4">
@@ -147,19 +147,22 @@ function AcademicYearClosure({ onFinished }: AcademicYearClosureProps): React.JS
                 </div>
 
                 {/* KPI Estimations */}
-                <div className="grid grid-cols-3 gap-3 bg-surface-high/30 border border-white/5 p-3 rounded-lg text-center text-xs">
-                  <div>
-                    <div className="text-[10px] text-on-surface-muted font-semibold uppercase">Admis</div>
-                    <div className="text-base font-bold text-success mt-0.5">{estimations.admis}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-on-surface-muted font-semibold uppercase">Ajournés</div>
-                    <div className="text-base font-bold text-error mt-0.5">{estimations.ajournes}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-on-surface-muted font-semibold uppercase">Diplômés</div>
-                    <div className="text-base font-bold text-accent mt-0.5">{estimations.diplomes}</div>
-                  </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <KPICard
+                    label="Admis"
+                    value={estimations.admis}
+                    variant="success"
+                  />
+                  <KPICard
+                    label="Ajournés"
+                    value={estimations.ajournes}
+                    variant="error"
+                  />
+                  <KPICard
+                    label="Diplômés"
+                    value={estimations.diplomes}
+                    variant="accent"
+                  />
                 </div>
 
                 {/* Liste d'alertes */}

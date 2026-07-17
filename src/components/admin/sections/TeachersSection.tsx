@@ -10,6 +10,7 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData.js';
 import { creerEnseignant, affecterCours } from '../../../services/teacherService';
 import { PlusIcon, BookIcon, AlertIcon, CheckIcon } from '../../icons/Icons.jsx';
 import type { Teacher } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface TeachersSectionProps {
   universityId?: string;
@@ -117,9 +118,7 @@ function TeachersSection({ universityId: propUniversityId }: TeachersSectionProp
       {/* Tableau des Enseignants */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des enseignants..." />
         ) : teachersList.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="table table-zebra table-sm w-full text-on-surface">

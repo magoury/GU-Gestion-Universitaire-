@@ -12,6 +12,10 @@ import { formatDate } from '../../../lib/utils.js';
 import { BookIcon, StudentsIcon, NotesIcon, FileIcon } from '../../icons/Icons.jsx';
 import type { Grade, Student, Assignment } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
 interface TeacherOverviewProps {
   onNavigateToGrades: (courseId: string) => void;
 }
@@ -99,10 +103,7 @@ function TeacherOverview({ onNavigateToGrades }: TeacherOverviewProps): React.JS
 
   if (loadingTeacher || loadingGrades) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos indicateurs...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos indicateurs..." />
     );
   }
 
@@ -113,48 +114,36 @@ function TeacherOverview({ onNavigateToGrades }: TeacherOverviewProps): React.JS
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* Mes Cours */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Mes Cours Assignés</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{coursList.length}</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-accent/10 text-accent">
-            <BookIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Mes Cours Assignés"
+          value={coursList.length}
+          icon={<BookIcon className="w-5 h-5" />}
+          variant="none"
+        />
 
         {/* Total Étudiants */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Total Étudiants</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{totalEtudiants}</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-primary/10 text-primary">
-            <StudentsIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Total Étudiants"
+          value={totalEtudiants}
+          icon={<StudentsIcon className="w-5 h-5" />}
+          variant="none"
+        />
 
         {/* Notes Saisies Ce Mois */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Notes Saisies (Mois)</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{notesSaisiesCeMois}</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-yellow-500/10 text-yellow-400">
-            <NotesIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Notes Saisies (Mois)"
+          value={notesSaisiesCeMois}
+          icon={<NotesIcon className="w-5 h-5 text-yellow-400" />}
+          variant="none"
+        />
 
         {/* Devoirs Publiés */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Devoirs Publiés</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{devoirsEnAttente}</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-blue-500/10 text-blue-400">
-            <FileIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Devoirs Publiés"
+          value={devoirsEnAttente}
+          icon={<FileIcon className="w-5 h-5 text-blue-400" />}
+          variant="none"
+        />
 
       </div>
 

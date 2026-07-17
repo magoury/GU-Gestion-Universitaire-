@@ -11,6 +11,7 @@ import { envoyerNotification } from '../../../services/notificationService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, BellIcon } from '../../icons/Icons.jsx';
 import type { Notification } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface CourseConfig {
   id: string;
@@ -98,10 +99,7 @@ function MessagesSection(): React.JSX.Element {
 
   if (loadingNotifs || loadingTeacher) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de la messagerie...</span>
-      </div>
+      <LoadingSpinner message="Chargement de la messagerie..." />
     );
   }
 
@@ -232,7 +230,7 @@ function MessagesSection(): React.JSX.Element {
                   disabled={loadingSend}
                   className="btn btn-xs h-8 px-4 bg-accent hover:bg-accent/80 text-bg border-none font-bold rounded cursor-pointer"
                 >
-                  {loadingSend ? <span className="loading loading-spinner loading-xs"></span> : 'Diffuser'}
+                  {loadingSend ? <LoadingSpinner size="xs" inline /> : 'Diffuser'}
                 </button>
               </div>
 

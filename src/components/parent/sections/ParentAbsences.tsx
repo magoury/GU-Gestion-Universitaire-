@@ -9,6 +9,11 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils';
 import type { Student, Teacher } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+import StatusBadge from '../../ui/StatusBadge';
+
 interface ParentAbsencesProps {
   etudiantLie: Student;
 }
@@ -88,37 +93,28 @@ function ParentAbsences({ etudiantLie }: ParentAbsencesProps): React.JSX.Element
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Total Absences */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Total Absences</span>
-            <span className="text-sm">📅</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-on-surface">
-            {stats.total} <span className="text-[10px] font-sans text-on-surface-muted">créneau(x)</span>
-          </div>
-        </div>
+        <KPICard
+          label="Total Absences"
+          value={`${stats.total} créneau(x)`}
+          icon={<span>📅</span>}
+          variant="none"
+        />
 
         {/* Absences Justifiées */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Absences Justifiées</span>
-            <span className="text-sm">✓</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-green-400">
-            {stats.justifiees} <span className="text-[10px] font-sans text-on-surface-muted">justifiée(s)</span>
-          </div>
-        </div>
+        <KPICard
+          label="Absences Justifiées"
+          value={`${stats.justifiees} justifiée(s)`}
+          icon={<span>✓</span>}
+          variant="success"
+        />
 
         {/* Absences Injustifiées */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Absences Injustifiées</span>
-            <span className="text-sm">⚠️</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-red-400 animate-pulse">
-            {stats.injustifiees} <span className="text-[10px] font-sans text-on-surface-muted">injustifiée(s)</span>
-          </div>
-        </div>
+        <KPICard
+          label="Absences Injustifiées"
+          value={`${stats.injustifiees} injustifiée(s)`}
+          icon={<span>⚠️</span>}
+          variant="error"
+        />
 
       </div>
 
@@ -131,10 +127,7 @@ function ParentAbsences({ etudiantLie }: ParentAbsencesProps): React.JSX.Element
         </div>
 
         {loadingAbsences ? (
-          <div className="flex items-center justify-center py-12">
-            <span className="loading loading-spinner text-accent loading-sm animate-spin"></span>
-            <span className="text-xs text-on-surface-muted ml-2">Chargement des absences...</span>
-          </div>
+          <LoadingSpinner size="sm" message="Chargement des absences..." />
         ) : myAbsences.length === 0 ? (
           <div className="text-center py-12 text-on-surface-muted text-xs italic">
             Félicitations, aucun créneau d'absence enregistré.
@@ -165,11 +158,7 @@ function ParentAbsences({ etudiantLie }: ParentAbsencesProps): React.JSX.Element
                         {estJustifiee ? (a.motif || 'Justifié par certificat médical') : 'Non justifié'}
                       </td>
                       <td className="py-2.5 pr-4 text-right">
-                        <span className={`badge badge-xs border-none font-bold px-2 py-0.5 rounded ${
-                          estJustifiee ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                        }`}>
-                          {estJustifiee ? 'Justifiée' : 'Injustifiée'}
-                        </span>
+                        <StatusBadge status={estJustifiee ? 'justifiée' : 'injustifiée'} customClass="border-none font-bold" />
                       </td>
                     </tr>
                   );

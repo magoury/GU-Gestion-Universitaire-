@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useNavigate } from 'react-router-dom';
-import forest4 from '../../assets/landing/forest-4.jpg.jpeg';
+import forest4 from '../../assets/Landing/forest-4.jpg.jpeg';
 
 export default function CTAFinalSection() {
   const navigate = useNavigate();

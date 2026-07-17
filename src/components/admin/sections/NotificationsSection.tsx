@@ -10,6 +10,7 @@ import { envoyerNotification } from '../../../services/notificationService';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, BellIcon } from '../../icons/Icons.jsx';
 import type { Notification } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 const DESTINATAIRES = [
   { value: 'all', label: 'Toute l\'Université (Tous)' },
@@ -111,9 +112,7 @@ function NotificationsSection({ universityId: propUniversityId }: NotificationsS
           Historique des Annonces diffusées
         </div>
         {loading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des annonces..." />
         ) : notificationsList.length > 0 ? (
           <div className="flex flex-col p-4 gap-3 animate-fade-in">
             {notificationsList.map((notif) => {

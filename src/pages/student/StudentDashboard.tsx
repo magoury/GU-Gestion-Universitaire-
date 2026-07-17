@@ -12,6 +12,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../hooks/useFirebaseData';
 import type { Student } from '@/types';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 // Sections
 import StudentOverview from '../../components/student/sections/StudentOverview';
@@ -54,9 +55,8 @@ function StudentDashboard(): React.JSX.Element {
     return (
       <div className="w-screen h-screen flex items-center justify-center bg-bg relative">
         <ForestBackground />
-        <div className="flex flex-col items-center gap-3 z-10">
-          <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-          <span className="text-on-surface-muted text-xs font-body">Initialisation de votre espace étudiant...</span>
+        <div className="z-10">
+          <LoadingSpinner message="Initialisation de votre espace étudiant..." />
         </div>
       </div>
     );

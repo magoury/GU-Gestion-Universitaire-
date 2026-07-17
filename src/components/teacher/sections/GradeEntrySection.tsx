@@ -12,6 +12,7 @@ import { saisirNote } from '../../../services/gradeService';
 import Papa from 'papaparse';
 import { AlertIcon, CheckIcon, FileIcon } from '../../icons/Icons.jsx';
 import type { Student, GradeType } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface TypesEvaluation {
   value: GradeType;
@@ -267,10 +268,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }: GradeEnt
 
   if (loadingTeacher || loadingStudents) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de la console de notes...</span>
-      </div>
+      <LoadingSpinner message="Chargement de la console de notes..." />
     );
   }
 
@@ -412,7 +410,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }: GradeEnt
               disabled={loadingAction || studentsOfCourse.length === 0}
               className="btn bg-accent hover:bg-accent/80 text-bg border-none font-bold uppercase tracking-wider h-10 w-full mt-2 cursor-pointer disabled:opacity-50"
             >
-              {loadingAction ? <span className="loading loading-spinner loading-xs"></span> : 'Enregistrer la note'}
+              {loadingAction ? <LoadingSpinner size="xs" inline /> : 'Enregistrer la note'}
             </button>
           </form>
         </div>
@@ -520,7 +518,7 @@ function GradeEntrySection({ preselectedCourseId, onClearPreselected }: GradeEnt
                 disabled={loadingAction}
                 className="btn btn-sm h-9 px-5 bg-accent hover:bg-accent/80 text-bg border-none font-bold uppercase tracking-wider rounded cursor-pointer disabled:opacity-50"
               >
-                {loadingAction ? <span className="loading loading-spinner loading-xs"></span> : 'Valider la grille'}
+                {loadingAction ? <LoadingSpinner size="xs" inline /> : 'Valider la grille'}
               </button>
             </div>
           )}

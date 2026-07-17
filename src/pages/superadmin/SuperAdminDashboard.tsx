@@ -32,6 +32,12 @@ import type { SaasUniversite } from '@/types'
 import type { KPIsGlobaux, RevenuMensuel } from '@/types'
 import type { AuditLog } from '@/types'
 
+// Composants UI partagés
+import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import ConfirmationModal from '../../components/ui/ConfirmationModal'
+import KPICard from '../../components/ui/KPICard'
+import StatusBadge from '../../components/ui/StatusBadge'
+
 // ── Types internes ────────────────────────────────────────────
 interface ActionUniv { id: string; nom: string; suspendre: boolean }
 type SortKey = 'nom' | 'mrr' | 'dateExpiration'
@@ -67,31 +73,6 @@ function calculerChurnApprox(univs: SaasUniversite[]): string {
   if (univs.length === 0) return '—'
   const nb = univs.filter(u => u.statut === 'suspendu').length
   return `${((nb / univs.length) * 100).toFixed(1)}%`
-}
-
-// ── Composants UI ─────────────────────────────────────────────
-function KpiCard({ label, value, sub, icon }: {
-  label: string; value: string; sub: string; icon: React.ReactNode
-}) {
-  return (
-    <div className="bg-surface/60 backdrop-blur-sm border border-white/10 rounded-lg p-4 flex items-center justify-between gap-3">
-      <div>
-        <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">{label}</div>
-        <div className="text-xl font-bold font-display text-accent mt-1">{value}</div>
-        <span className="text-[9px] text-on-surface-muted/60 block mt-0.5">{sub}</span>
-      </div>
-      <div className="w-9 h-9 rounded-md bg-surface-high border border-white/5 flex items-center justify-center flex-shrink-0">
-        {icon}
-      </div>
-    </div>
-  )
-}
-
-function StatutBadge({ statut }: { statut: string }) {
-  if (statut === 'actif') return <span className="badge badge-xs badge-success text-[9px]">Actif</span>
-  if (statut === 'suspendu') return <span className="badge badge-xs badge-error text-[9px]">Suspendu</span>
-  if (statut === 'essai') return <span className="badge badge-xs badge-warning text-[9px]">Essai</span>
-  return <span className="badge badge-xs badge-ghost text-[9px]">{statut}</span>
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -228,10 +209,7 @@ function SuperAdminDashboard(): React.JSX.Element {
 
         <main className="flex-1 overflow-y-auto p-6 sidebar-nav">
           {loading ? (
-            <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-              <span className="loading loading-spinner text-accent loading-md"></span>
-              <span className="text-on-surface-muted text-xs">Chargement du Command Center...</span>
-            </div>
+            <LoadingSpinner message="Chargement du Command Center..." />
           ) : (<>
 
             {/* ═══ OVERVIEW ════════════════════════════════════════════ */}
@@ -248,10 +226,10 @@ function SuperAdminDashboard(): React.JSX.Element {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <KpiCard label="Total Revenue (MRR)" value={`${kpis.mrr.toLocaleString('fr-FR')} FCFA`} sub="Actifs + essai uniquement" icon={<MoneyIcon className="w-4.5 h-4.5 text-accent" />} />
-                  <KpiCard label="Active Universities" value={`${kpis.nbUniversitesActives} / ${kpis.totalUniversites}`} sub="Actives + essai / total" icon={<BuildingIcon className="w-4.5 h-4.5 text-primary" />} />
-                  <KpiCard label="MRR Growth" value={mrrGrowth} sub="Mois N vs mois N-1" icon={<ClockIcon className="w-4.5 h-4.5 text-success" />} />
-                  <KpiCard label="Total Students" value={kpis.nbTotalEtudiants.toLocaleString('fr-FR')} sub="Across all tenants" icon={<TeachersIcon className="w-4.5 h-4.5 text-primary" />} />
+                  <KPICard label="Total Revenue (MRR)" value={`${kpis.mrr.toLocaleString('fr-FR')} FCFA`} sub="Actifs + essai uniquement" icon={<MoneyIcon className="w-4.5 h-4.5 text-accent" />} />
+                  <KPICard label="Active Universities" value={`${kpis.nbUniversitesActives} / ${kpis.totalUniversites}`} sub="Actives + essai / total" icon={<BuildingIcon className="w-4.5 h-4.5 text-primary" />} />
+                  <KPICard label="MRR Growth" value={mrrGrowth} sub="Mois N vs mois N-1" icon={<ClockIcon className="w-4.5 h-4.5 text-success" />} />
+                  <KPICard label="Total Students" value={kpis.nbTotalEtudiants.toLocaleString('fr-FR')} sub="Across all tenants" icon={<TeachersIcon className="w-4.5 h-4.5 text-primary" />} />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -276,7 +254,7 @@ function SuperAdminDashboard(): React.JSX.Element {
                               </div>
                             </td>
                             <td><span className="badge badge-xs badge-outline border-accent text-accent">{u.plan}</span></td>
-                            <td><StatutBadge statut={u.statut} /></td>
+                            <td><StatusBadge status={u.statut} /></td>
                             <td className="text-accent font-semibold">{u.mrr.toLocaleString('fr-FR')} F</td>
                             <td className="text-right">
                               <div className="flex justify-end gap-1">
@@ -438,7 +416,7 @@ function SuperAdminDashboard(): React.JSX.Element {
                           </div>
                           <div className="flex flex-col items-end gap-1 shrink-0">
                             <span className={`badge badge-xs badge-outline uppercase text-[8px] ${u.plan.toLowerCase() === 'premium' ? 'border-accent text-accent' : u.plan.toLowerCase() === 'enterprise' ? 'border-warning text-warning' : 'border-primary text-primary'}`}>{u.plan}</span>
-                            <StatutBadge statut={u.statut} />
+                            <StatusBadge status={u.statut} />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2 bg-white/2 p-2 rounded border border-white/5 text-[10px]">
@@ -484,7 +462,7 @@ function SuperAdminDashboard(): React.JSX.Element {
                   </select>
                 </div>
                 {utilisateurs.length === 0 ? (
-                  <div className="flex justify-center p-12"><span className="loading loading-spinner text-accent"></span></div>
+                  <LoadingSpinner message="Chargement des utilisateurs..." />
                 ) : (
                   <div className="bg-surface/60 border border-white/10 rounded-lg overflow-hidden">
                     <table className="table table-sm w-full text-left">
@@ -530,7 +508,7 @@ function SuperAdminDashboard(): React.JSX.Element {
                   <p className="text-[10px] text-on-surface-muted">Stockes dans /saas_admin/config — s appliquent a toutes les universites.</p>
                 </div>
                 {config === null ? (
-                  <div className="flex justify-center p-12"><span className="loading loading-spinner text-accent"></span></div>
+                  <LoadingSpinner message="Chargement de la configuration..." />
                 ) : (
                   <form onSubmit={handleSaveConfig} className="bg-surface/60 border border-white/10 rounded-lg p-6 flex flex-col gap-5">
                     {([
@@ -591,13 +569,13 @@ function SuperAdminDashboard(): React.JSX.Element {
                 ))}
                 <div className="flex justify-between border-b border-white/5 py-1">
                   <span className="text-on-surface-muted">Statut</span>
-                  <StatutBadge statut={universiteDetails.statut} />
+                  <StatusBadge status={universiteDetails.statut} />
                 </div>
               </div>
               <div className="mt-5">
                 <div className="text-[10px] font-semibold text-on-surface-muted uppercase tracking-wider mb-2">Logs d audit</div>
                 {loadingLogs ? (
-                  <div className="flex justify-center p-4"><span className="loading loading-spinner loading-xs text-accent"></span></div>
+                  <LoadingSpinner size="xs" message="Chargement..." />
                 ) : logsDetails.length === 0 ? (
                   <div className="text-[10px] text-on-surface-muted italic">Aucune activite enregistree.</div>
                 ) : (
@@ -626,24 +604,17 @@ function SuperAdminDashboard(): React.JSX.Element {
 
       {/* ── Modal confirmation suspension ─────────────────────── */}
       {univAActionner && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface border border-white/10 rounded-lg p-5 max-w-sm w-full flex flex-col gap-4 animate-scale-up">
-            <div>
-              <h3 className="font-semibold text-sm">{univAActionner.suspendre ? "Suspendre l universite ?" : "Reactiver l universite ?"}</h3>
-              <p className="text-[10px] text-on-surface-muted mt-1">
-                {univAActionner.suspendre
-                  ? `Suspension de "${univAActionner.nom}". Acces bloques pour tous les utilisateurs du tenant.`
-                  : `Reactivation de "${univAActionner.nom}". Acces restaures instantanement.`}
-              </p>
-            </div>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setUnivAActionner(null)} className="btn btn-sm btn-ghost h-8 px-3 text-xs border border-white/10">Annuler</button>
-              <button onClick={() => void executerActionUniv()} className={`btn btn-sm h-8 px-3 text-xs border-none ${univAActionner.suspendre ? 'bg-error hover:bg-error/80 text-white' : 'bg-success hover:bg-success/80 text-white'}`}>
-                {univAActionner.suspendre ? 'Suspendre' : 'Reactiver'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmationModal
+          title={univAActionner.suspendre ? "Suspendre l'université ?" : "Réactiver l'université ?"}
+          message={univAActionner.suspendre
+            ? `Suspension de "${univAActionner.nom}". Accès bloqués pour tous les utilisateurs du tenant.`
+            : `Réactivation de "${univAActionner.nom}". Accès restaurés instantanément.`}
+          confirmLabel={univAActionner.suspendre ? 'Suspendre' : 'Réactiver'}
+          cancelLabel="Annuler"
+          onConfirm={() => void executerActionUniv()}
+          onCancel={() => setUnivAActionner(null)}
+          variant={univAActionner.suspendre ? 'danger' : 'success'}
+        />
       )}
 
     </div>

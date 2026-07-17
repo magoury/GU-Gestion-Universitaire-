@@ -9,6 +9,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { exporterDonneesEtudiant } from '../../../services/rgpdService';
 import { AlertIcon, CheckIcon, ShieldIcon, FileIcon } from '../../icons/Icons.jsx';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 function StudentRGPD(): React.JSX.Element {
   const { user } = useAuth();
@@ -106,7 +107,7 @@ function StudentRGPD(): React.JSX.Element {
           className="btn bg-accent hover:bg-accent/80 text-bg border-none font-bold uppercase tracking-wider h-10 w-full mt-2 cursor-pointer flex items-center justify-center gap-2"
         >
           {loading ? (
-            <span className="loading loading-spinner loading-xs"></span>
+            <LoadingSpinner size="xs" inline />
           ) : (
             <>
               <FileIcon className="w-4 h-4" />

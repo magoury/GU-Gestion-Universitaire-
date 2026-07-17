@@ -11,6 +11,10 @@ import { formatDate, formatMontant } from '../../../lib/utils.js';
 import { FileIcon, MoneyIcon } from '../../icons/Icons.jsx';
 import type { Payment } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
 interface FinanceSummary {
   statut: string;
   montantRestant: number;
@@ -92,10 +96,7 @@ function StudentPayments(): React.JSX.Element {
 
   if (loading) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos paiements...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos paiements..." />
     );
   }
 
@@ -106,37 +107,28 @@ function StudentPayments(): React.JSX.Element {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Total Dû */}
-        <div className="glass-card p-4 border border-white/5 rounded-lg flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider">Total Scolarité</div>
-            <div className="text-xl font-bold font-display text-on-surface mt-1">{formatMontant(totalDu)}</div>
-          </div>
-          <div className="p-2 bg-white/5 rounded text-on-surface-muted">
-            <MoneyIcon className="w-4 h-4" />
-          </div>
-        </div>
+        <KPICard
+          label="Total Scolarité"
+          value={formatMontant(totalDu)}
+          icon={<MoneyIcon className="w-4 h-4" />}
+          variant="none"
+        />
 
         {/* Total Payé */}
-        <div className="glass-card p-4 border border-white/5 rounded-lg flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider">Montant Versé</div>
-            <div className="text-xl font-bold font-display text-green-400 mt-1">{formatMontant(totalPaye)}</div>
-          </div>
-          <div className="p-2 bg-green-500/10 rounded text-green-400">
-            <MoneyIcon className="w-4 h-4" />
-          </div>
-        </div>
+        <KPICard
+          label="Montant Versé"
+          value={formatMontant(totalPaye)}
+          icon={<MoneyIcon className="w-4 h-4" />}
+          variant="success"
+        />
 
         {/* Solde restant */}
-        <div className="glass-card p-4 border border-white/5 rounded-lg flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase font-bold tracking-wider">Reste à recouvrer</div>
-            <div className="text-xl font-bold font-display text-accent mt-1">{formatMontant(financeSummary.montantRestant)}</div>
-          </div>
-          <div className="p-2 bg-accent/10 rounded text-accent">
-            <MoneyIcon className="w-4 h-4" />
-          </div>
-        </div>
+        <KPICard
+          label="Reste à recouvrer"
+          value={formatMontant(financeSummary.montantRestant)}
+          icon={<MoneyIcon className="w-4 h-4" />}
+          variant="accent"
+        />
 
       </div>
 

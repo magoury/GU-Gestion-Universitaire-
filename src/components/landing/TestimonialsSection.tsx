@@ -6,7 +6,7 @@
 // Style compact, moderne et conforme au design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
-import forest3 from '../../assets/landing/forest-3.jpg.jpeg';
+import forest3 from '../../assets/Landing/forest-3.jpg.jpeg';
 
 interface Testimonial {
   id: string;

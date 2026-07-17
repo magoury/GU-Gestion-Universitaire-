@@ -12,6 +12,8 @@ import { configurerFraisScolarite, enregistrerPaiement } from '../../../services
 import { formatDate, formatMontant } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, MoneyIcon, SettingsIcon } from '../../icons/Icons.jsx';
 import type { Student, Payment, ModePaiement } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
 
 // Filières par défaut (pour le select)
 const FILIERES = [
@@ -198,33 +200,31 @@ function FinancesSection({ universityId: propUniversityId }: FinancesSectionProp
         </div>
       </div>
 
-      {/* Stats Cards DaisyUI */}
-      <div className="stats shadow bg-surface border border-white/5 text-on-surface w-full grid grid-cols-1 md:grid-cols-3">
-        <div className="stat p-4 border-r border-white/5">
-          <div className="stat-title text-on-surface-muted text-xs">Total Encaissé</div>
-          <div className="stat-value text-primary text-xl mt-0.5">
-            {formatMontant(kpis.totalEncaisse, 'FCFA')}
-          </div>
-          <div className="stat-desc text-[10px] text-on-surface-muted mt-0.5">Sur les étudiants inscrits</div>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <KPICard
+          label="Total Encaissé"
+          value={formatMontant(kpis.totalEncaisse, 'FCFA')}
+          sub="Sur les étudiants inscrits"
+          variant="primary"
+        />
         
-        <div className="stat p-4 border-r border-white/5">
-          <div className="stat-title text-on-surface-muted text-xs">Reste à Recouvrer</div>
-          <div className="stat-value text-error text-xl mt-0.5">
-            {formatMontant(kpis.resteADu, 'FCFA')}
-          </div>
-          <div className="stat-desc text-[10px] text-on-surface-muted mt-0.5">Créances académiques en attente</div>
-        </div>
+        <KPICard
+          label="Reste à Recouvrer"
+          value={formatMontant(kpis.resteADu, 'FCFA')}
+          sub="Créances académiques en attente"
+          variant="error"
+        />
 
-        <div className="stat p-4">
-          <div className="stat-title text-on-surface-muted text-xs">Taux de Recouvrement</div>
-          <div className="stat-value text-accent text-xl mt-0.5">
-            {kpis.tauxRecouvrement}%
+        <KPICard
+          label="Taux de Recouvrement"
+          value={`${kpis.tauxRecouvrement}%`}
+          variant="accent"
+        >
+          <div className="w-full mt-1.5">
+            <progress className="progress progress-accent w-full h-1 bg-white/10" value={kpis.tauxRecouvrement} max="100"></progress>
           </div>
-          <div className="stat-desc mt-1">
-            <progress className="progress progress-accent w-full h-1" value={kpis.tauxRecouvrement} max="100"></progress>
-          </div>
-        </div>
+        </KPICard>
       </div>
 
       {/* Feedbacks */}
@@ -237,9 +237,7 @@ function FinancesSection({ universityId: propUniversityId }: FinancesSectionProp
           Journal des Opérations Financières
         </div>
         {loadingPayments ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des transactions..." />
         ) : paiementsList.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="table table-zebra table-sm w-full text-on-surface text-xs">

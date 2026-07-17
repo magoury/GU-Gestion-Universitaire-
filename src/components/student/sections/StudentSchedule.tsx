@@ -6,6 +6,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const CRENEAUX_HORAIRES = [
@@ -76,10 +77,7 @@ function StudentSchedule({ studentProfile }: StudentScheduleProps): React.JSX.El
 
   if (loading) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de votre emploi du temps...</span>
-      </div>
+      <LoadingSpinner message="Chargement de votre emploi du temps..." />
     );
   }
 

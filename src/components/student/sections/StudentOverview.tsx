@@ -11,6 +11,10 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { BookIcon, NotesIcon, ClockIcon, LibraryIcon, FileIcon } from '../../icons/Icons.jsx';
 import type { Grade, Teacher, Notification, Student } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
 interface StudentOverviewProps {
   onNavigate: (section: string) => void;
   studentProfile: Student;
@@ -132,10 +136,7 @@ function StudentOverview({ onNavigate, studentProfile }: StudentOverviewProps): 
 
   if (loadingGrades) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos indicateurs...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos indicateurs..." />
     );
   }
 
@@ -146,63 +147,49 @@ function StudentOverview({ onNavigate, studentProfile }: StudentOverviewProps): 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* Moyenne Générale (MGA) */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Moyenne Générale (MGA)</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{academicCalculations.mga}/20</div>
-            <div className="text-[9px] text-success mt-1 font-semibold">Mention {academicCalculations.mention}</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-accent/10 text-accent">
-            <NotesIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Moyenne Générale (MGA)"
+          value={`${academicCalculations.mga}/20`}
+          icon={<NotesIcon className="w-5 h-5" />}
+          variant="none"
+        >
+          <div className="text-[9px] text-success font-semibold">Mention {academicCalculations.mention}</div>
+        </KPICard>
 
         {/* Crédits ECTS */}
-        <div className="glass-card p-4 flex flex-col justify-between border border-white/5 rounded-lg">
-          <div className="flex justify-between items-center w-full">
-            <div>
-              <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Crédits ECTS</div>
-              <div className="text-2xl font-bold font-display text-on-surface mt-1">{academicCalculations.ectsObtenus}/120</div>
-            </div>
-            <div className="p-2.5 rounded-full bg-primary/10 text-primary">
-              <BookIcon className="w-5 h-5" />
-            </div>
-          </div>
-          {/* Barre de progression */}
-          <div className="mt-3">
-            <progress
-              className="progress progress-accent w-full h-1.5 bg-surface/50"
-              value={academicCalculations.ectsObtenus}
-              max="120"
-            ></progress>
-          </div>
-        </div>
+        <KPICard
+          label="Crédits ECTS"
+          value={`${academicCalculations.ectsObtenus}/120`}
+          icon={<BookIcon className="w-5 h-5" />}
+          variant="none"
+        >
+          <progress
+            className="progress progress-accent w-full h-1.5 bg-surface/50 mt-1"
+            value={academicCalculations.ectsObtenus}
+            max="120"
+          />
+        </KPICard>
 
         {/* Taux de présence */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Taux de Présence</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">{tauxPresence}%</div>
-            {tauxPresence >= 90 && (
-              <span className="badge badge-success text-[8px] font-bold h-4 px-1.5 text-bg border-none mt-1 uppercase">Excellent Standing</span>
-            )}
-          </div>
-          <div className="p-2.5 rounded-full bg-yellow-500/10 text-yellow-400">
-            <ClockIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Taux de Présence"
+          value={`${tauxPresence}%`}
+          icon={<ClockIcon className="w-5 h-5 text-yellow-400" />}
+          variant="none"
+        >
+          {tauxPresence >= 90 && (
+            <span className="badge badge-success text-[8px] font-bold h-4 px-1.5 text-bg border-none uppercase">Excellent Standing</span>
+          )}
+        </KPICard>
 
         {/* Examens à venir */}
-        <div className="glass-card p-4 flex items-center justify-between border border-white/5 rounded-lg">
-          <div>
-            <div className="text-[10px] text-on-surface-muted uppercase tracking-wider font-semibold">Prochains Examens</div>
-            <div className="text-2xl font-bold font-display text-on-surface mt-1">2</div>
-            <div className="text-[9px] text-on-surface-muted mt-1">Session normale en cours</div>
-          </div>
-          <div className="p-2.5 rounded-full bg-blue-500/10 text-blue-400">
-            <FileIcon className="w-5 h-5" />
-          </div>
-        </div>
+        <KPICard
+          label="Prochains Examens"
+          value="2"
+          sub="Session normale en cours"
+          icon={<FileIcon className="w-5 h-5 text-blue-400" />}
+          variant="none"
+        />
 
       </div>
 

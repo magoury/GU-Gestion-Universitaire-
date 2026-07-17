@@ -13,6 +13,7 @@ import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, FileIcon } from '../../icons/Icons.jsx';
 import AcademicYearClosure from '../AcademicYearClosure';
 import type { Student } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 const FILIERES = [
   'Génie Logiciel',
@@ -193,9 +194,7 @@ function NotesSection({ universityId: propUniversityId }: NotesSectionProps): Re
       {/* Tableau Croisé */}
       <div className="card bg-surface border border-white/10 shadow-xl overflow-hidden">
         {loadingGrades ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-          </div>
+          <LoadingSpinner message="Chargement des notes..." />
         ) : etudiantsFiltres.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="table table-sm w-full text-on-surface">
@@ -277,10 +276,7 @@ function NotesSection({ universityId: propUniversityId }: NotesSectionProps): Re
             <button onClick={() => setModalBulletinOuverte(false)} className="absolute top-4 right-4 text-xl">✕</button>
 
             {loadingBulletin ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <span className="loading loading-spinner loading-lg text-primary animate-spin"></span>
-                <span className="text-sm text-on-surface-muted">Calcul des moyennes en cours...</span>
-              </div>
+              <LoadingSpinner message="Calcul des moyennes en cours..." />
             ) : bulletinActif ? (
               <div className="flex flex-col gap-6" id="bulletin-print-area">
                 {/* En-tête académique */}

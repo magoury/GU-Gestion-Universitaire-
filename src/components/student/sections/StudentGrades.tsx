@@ -10,6 +10,7 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { genererBulletin } from '../../../services/gradeService';
 import { FileIcon } from '../../icons/Icons.jsx';
 import type { Grade } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface CourseAverage {
   id: string;
@@ -155,10 +156,7 @@ function StudentGrades(): React.JSX.Element {
 
   if (loadingGrades) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos notes...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos notes..." />
     );
   }
 

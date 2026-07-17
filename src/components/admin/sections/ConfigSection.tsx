@@ -11,6 +11,7 @@ import { database } from '@fb';
 import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { ecrireAuditLog } from '../../../services/auditService';
 import { AlertIcon, CheckIcon, PlusIcon } from '../../icons/Icons.jsx';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface FiliereConfig {
   nom: string;
@@ -345,7 +346,7 @@ function ConfigSection({ universityId: propUniversityId }: ConfigSectionProps): 
         disabled={loading}
         className="btn btn-sm btn-primary w-full flex items-center justify-center gap-2 h-9 text-xs"
       >
-        {loading ? <span className="loading loading-spinner"></span> : <><CheckIcon className="w-4 h-4" /> <span>Sauvegarder la Configuration</span></>}
+        {loading ? <LoadingSpinner size="xs" inline /> : <><CheckIcon className="w-4 h-4" /> <span>Sauvegarder la Configuration</span></>}
       </button>
 
     </form>

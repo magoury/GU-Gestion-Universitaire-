@@ -11,6 +11,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { formatDate } from '../../../lib/utils.js';
 import { AlertIcon, CheckIcon, PlusIcon, BookIcon } from '../../icons/Icons.jsx';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface CourseConfig {
   id: string;
@@ -115,10 +116,7 @@ function ResourcesSection(): React.JSX.Element {
 
   if (loadingTeacher || loadingResources) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement des ressources...</span>
-      </div>
+      <LoadingSpinner message="Chargement des ressources..." />
     );
   }
 
@@ -288,7 +286,7 @@ function ResourcesSection(): React.JSX.Element {
                   disabled={loadingAdd}
                   className="btn btn-xs h-8 px-4 bg-accent hover:bg-accent/80 text-bg border-none font-bold rounded cursor-pointer"
                 >
-                  {loadingAdd ? <span className="loading loading-spinner loading-xs"></span> : 'Ajouter'}
+                  {loadingAdd ? <LoadingSpinner size="xs" inline /> : 'Ajouter'}
                 </button>
               </div>
 

@@ -9,6 +9,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { StudentsIcon } from '../../icons/Icons.jsx';
 import type { Student } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface Course {
   id: string;
@@ -64,10 +65,7 @@ function CoursesSection({ onNavigateToGrades }: CoursesSectionProps): React.JSX.
 
   if (loadingTeacher || loadingStudents) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos cours...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos cours..." />
     );
   }
 

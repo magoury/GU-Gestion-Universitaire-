@@ -11,6 +11,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { ecrireAuditLog } from '../../../services/auditService';
 import type { Student, Grade, Teacher } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface ParentResultsProps {
   etudiantLie: Student;
@@ -236,8 +237,8 @@ function ParentResults({ etudiantLie }: ParentResultsProps): React.JSX.Element {
       {/* Liste des matières */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loadingGrades ? (
-          <div className="col-span-2 flex items-center justify-center py-12">
-            <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
+          <div className="col-span-2">
+            <LoadingSpinner message="Chargement des évaluations..." />
           </div>
         ) : gradesByCourse.length === 0 ? (
           <div className="col-span-2 text-center py-12 text-on-surface-muted text-xs italic bg-surface/30 rounded-xl border border-white/5">

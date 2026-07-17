@@ -12,6 +12,7 @@ import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { ecrireAuditLog } from '../../../services/auditService';
 import { formatDate } from '../../../lib/utils';
 import type { Student, Notification } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface ParentContactProps {
   etudiantLie: Student;
@@ -167,10 +168,7 @@ function ParentContact({ etudiantLie }: ParentContactProps): React.JSX.Element {
         </h3>
 
         {loadingNotifs ? (
-          <div className="flex items-center justify-center py-12">
-            <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-            <span className="text-xs text-on-surface-muted ml-2">Chargement des messages...</span>
-          </div>
+          <LoadingSpinner message="Chargement des messages..." />
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-12 text-on-surface-muted italic">
             Aucun message ou annonce de la direction pour le moment.

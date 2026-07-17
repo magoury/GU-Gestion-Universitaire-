@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useNavigate } from 'react-router-dom';
-import forest1 from '../../assets/landing/forest-1.jpg.jpeg';
+import forest1 from '../../assets/Landing/forest-1.jpg.jpeg';
 import Navbar from './Navbar';
 
 export default function HeroSection() {

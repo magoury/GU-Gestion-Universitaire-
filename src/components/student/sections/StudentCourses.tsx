@@ -9,6 +9,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { LibraryIcon } from '../../icons/Icons.jsx';
 import type { Teacher, Grade, Student } from '@/types';
+import LoadingSpinner from '../../ui/LoadingSpinner';
 
 interface StudentCoursesProps {
   onNavigateToLibrary: (courseId: string) => void;
@@ -93,10 +94,7 @@ function StudentCourses({ onNavigateToLibrary, studentProfile }: StudentCoursesP
 
   if (loadingTeachers || loadingGrades) {
     return (
-      <div className="h-full w-full flex items-center justify-center flex-col gap-2">
-        <span className="loading loading-spinner text-accent loading-md animate-spin"></span>
-        <span className="text-on-surface-muted text-xs">Chargement de vos cours...</span>
-      </div>
+      <LoadingSpinner message="Chargement de vos cours..." />
     );
   }
 

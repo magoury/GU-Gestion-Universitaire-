@@ -23,6 +23,10 @@ import {
 } from '../../icons/Icons.jsx';
 import type { Student, Payment, AuditLog } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
 interface OverviewSectionProps {
   onNavigate: (section: string) => void;
   universityId?: string;
@@ -166,9 +170,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }: Overvie
 
   if (loadingGlobal) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <span className="loading loading-spinner loading-lg text-primary animate-spin"></span>
-      </div>
+      <LoadingSpinner size="lg" message="Chargement des indicateurs globaux..." />
     );
   }
 
@@ -179,48 +181,36 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }: Overvie
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         
         {/* KPI 1 : Étudiants */}
-        <div className="card bg-surface shadow-xl border border-white/5 p-4 flex flex-row items-center justify-between">
-          <div>
-            <div className="text-[10px] font-bold text-on-surface-muted uppercase tracking-wider">Étudiants Actifs</div>
-            <div className="text-2xl font-bold text-on-surface mt-1">{nbStudents}</div>
-          </div>
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <StudentsIcon className="w-4.5 h-4.5 text-primary" />
-          </div>
-        </div>
+        <KPICard
+          label="Étudiants Actifs"
+          value={nbStudents}
+          icon={<StudentsIcon className="w-4.5 h-4.5 text-primary" />}
+          variant="none"
+        />
 
         {/* KPI 2 : Enseignants */}
-        <div className="card bg-surface shadow-xl border border-white/5 p-4 flex flex-row items-center justify-between">
-          <div>
-            <div className="text-[10px] font-bold text-on-surface-muted uppercase tracking-wider">Enseignants</div>
-            <div className="text-2xl font-bold text-on-surface mt-1">{nbTeachers}</div>
-          </div>
-          <div className="bg-accent/10 p-2 rounded-lg">
-            <TeachersIcon className="w-4.5 h-4.5 text-accent" />
-          </div>
-        </div>
+        <KPICard
+          label="Enseignants"
+          value={nbTeachers}
+          icon={<TeachersIcon className="w-4.5 h-4.5 text-accent" />}
+          variant="none"
+        />
 
         {/* KPI 3 : Taux de Paiement */}
-        <div className="card bg-surface shadow-xl border border-white/5 p-4 flex flex-row items-center justify-between">
-          <div>
-            <div className="text-[10px] font-bold text-on-surface-muted uppercase tracking-wider">Taux de Paiement</div>
-            <div className="text-2xl font-bold text-primary mt-1">{tauxPaiement}%</div>
-          </div>
-          <div className="bg-success/10 p-2 rounded-lg">
-            <MoneyIcon className="w-4.5 h-4.5 text-success" />
-          </div>
-        </div>
+        <KPICard
+          label="Taux de Paiement"
+          value={`${tauxPaiement}%`}
+          icon={<MoneyIcon className="w-4.5 h-4.5 text-success" />}
+          variant="none"
+        />
 
         {/* KPI 4 : Année Académique */}
-        <div className="card bg-surface shadow-xl border border-white/5 p-4 flex flex-row items-center justify-between">
-          <div>
-            <div className="text-[10px] font-bold text-on-surface-muted uppercase tracking-wider">Année Scolaire</div>
-            <div className="text-xl font-bold text-on-surface mt-1.5">{anneeAcademique}</div>
-          </div>
-          <div className="bg-info/10 p-2 rounded-lg">
-            <ClockIcon className="w-4.5 h-4.5 text-info" />
-          </div>
-        </div>
+        <KPICard
+          label="Année Scolaire"
+          value={anneeAcademique}
+          icon={<ClockIcon className="w-4.5 h-4.5 text-info" />}
+          variant="none"
+        />
 
       </div>
 
@@ -288,9 +278,7 @@ function OverviewSection({ onNavigate, universityId: propUniversityId }: Overvie
           </h3>
 
           {loadingAudit ? (
-            <div className="flex justify-center py-6">
-              <span className="loading loading-spinner loading-md text-primary animate-spin"></span>
-            </div>
+            <LoadingSpinner size="md" message="Chargement des journaux d'audit..." />
           ) : auditLogs.length > 0 ? (
             <div className="flex flex-col gap-3 animate-fade-in">
               {auditLogs.map((log) => {

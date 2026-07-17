@@ -6,7 +6,7 @@
 // Respecte strictement le design system "Arbor Tech".
 // ─────────────────────────────────────────────────────────────────────────────
 
-import forest2 from '../../assets/landing/forest-2.jpg.jpeg';
+import forest2 from '../../assets/Landing/forest-2.jpg.jpeg';
 import { 
   BuildingIcon, 
   TeacherIcon, 

@@ -15,6 +15,11 @@ import { formatDate, formatMontant } from '../../../lib/utils';
 import { FileIcon } from '../../icons/Icons';
 import type { Student, Payment, FraisConfig } from '@/types';
 
+// Composants UI partagés
+import LoadingSpinner from '../../ui/LoadingSpinner';
+import KPICard from '../../ui/KPICard';
+
+
 interface ParentPaymentsProps {
   etudiantLie: Student;
 }
@@ -181,37 +186,28 @@ function ParentPayments({ etudiantLie }: ParentPaymentsProps): React.JSX.Element
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Frais Scolarité de l'Année */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Scolarité Annuelle</span>
-            <span className="text-sm">💵</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-on-surface">
-            {formatMontant(totalFrais)}
-          </div>
-        </div>
+        <KPICard
+          label="Scolarité Annuelle"
+          value={formatMontant(totalFrais)}
+          icon={<span>💵</span>}
+          variant="none"
+        />
 
         {/* Montant Déjà Réglé */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Montant Réglé</span>
-            <span className="text-sm">✓</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-green-400">
-            {formatMontant(totalPaye)}
-          </div>
-        </div>
+        <KPICard
+          label="Montant Réglé"
+          value={formatMontant(totalPaye)}
+          icon={<span>✓</span>}
+          variant="success"
+        />
 
         {/* Reste à Payer (Solde) */}
-        <div className="bg-surface/80 backdrop-blur border border-white/10 p-5 rounded-xl flex flex-col justify-between shadow-lg">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-on-surface-muted uppercase">Reste à Solder</span>
-            <span className="text-sm">⚠️</span>
-          </div>
-          <div className="mt-2 text-xl font-bold font-display text-accent">
-            {formatMontant(soldeRestant)}
-          </div>
-        </div>
+        <KPICard
+          label="Reste à Solder"
+          value={formatMontant(soldeRestant)}
+          icon={<span>⚠️</span>}
+          variant="accent"
+        />
 
       </div>
 
@@ -242,10 +238,7 @@ function ParentPayments({ etudiantLie }: ParentPaymentsProps): React.JSX.Element
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <span className="loading loading-spinner text-accent loading-sm animate-spin"></span>
-            <span className="text-xs text-on-surface-muted ml-2">Chargement des transactions...</span>
-          </div>
+          <LoadingSpinner size="sm" message="Chargement des transactions..." />
         ) : payments.length === 0 ? (
           <div className="text-center py-12 text-on-surface-muted text-xs italic">
             Aucun paiement n'a encore été enregistré pour cet élève.
@@ -382,7 +375,7 @@ function ParentPayments({ etudiantLie }: ParentPaymentsProps): React.JSX.Element
                 >
                   {payementEnCours ? (
                     <>
-                      <span className="loading loading-spinner loading-xs animate-spin"></span>
+                      <LoadingSpinner size="xs" inline />
                       <span>Transaction...</span>
                     </>
                   ) : (
