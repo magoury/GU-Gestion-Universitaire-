@@ -4,7 +4,7 @@
 // Isolation multi-tenant : universityId requis sur chaque opération.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { ref, set, get, push } from 'firebase/database';
+import { ref, set, get, push, update } from 'firebase/database';
 import { database, auth } from '@fb';
 import { ecrireAuditLog } from './auditService.js';
 import type { Payment, FraisConfig, ModePaiement } from '@/types';
@@ -213,7 +213,11 @@ export async function enregistrerPaiement(universityId: string, data: Enregistre
     timestamp: Date.now(),
   };
 
-  await set(newPaymentRef, paymentData);
+  // Écriture atomique multi-path
+  const updates: Record<string, any> = {};
+  updates[`universities/${universityId}/payments/${paymentId}`] = paymentData;
+  updates[`universities/${universityId}/payments_by_student/${data.studentId}/${paymentId}`] = paymentData;
+  await update(ref(database), updates);
 
   // Journal d'audit
   await ecrireAuditLog(universityId, {
@@ -229,7 +233,7 @@ export async function enregistrerPaiement(universityId: string, data: Enregistre
 }
 
 /**
- * Liste tous les paiements d'un étudiant.
+ * Liste tous les paiements d'un étudiant à partir de son index sécurisé.
  *
  * @param universityId - Identifiant de l'université
  * @param studentId - Matricule de l'étudiant
@@ -240,8 +244,8 @@ export async function listerPaiementsEtudiant(universityId: string, studentId: s
     throw new Error('universityId et studentId requis.');
   }
 
-  const paymentsRef = ref(database, `universities/${universityId}/payments`);
-  const snapshot = await get(paymentsRef);
+  const studentPaymentsRef = ref(database, `universities/${universityId}/payments_by_student/${studentId}`);
+  const snapshot = await get(studentPaymentsRef);
 
   if (!snapshot.exists()) {
     return [];
@@ -250,15 +254,25 @@ export async function listerPaiementsEtudiant(universityId: string, studentId: s
   const payments: Payment[] = [];
   snapshot.forEach((childSnapshot) => {
     const payment = childSnapshot.val() as Payment;
-    if (payment.studentId === studentId) {
-      payments.push(payment);
-    }
+    payments.push(payment);
   });
 
   // Trier par date décroissante
   payments.sort((a, b) => b.timestamp - a.timestamp);
 
   return payments;
+}
+
+/**
+ * Lit tous les paiements d'un étudiant à partir de son index sécurisé.
+ * Alias sécurisé conforme aux spécifications.
+ *
+ * @param universityId - Identifiant de l'université
+ * @param studentId - Matricule de l'étudiant
+ * @returns Liste de paiements, triée par date décroissante
+ */
+export async function lirePaiementsEtudiant(universityId: string, studentId: string): Promise<Payment[]> {
+  return listerPaiementsEtudiant(universityId, studentId);
 }
 
 /**
