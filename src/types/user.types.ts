@@ -116,7 +116,7 @@ export interface User {
    * Liste des studentId liés (parent uniquement). [NOUVEAU]
    * Remplace linkedStudentId pour supporter la fratrie.
    */
-  linkedStudentIds?: string[]
+  linkedStudentIds?: Record<string, boolean>
 }
 
 // ── Profil contexte Auth (sous-ensemble lu par AuthContext) ───────────────────

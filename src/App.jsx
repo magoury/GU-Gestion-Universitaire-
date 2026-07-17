@@ -39,7 +39,7 @@ import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import StudentDashboard from './pages/student/StudentDashboard';
 
 // Pages protégées — Parent
-import ParentDashboard from './pages/parent/ParentDashboard.jsx';
+import ParentDashboard from './pages/parent/ParentDashboard';
 
 function App() {
   return (

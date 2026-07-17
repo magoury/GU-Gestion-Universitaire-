@@ -16,6 +16,7 @@ export type ModePaiement =
   | 'virement'
   | 'mobile_money'
   | 'cheque'
+  | 'carte_bancaire'
 
 // ── Statut financier ──────────────────────────────────────────────────────────
 

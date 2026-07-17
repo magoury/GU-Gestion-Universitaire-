@@ -11,9 +11,36 @@
         ".read": "auth != null && (root.child('users/' + auth.uid + '/universityId').val() === $universityId || root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme')",
         ".write": "auth != null && ((root.child('users/' + auth.uid + '/universityId').val() === $universityId && root.child('users/' + auth.uid + '/role').val() === 'admin_universite') || root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme')",
         "grades": {
-          "$gradeId": {
-            ".read": "auth != null && (root.child('users/' + auth.uid + '/universityId').val() === $universityId || root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme')",
-            ".write": "auth != null && ((root.child('users/' + auth.uid + '/universityId').val() === $universityId && root.child('users/' + auth.uid + '/role').val() === 'teacher') || root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme')"
+          ".read": "auth != null && (
+            (root.child('users/' + auth.uid + '/universityId').val() === $universityId && (
+              root.child('users/' + auth.uid + '/role').val() === 'admin_universite' ||
+              root.child('users/' + auth.uid + '/role').val() === 'teacher'
+            )) ||
+            root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme'
+          )",
+          ".write": "auth != null && ((root.child('users/' + auth.uid + '/universityId').val() === $universityId && root.child('users/' + auth.uid + '/role').val() === 'teacher') || root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme')"
+        },
+        "grades_by_student": {
+          "$studentId": {
+            ".read": "auth != null && (
+              (
+                root.child('users/' + auth.uid + '/universityId').val() === $universityId && (
+                  auth.uid === $studentId ||
+                  root.child('users/' + auth.uid + '/role').val() === 'admin_universite' ||
+                  root.child('users/' + auth.uid + '/role').val() === 'teacher' ||
+                  root.child('users/' + auth.uid + '/linkedStudentIds/' + $studentId).val() === true
+                )
+              ) ||
+              root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme'
+            )",
+            ".write": "auth != null && (
+              (
+                root.child('users/' + auth.uid + '/universityId').val() === $universityId && (
+                  root.child('users/' + auth.uid + '/role').val() === 'teacher'
+                )
+              ) ||
+              root.child('users/' + auth.uid + '/role').val() === 'super_admin_plateforme'
+            )"
           }
         },
         "payments": {

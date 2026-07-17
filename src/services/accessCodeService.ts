@@ -404,7 +404,12 @@ export async function activateAccountWithCode(
     status: 'active',
     createdBy: accessCode.createdBy,
     ...(matriculeFinal && { matricule: matriculeFinal }),
-    ...(role === 'parent' && linkedStudentIds && { linkedStudentIds }),
+    ...(role === 'parent' && linkedStudentIds && {
+      linkedStudentIds: linkedStudentIds.reduce<Record<string, boolean>>((acc, id) => {
+        acc[id] = true;
+        return acc;
+      }, {})
+    }),
     // Compatibilité avec le champ singulier déprécié (premier étudiant)
     ...(role === 'parent' && linkedStudentIds?.[0] && {
       linkedStudentId: linkedStudentIds[0],

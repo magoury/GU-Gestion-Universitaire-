@@ -9,7 +9,7 @@ import { useTenant } from '../../../contexts/TenantContext.jsx';
 import { useFirebaseData } from '../../../hooks/useFirebaseData';
 import { genererBulletin } from '../../../services/gradeService';
 import { FileIcon } from '../../icons/Icons.jsx';
-import type { Student, Grade } from '@/types';
+import type { Grade } from '@/types';
 
 interface CourseAverage {
   id: string;
@@ -32,18 +32,17 @@ function StudentGrades(): React.JSX.Element {
 
   const [anneeSelectionnee, setAnneeSelectionnee] = useState('2025-2026');
 
-  // Écouter toutes les notes et tous les étudiants de l'établissement
-  const { data: allGrades, loading: loadingGrades } = useFirebaseData('grades', universityId);
-  const { data: allStudents, loading: loadingStudents } = useFirebaseData('students', universityId);
+  // Écouter uniquement les notes de cet étudiant (index sécurisé)
+  const { data: myGradesData, loading: loadingGrades } = useFirebaseData(`grades_by_student/${user?.uid}`, universityId);
 
   // Notes filtrées de cet étudiant pour l'année sélectionnée
   const myGrades = useMemo<Grade[]>(() => {
-    if (!allGrades || !user) return [];
-    const list = Object.values(allGrades) as Grade[];
+    if (!myGradesData) return [];
+    const list = Object.values(myGradesData) as Grade[];
     return list.filter(
-      (g) => g.studentId === user.uid && g.anneeAcademique === anneeSelectionnee
+      (g) => g.anneeAcademique === anneeSelectionnee
     );
-  }, [allGrades, user, anneeSelectionnee]);
+  }, [myGradesData, anneeSelectionnee]);
 
   // Regrouper les notes par matière et par type
   const gradesByCourse = useMemo<CourseAverage[]>(() => {
@@ -129,39 +128,8 @@ function StudentGrades(): React.JSX.Element {
 
   // Calcul du classement de l'étudiant
   const classementText = useMemo(() => {
-    if (!allStudents || !allGrades || gradesByCourse.length === 0) return 'Non classé';
-
-    const studentsList = Object.values(allStudents) as Student[];
-    const gradesList = Object.values(allGrades) as Grade[];
-    const scores: { studentId: string; mga: number }[] = [];
-
-    studentsList.forEach((s) => {
-      const studentGrades = gradesList.filter(
-        (g) => g.studentId === s.id && g.anneeAcademique === anneeSelectionnee
-      );
-      if (studentGrades.length === 0) return;
-
-      // Calculer sa moyenne générale
-      const coursScores: Record<string, number[]> = {};
-      studentGrades.forEach((g) => {
-        const mat = g.courseId || g.matiereId;
-        if (!coursScores[mat]) coursScores[mat] = [];
-        coursScores[mat].push(g.note);
-      });
-
-      const averages = Object.values(coursScores).map((notes) => notes.reduce((a, b) => a + b, 0) / notes.length);
-      const studentMga = averages.reduce((a, b) => a + b, 0) / averages.length;
-
-      scores.push({ studentId: s.id, mga: studentMga });
-    });
-
-    // Trier les étudiants par MGA décroissante
-    scores.sort((a, b) => b.mga - a.mga);
-
-    const index = scores.findIndex((x) => x.studentId === user?.uid);
-    if (index === -1) return 'Non classé';
-    return `${index + 1}er / ${scores.length}`;
-  }, [allStudents, allGrades, user, anneeSelectionnee, gradesByCourse]);
+    return 'Calculé en fin de semestre';
+  }, []);
 
   // Exporter le bulletin au format JSON téléchargeable
   const handleTelechargerBulletin = async () => {
@@ -185,7 +153,7 @@ function StudentGrades(): React.JSX.Element {
     }
   };
 
-  if (loadingGrades || loadingStudents) {
+  if (loadingGrades) {
     return (
       <div className="h-full w-full flex items-center justify-center flex-col gap-2">
         <span className="loading loading-spinner text-accent loading-md animate-spin"></span>

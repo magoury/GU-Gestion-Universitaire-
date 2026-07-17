@@ -1,13 +1,13 @@
-// src/components/parent/ParentSidebar.jsx
+// src/components/parent/ParentSidebar.tsx
 // ──────────────────────────────────────────────────────────────
-// Sidebar pour l'espace Parent.
+// Sidebar pour l'espace Parent — Version TSX.
 // ──────────────────────────────────────────────────────────────
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth.js';
+import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../contexts/TenantContext.jsx';
-import { logout } from '../../services/authService.js';
+import { logout } from '../../services/authService';
 import LogoGU from '../ui/LogoGU.jsx';
 import {
   HomeIcon,
@@ -16,9 +16,18 @@ import {
   MoneyIcon,
   HelpIcon,
   LogoutIcon
-} from '../icons/Icons.jsx';
+} from '../icons/Icons';
+import type { Student } from '@/types';
 
-const MENU_ITEMS = [
+type ParentSection = 'overview' | 'results' | 'absences' | 'payments' | 'contact';
+
+interface ParentSidebarProps {
+  etudiantLie: Student | null;
+  activeSection: ParentSection;
+  onSectionChange: (section: ParentSection) => void;
+}
+
+const MENU_ITEMS: Array<{ id: ParentSection; label: string; Icon: React.ComponentType<any> }> = [
   { id: 'overview', label: "Vue d'ensemble", Icon: HomeIcon },
   { id: 'results', label: 'Résultats', Icon: NotesIcon },
   { id: 'absences', label: 'Absences', Icon: ClockIcon },
@@ -26,7 +35,11 @@ const MENU_ITEMS = [
   { id: 'contact', label: "Contacter l'école", Icon: HelpIcon },
 ];
 
-function ParentSidebar({ etudiantLie, activeSection = 'overview', onSectionChange }) {
+function ParentSidebar({
+  etudiantLie,
+  activeSection = 'overview',
+  onSectionChange,
+}: ParentSidebarProps): React.JSX.Element {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { universityConfig } = useTenant();
@@ -41,12 +54,14 @@ function ParentSidebar({ etudiantLie, activeSection = 'overview', onSectionChang
   };
 
   const nomParent = userProfile ? `${userProfile.prenom} ${userProfile.nom}` : 'Chargement...';
-  const initiales = userProfile ? `${userProfile.prenom.charAt(0)}${userProfile.nom.charAt(0)}`.toUpperCase() : 'P';
+  const initiales = userProfile && userProfile.prenom && userProfile.nom
+    ? `${userProfile.prenom.charAt(0)}${userProfile.nom.charAt(0)}`.toUpperCase()
+    : 'P';
   const nomUniv = universityConfig?.nom || 'Mon Établissement';
   const nomEtudiant = etudiantLie ? `${etudiantLie.prenom} ${etudiantLie.nom}` : 'Aucun étudiant lié';
 
   return (
-    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30 font-body">
+    <aside className="w-52 fixed left-0 top-0 h-screen bg-bg/95 backdrop-blur-md border-r border-white/10 flex flex-col z-30 font-body shrink-0 select-none">
       
       {/* En-tête : Logo & Nom Université */}
       <div className="p-4 border-b border-white/10 flex flex-col items-center gap-1">
@@ -67,8 +82,8 @@ function ParentSidebar({ etudiantLie, activeSection = 'overview', onSectionChang
               onClick={() => onSectionChange?.(item.id)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded transition-all text-left cursor-pointer ${
                 estActif
-                  ? 'border-l-2 border-accent bg-surface text-accent text-sm font-semibold'
-                  : 'text-on-surface-muted text-sm hover:bg-surface/50 hover:text-on-surface'
+                  ? 'border-l-2 border-accent bg-surface/80 text-accent text-xs font-semibold'
+                  : 'text-on-surface-muted text-xs hover:bg-surface/50 hover:text-on-surface'
               }`}
             >
               <ItemIcon className="w-4 h-4" />
@@ -85,9 +100,9 @@ function ParentSidebar({ etudiantLie, activeSection = 'overview', onSectionChang
             {initiales}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate text-on-surface">{nomParent}</div>
-            <div className="text-[10px] text-accent font-medium truncate">Parent / Tuteur</div>
-            <div className="text-[10px] text-on-surface-muted truncate">Élève : {nomEtudiant}</div>
+            <div className="text-xs font-semibold truncate text-on-surface">{nomParent}</div>
+            <div className="text-[9px] text-accent font-medium truncate">Parent / Tuteur</div>
+            <div className="text-[9px] text-on-surface-muted truncate">Enfant : {nomEtudiant}</div>
           </div>
         </div>
 
@@ -105,3 +120,4 @@ function ParentSidebar({ etudiantLie, activeSection = 'overview', onSectionChang
 }
 
 export default ParentSidebar;
+export { ParentSidebar };

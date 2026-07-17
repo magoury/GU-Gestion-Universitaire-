@@ -4,7 +4,7 @@
 // Isolation multi-tenant : universityId requis sur chaque opération.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { ref, set, get, push } from 'firebase/database';
+import { ref, get, push, update } from 'firebase/database';
 import { database, auth } from '@fb';
 import { ecrireAuditLog } from './auditService.js';
 import { calculerMoyenne } from '../lib/utils.js';
@@ -131,7 +131,11 @@ export async function saisirNote(universityId: string, data: SaisirNoteParams): 
     semestre: data.semestre || undefined, // Stocké uniquement si fourni (Point 2)
   };
 
-  await set(newGradeRef, gradeData);
+  // Écriture atomique multi-path
+  const updates: Record<string, any> = {};
+  updates[`universities/${universityId}/grades/${gradeId}`] = gradeData;
+  updates[`universities/${universityId}/grades_by_student/${data.studentId}/${gradeId}`] = gradeData;
+  await update(ref(database), updates);
 
   // Journal d'audit
   const dateStr = new Date().toLocaleDateString('fr-FR');
@@ -147,6 +151,35 @@ export async function saisirNote(universityId: string, data: SaisirNoteParams): 
   });
 
   return gradeId;
+}
+
+/**
+ * Lit toutes les notes d'un étudiant à partir de son index sécurisé.
+ * 
+ * @param universityId - Identifiant de l'université
+ * @param studentId - Identifiant de l'étudiant
+ * @returns Liste de notes, triée par date décroissante
+ */
+export async function lireNotesEtudiant(universityId: string, studentId: string): Promise<Grade[]> {
+  if (!universityId || !studentId) {
+    throw new Error('universityId et studentId requis.');
+  }
+
+  const studentGradesRef = ref(database, `universities/${universityId}/grades_by_student/${studentId}`);
+  const snapshot = await get(studentGradesRef);
+
+  if (!snapshot.exists()) {
+    return [];
+  }
+
+  const grades: Grade[] = [];
+  snapshot.forEach((childSnapshot) => {
+    const grade = childSnapshot.val() as Grade;
+    grades.push(grade);
+  });
+
+  // Trier par date de saisie décroissante
+  return grades.sort((a, b) => b.dateSaisie - a.dateSaisie);
 }
 
 /**
