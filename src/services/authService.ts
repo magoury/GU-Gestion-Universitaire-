@@ -26,7 +26,7 @@ import {
 import { ref, set, get } from 'firebase/database'
 import { auth, database } from '@fb'
 import type { Role, UserProfile } from '@/types'
-import { ecrireAuditLog } from './auditService.js'
+import { ecrireAuditLog } from './auditService'
 
 // ── Ré-exports du système d'activation par code ───────────────────────────────
 // Les composants qui importent depuis authService.js continuent de fonctionner.

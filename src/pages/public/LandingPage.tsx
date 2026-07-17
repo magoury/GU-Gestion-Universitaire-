@@ -1,4 +1,4 @@
-// src/pages/public/LandingPage.jsx
+// src/pages/public/LandingPage.tsx
 // ──────────────────────────────────────────────────────────────
 // Page de destination (Landing Page) publique du SaaS GU.
 // Design moderne, clair (dégradé blanc/gris), responsive,
@@ -6,8 +6,7 @@
 // Conteneurs centrés et typographie contrastée pour la lisibilité.
 // ──────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import HeroSection from '../../components/landing/HeroSection';
 import FeaturesGrid from '../../components/landing/FeaturesGrid';
 import PricingTable from '../../components/landing/PricingTable';
@@ -18,9 +17,7 @@ import Footer from '../../components/landing/Footer';
 import ScrollIndicator from '../../components/landing/ScrollIndicator';
 import StatsBar from '../../components/landing/StatsBar';
 
-function LandingPage() {
-  const navigate = useNavigate();
-
+export function LandingPage() {
   // Animations au scroll via Intersection Observer
   useEffect(() => {
     const targets = document.querySelectorAll('.reveal-on-scroll');
@@ -68,4 +65,3 @@ function LandingPage() {
 }
 
 export default LandingPage;
-export { LandingPage };

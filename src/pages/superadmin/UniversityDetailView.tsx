@@ -1,30 +1,30 @@
-// src/pages/superadmin/UniversityDetailView.jsx
+// src/pages/superadmin/UniversityDetailView.tsx
 // ──────────────────────────────────────────────────────────────
 // Vue d'impersonnalisation de session universitaire.
 // Le Super Admin consulte et gère un tenant universitaire en temps réel.
 // ──────────────────────────────────────────────────────────────
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ref, onValue, off } from 'firebase/database';
+import { ref, onValue } from 'firebase/database';
 import { database } from '@fb';
 
 // Composants de structure
-import ForestBackground from '../../components/layout/ForestBackground.jsx';
-import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar.jsx';
-import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader.jsx';
+import ForestBackground from '../../components/layout/ForestBackground';
+import SuperAdminSidebar from '../../components/superadmin/SuperAdminSidebar';
+import SuperAdminHeader from '../../components/superadmin/SuperAdminHeader';
 
-// Sections administratives universitaires réutilisées
-import OverviewSection from '../../components/admin/sections/OverviewSection.jsx';
-import StudentsSection from '../../components/admin/sections/StudentsSection.jsx';
-import TeachersSection from '../../components/admin/sections/TeachersSection.jsx';
-import NotesSection from '../../components/admin/sections/NotesSection.jsx';
-import FinancesSection from '../../components/admin/sections/FinancesSection.jsx';
-import LibrarySection from '../../components/admin/sections/LibrarySection.jsx';
-import NotificationsSection from '../../components/admin/sections/NotificationsSection.jsx';
-import AuditSection from '../../components/admin/sections/AuditSection.jsx';
-import ConfigSection from '../../components/admin/sections/ConfigSection.jsx';
+// Sections administratives universitaires réutilisées (sans extension pour robustesse)
+import OverviewSection from '../../components/admin/sections/OverviewSection';
+import StudentsSection from '../../components/admin/sections/StudentsSection';
+import TeachersSection from '../../components/admin/sections/TeachersSection';
+import NotesSection from '../../components/admin/sections/NotesSection';
+import FinancesSection from '../../components/admin/sections/FinancesSection';
+import LibrarySection from '../../components/admin/sections/LibrarySection';
+import NotificationsSection from '../../components/admin/sections/NotificationsSection';
+import AuditSection from '../../components/admin/sections/AuditSection';
+import ConfigSection from '../../components/admin/sections/ConfigSection';
 
-const SECTION_TITLES = {
+const SECTION_TITLES: Record<string, string> = {
   overview: "Vue d'ensemble",
   students: "Gestion des Étudiants",
   teachers: "Gestion du Corps Enseignant",
@@ -36,8 +36,8 @@ const SECTION_TITLES = {
   config: "Configuration de l'Université",
 };
 
-function UniversityDetailView() {
-  const { universityId } = useParams();
+export function UniversityDetailView() {
+  const { universityId } = useParams<{ universityId: string }>();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('overview');
   const [nomUniversite, setNomUniversite] = useState('Chargement...');
@@ -62,11 +62,13 @@ function UniversityDetailView() {
       setLoading(false);
     });
 
-    return () => off(nameRef);
+    return () => unsubscribe();
   }, [universityId]);
 
   // Rendu de la section active en y passant la prop universityId={universityId}
   const renderSection = () => {
+    if (!universityId) return null;
+
     switch (activeSection) {
       case 'overview':
         return <OverviewSection onNavigate={setActiveSection} universityId={universityId} />;

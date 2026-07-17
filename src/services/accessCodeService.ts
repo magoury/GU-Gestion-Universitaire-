@@ -25,7 +25,7 @@ import type {
   ParentStudentLink,
 } from '@/types'
 import type { Role } from '@/types'
-import { ecrireAuditLog } from './auditService.js'
+import { ecrireAuditLog } from './auditService'
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 

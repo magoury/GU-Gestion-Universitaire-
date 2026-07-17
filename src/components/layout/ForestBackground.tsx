@@ -1,13 +1,13 @@
-// src/components/layout/ForestBackground.jsx
+// src/components/layout/ForestBackground.tsx
 // ──────────────────────────────────────────────────────────────
 // Composant d'arrière-plan avec dégradé sombre de forêt.
 // Utilisé dans les pages d'authentification et les dashboards.
 // ──────────────────────────────────────────────────────────────
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-function ForestBackground() {
-  const containerStyle = useMemo(() => ({
+export function ForestBackground() {
+  const containerStyle = useMemo<React.CSSProperties>(() => ({
     position: 'fixed',
     top: 0,
     left: 0,
@@ -20,7 +20,7 @@ function ForestBackground() {
     background: 'linear-gradient(135deg, #041710 0%, #0a2318 30%, #0d2d1e 60%, #041710 100%)',
   }), []);
 
-  const overlayStyle = useMemo(() => ({
+  const overlayStyle = useMemo<React.CSSProperties>(() => ({
     position: 'absolute',
     top: 0,
     left: 0,

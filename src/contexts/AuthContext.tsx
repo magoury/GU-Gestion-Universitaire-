@@ -13,7 +13,7 @@ import { createContext, useState, useEffect, useContext, ReactNode } from 'react
 import { onAuthStateChanged, signOut, User as FirebaseUser } from 'firebase/auth';
 import { ref, onValue, off } from 'firebase/database';
 import { auth, database } from '@fb';
-import { ecrireAuditLog } from '../services/auditService.js';
+import { ecrireAuditLog } from '../services/auditService';
 import type { UserProfile } from '../types/user.types';
 
 /**

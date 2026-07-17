@@ -6,7 +6,8 @@
 
 import { ref, push, get, set, update } from 'firebase/database';
 import { database, auth } from '@fb';
-import { ecrireAuditLog } from './auditService.js';
+import { ecrireAuditLog } from './auditService';
+import { verifierStatutFinancier } from './paymentService';
 import type { Notification, NotificationType, NotificationsResult, Student } from '@/types';
 
 /**
@@ -262,9 +263,6 @@ export async function envoyerAlertesPaiement(universityId: string): Promise<numb
   }
 
   let alertesEnvoyees = 0;
-
-  // Import dynamique de verifierStatutFinancier pour éviter les cycles de dépendance
-  const { verifierStatutFinancier } = await import('./paymentService.js');
 
   for (const student of students) {
     if (student.statut !== 'actif') continue;

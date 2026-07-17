@@ -1,28 +1,40 @@
-// src/components/ui/LogoGU.jsx
+// src/components/ui/LogoGU.tsx
 // ──────────────────────────────────────────────────────────────
 // Logo GU — Gestion Universitaire
 // Intègre un icône temple (bâtiment) dans un cercle vert
 // et les polices du design system.
 // ──────────────────────────────────────────────────────────────
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-const TAILLES = {
+interface TailleConfig {
+  cercle: number;
+  icone: string;
+  sigle: string;
+  texte: string;
+  gap: string;
+}
+
+const TAILLES: Record<'xs' | 'sm' | 'md' | 'lg', TailleConfig> = {
   xs: { cercle: 24, icone: '12px', sigle: '1.1rem', texte: '0.55rem', gap: '3px' },
   sm: { cercle: 28, icone: '14px', sigle: '1.25rem', texte: '0.65rem', gap: '4px' },
   md: { cercle: 40, icone: '20px', sigle: '1.75rem', texte: '0.75rem', gap: '8px' },
   lg: { cercle: 56, icone: '28px', sigle: '2.5rem', texte: '0.9rem', gap: '12px' },
 };
 
-/**
- * @param {{ size?: 'xs'|'sm'|'md'|'lg', onClick?: () => void, clickable?: boolean, showSubtext?: boolean }} props
- */
-function LogoGU({ size = 'md', onClick, clickable = false, showSubtext = true }) {
+interface LogoGUProps {
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  onClick?: () => void;
+  clickable?: boolean;
+  showSubtext?: boolean;
+}
+
+export function LogoGU({ size = 'md', onClick, clickable = false, showSubtext = true }: LogoGUProps) {
   const taille = useMemo(() => TAILLES[size] || TAILLES.md, [size]);
 
   const estCliquable = clickable || !!onClick;
 
-  const conteneurStyle = useMemo(() => ({
+  const conteneurStyle = useMemo<React.CSSProperties>(() => ({
     display: 'flex',
     alignItems: 'center',
     gap: taille.gap,
@@ -30,7 +42,7 @@ function LogoGU({ size = 'md', onClick, clickable = false, showSubtext = true })
     userSelect: 'none',
   }), [taille.gap, estCliquable]);
 
-  const cercleStyle = useMemo(() => ({
+  const cercleStyle = useMemo<React.CSSProperties>(() => ({
     width: `${taille.cercle}px`,
     height: `${taille.cercle}px`,
     borderRadius: '50%',
@@ -42,13 +54,13 @@ function LogoGU({ size = 'md', onClick, clickable = false, showSubtext = true })
     border: '1px solid rgba(255, 255, 255, 0.1)',
   }), [taille.cercle]);
 
-  const texteConteneurStyle = useMemo(() => ({
+  const texteConteneurStyle = useMemo<React.CSSProperties>(() => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
   }), []);
 
-  const sigleStyle = useMemo(() => ({
+  const sigleStyle = useMemo<React.CSSProperties>(() => ({
     fontSize: taille.sigle,
     fontWeight: 700,
     color: '#EEC058',
@@ -57,7 +69,7 @@ function LogoGU({ size = 'md', onClick, clickable = false, showSubtext = true })
     fontFamily: "'Playfair Display', Georgia, serif",
   }), [taille.sigle]);
 
-  const descriptionStyle = useMemo(() => ({
+  const descriptionStyle = useMemo<React.CSSProperties>(() => ({
     fontSize: taille.texte,
     fontWeight: 500,
     color: '#95D4B3',

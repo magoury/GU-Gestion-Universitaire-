@@ -7,7 +7,7 @@
 import { ref, set, get, update } from 'firebase/database';
 import { database, auth } from '@fb';
 import { generateMatricule } from '../lib/utils.js';
-import { ecrireAuditLog } from './auditService.js';
+import { ecrireAuditLog } from './auditService';
 import type { Student, StatutEtudiant } from '@/types';
 
 /**

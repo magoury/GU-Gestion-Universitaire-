@@ -1,4 +1,4 @@
-// src/components/superadmin/SuperAdminSidebar.jsx
+// src/components/superadmin/SuperAdminSidebar.tsx
 // ──────────────────────────────────────────────────────────────
 // Sidebar fixe w-52 h-screen pour le Command Center du Super Admin.
 // ──────────────────────────────────────────────────────────────
@@ -7,7 +7,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
 import { logout } from '../../services/authService.js';
-import LogoGU from '../ui/LogoGU.jsx';
+import LogoGU from '../ui/LogoGU';
 import {
   HomeIcon,
   StudentsIcon,
@@ -20,10 +20,17 @@ import {
   SettingsIcon,
   LogoutIcon,
   BuildingIcon,
-  AnalyticsIcon
-} from '../icons/Icons.jsx';
+  AnalyticsIcon,
+  IconProps
+} from '../icons/Icons';
 
-const NAV_ITEMS = [
+interface NavItem {
+  id: string;
+  label: string;
+  Icon: React.ComponentType<IconProps>;
+}
+
+const NAV_ITEMS: NavItem[] = [
   { id: 'overview', label: 'Dashboard', Icon: HomeIcon },
   { id: 'analytics', label: 'Analytics', Icon: AnalyticsIcon },
   { id: 'universites', label: 'Universités', Icon: BuildingIcon },
@@ -31,7 +38,7 @@ const NAV_ITEMS = [
   { id: 'config', label: 'Paramètres', Icon: SettingsIcon },
 ];
 
-const TENANT_ITEMS = [
+const TENANT_ITEMS: NavItem[] = [
   { id: 'overview', label: "Vue d'ensemble", Icon: HomeIcon },
   { id: 'students', label: 'Étudiants', Icon: StudentsIcon },
   { id: 'teachers', label: 'Enseignants', Icon: TeachersIcon },
@@ -43,7 +50,13 @@ const TENANT_ITEMS = [
   { id: 'config', label: 'Configuration', Icon: SettingsIcon },
 ];
 
-function SuperAdminSidebar({ activeSection = 'overview', onSectionChange, mode = 'global' }) {
+interface SuperAdminSidebarProps {
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
+  mode?: 'global' | 'impersonate';
+}
+
+export function SuperAdminSidebar({ activeSection = 'overview', onSectionChange, mode = 'global' }: SuperAdminSidebarProps) {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const items = mode === 'impersonate' ? TENANT_ITEMS : NAV_ITEMS;

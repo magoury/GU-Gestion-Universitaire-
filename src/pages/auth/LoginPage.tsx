@@ -1,4 +1,4 @@
-// src/pages/auth/LoginPage.jsx
+// src/pages/auth/LoginPage.tsx
 // ──────────────────────────────────────────────────────────────
 // Page d'authentification complète du SaaS GU.
 // Combine Connexion et Inscription en libre-service sans simplification.
@@ -6,19 +6,20 @@
 // et modal cachée Super Admin sécurisée par PIN OTP à 10 chiffres.
 // ──────────────────────────────────────────────────────────────
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ref, onValue, off, get, query, orderByChild, equalTo, set, update } from 'firebase/database';
 import { database } from '@fb';
 
 // Importations des composants et services locaux
-import LogoGU from '../../components/ui/LogoGU.jsx';
-import ForestBackground from '../../components/layout/ForestBackground.jsx';
+import LogoGU from '../../components/ui/LogoGU';
+import ForestBackground from '../../components/layout/ForestBackground';
 import { useAuth } from '../../hooks/useAuth.js';
-import { login, createUserWithRole, resetPassword, logout } from '../../services/authService.js';
-import { ecrireAuditLog } from '../../services/auditService.js';
+import type { Role } from '../../types/user.types';
+import { login, createUserWithRole, resetPassword, logout } from '../../services/authService';
+import { ecrireAuditLog } from '../../services/auditService';
 import { generateMatricule } from '../../lib/utils.js';
-import { BuildingIcon, TeacherIcon, StudentsIcon, ParentIcon } from '../../components/icons/Icons.jsx';
+import { BuildingIcon, TeacherIcon, StudentsIcon, ParentIcon, IconProps } from '../../components/icons/Icons';
 
 // Listes prédéfinies pour l'inscription des étudiants
 const FILIERES = [
@@ -37,19 +38,30 @@ const NIVEAUX = [
   { value: 'M2', label: 'Master 2 (M2)' },
 ];
 
-const ROLES = [
+interface RoleConfig {
+  id: Role;
+  label: string;
+  Icon: React.ComponentType<IconProps>;
+}
+
+const ROLES: RoleConfig[] = [
   { id: 'admin_universite', label: 'Admin Université', Icon: BuildingIcon },
   { id: 'teacher', label: 'Enseignant', Icon: TeacherIcon },
   { id: 'student', label: 'Étudiant', Icon: StudentsIcon },
   { id: 'parent', label: 'Parent', Icon: ParentIcon },
 ];
 
-// Component PIN Input pour l'authentification Super Admin
-function PinInput({ length = 10, onChange }) {
-  const [values, setValues] = useState(Array(length).fill(''));
-  const inputsRef = useRef([]);
+interface PinInputProps {
+  length?: number;
+  onChange?: (value: string) => void;
+}
 
-  const handleChange = (e, index) => {
+// Component PIN Input pour l'authentification Super Admin
+function PinInput({ length = 10, onChange }: PinInputProps) {
+  const [values, setValues] = useState<string[]>(Array(length).fill(''));
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const val = e.target.value;
     const char = val.slice(-1); // Garde le dernier caractère
     const newValues = [...values];
@@ -64,7 +76,7 @@ function PinInput({ length = 10, onChange }) {
     }
   };
 
-  const handleKeyDown = (e, index) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     // Déplace le focus au précédent si Backspace sur case vide
     if (e.key === 'Backspace' && !values[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
@@ -76,7 +88,7 @@ function PinInput({ length = 10, onChange }) {
       {Array(length).fill(0).map((_, i) => (
         <input
           key={i}
-          ref={(el) => (inputsRef.current[i] = el)}
+          ref={(el) => { inputsRef.current[i] = el; }}
           type="password"
           maxLength={1}
           value={values[i]}
@@ -95,26 +107,33 @@ function PinInput({ length = 10, onChange }) {
             outline: 'none',
             transition: 'border-color 0.2s',
           }}
-          onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
-          onBlur={(e) => e.target.style.borderColor = 'var(--glass-border)'}
+          onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; }}
         />
       ))}
     </div>
   );
 }
 
-function LoginPage() {
+interface Universite {
+  id: string;
+  nom: string;
+  ville?: string;
+  statut?: string;
+}
+
+export function LoginPage() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  useAuth();
 
   // États du formulaire
   const [estInscription, setEstInscription] = useState(false);
-  const [roleSelectionne, setRoleSelectionne] = useState('student');
+  const [roleSelectionne, setRoleSelectionne] = useState<Role>('student');
   
   // États d'autocomplétion université
-  const [listeUniversites, setListeUniversites] = useState([]);
+  const [listeUniversites, setListeUniversites] = useState<Universite[]>([]);
   const [rechercheUniv, setRechercheUniv] = useState('');
-  const [univSelectionnee, setUnivSelectionnee] = useState(null);
+  const [univSelectionnee, setUnivSelectionnee] = useState<Universite | null>(null);
   const [afficherSuggestions, setAfficherSuggestions] = useState(false);
   
   // Champs formulaire
@@ -126,7 +145,6 @@ function LoginPage() {
   const [afficherMdp, setAfficherMdp] = useState(false);
   
   // Champs spécifiques Inscription
-  // NOTE: nomNouvelleUniv supprimé — la création d'université passe uniquement par /onboarding
   const [emailEtudiantLier, setEmailEtudiantLier] = useState('');
   const [filiere, setFiliere] = useState('');
   const [niveau, setNiveau] = useState('L1');
@@ -173,8 +191,7 @@ function LoginPage() {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const modeParam = searchParams.get('mode');
-    const roleParam = searchParams.get('role');
-    const planParam = searchParams.get('plan');
+    const roleParam = searchParams.get('role') as Role | null;
     
     if (modeParam === 'inscription') {
       setEstInscription(true);
@@ -189,7 +206,7 @@ function LoginPage() {
 
   // Détecter la reconnexion rapide
   useEffect(() => {
-    const lastRole = localStorage.getItem('lastRole');
+    const lastRole = localStorage.getItem('lastRole') as Role | null;
     const lastUniversityId = localStorage.getItem('lastUniversityId');
 
     if (lastRole && lastUniversityId) {
@@ -201,7 +218,7 @@ function LoginPage() {
       get(publicUnivRef).then((snapshot) => {
         if (snapshot.exists()) {
           const univData = snapshot.val();
-          setUnivSelectionnee(univData);
+          setUnivSelectionnee({ id: lastUniversityId, ...univData });
           setNomUnivRecuperee(univData.nom);
         } else {
           // Si l'université n'est plus en base, nettoyer
@@ -239,7 +256,7 @@ function LoginPage() {
   };
 
   // Soumission connexion classique
-  const handleConnexion = async (e) => {
+  const handleConnexion = async (e: React.FormEvent) => {
     e.preventDefault();
     setErreur('');
     setSuccessMsg('');
@@ -309,7 +326,7 @@ function LoginPage() {
         default:
           navigate('/unauthorized');
       }
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Une erreur est survenue lors de la connexion.');
     } finally {
       setLoading(false);
@@ -317,7 +334,7 @@ function LoginPage() {
   };
 
   // Soumission création de compte
-  const handleInscription = async (e) => {
+  const handleInscription = async (e: React.FormEvent) => {
     e.preventDefault();
     setErreur('');
     setSuccessMsg('');
@@ -343,23 +360,21 @@ function LoginPage() {
       return;
     }
 
-    // La création d'université pour admin_universite est UNIQUEMENT via /onboarding
-    // (tunnel sécurisé avec transaction Firebase et rollback — OnboardingPage.tsx)
+    // La création d'université pour admin_universite est uniquement via /onboarding
     if (roleSelectionne === 'admin_universite') {
       navigate('/onboarding');
       return;
     }
 
     // Pour les autres rôles : sélection d'université existante obligatoire
-    let finalUniversityId = null;
     if (!univSelectionnee) {
       setErreur('Veuillez sélectionner votre université.');
       return;
     }
-    finalUniversityId = univSelectionnee.id;
+    const finalUniversityId = univSelectionnee.id;
 
     // Si rôle Parent : recherche et liaison de l'étudiant
-    let linkedStudentId = null;
+    let linkedStudentId: string | null = null;
     if (roleSelectionne === 'parent') {
       if (!emailEtudiantLier.trim()) {
         setErreur('Veuillez saisir l\'adresse e-mail de votre enfant.');
@@ -382,7 +397,7 @@ function LoginPage() {
           });
         }
 
-        if (!etudiantTrouve) {
+        if (!etudiantTrouve || !linkedStudentId) {
           setErreur('Aucun étudiant inscrit avec cet e-mail n\'a été trouvé dans cette université.');
           setLoading(false);
           return;
@@ -406,7 +421,6 @@ function LoginPage() {
 
     try {
       // 1. Créer le compte utilisateur
-      // NOTE: admin_universite redirigé vers /onboarding avant d'arriver ici
       const { uid } = await createUserWithRole(email, password, roleSelectionne, finalUniversityId, nom, prenom, null);
 
       // 3. Si Étudiant : Enregistrer sa fiche académique complète dans le tenant
@@ -430,7 +444,8 @@ function LoginPage() {
 
       // 4. Si Parent : Rattacher l'étudiant dans le profil utilisateur
       if (roleSelectionne === 'parent' && linkedStudentId) {
-        await update(ref(database, `users/${uid}`), { linkedStudentId });
+        // Adaptation linkedStudentIds restructure en objet / Record<string, boolean>
+        await update(ref(database, `users/${uid}/linkedStudentIds`), { [linkedStudentId]: true });
       }
 
       // 5. Écrire un log d'audit
@@ -452,9 +467,6 @@ function LoginPage() {
       // Connexion automatique et redirection
       setTimeout(() => {
         switch (roleSelectionne) {
-          case 'admin_universite':
-            navigate('/admin/dashboard');
-            break;
           case 'teacher':
             navigate('/teacher/dashboard');
             break;
@@ -469,7 +481,7 @@ function LoginPage() {
         }
       }, 1500);
 
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Une erreur est survenue lors de la création de votre compte.');
     } finally {
       setLoading(false);
@@ -489,13 +501,13 @@ function LoginPage() {
     try {
       await resetPassword(email.trim());
       setSuccessMsg('Un e-mail de réinitialisation de mot de passe a été envoyé.');
-    } catch (err) {
+    } catch (err: any) {
       setErreur(err.message || 'Erreur lors de l\'envoi de l\'e-mail.');
     }
   };
 
   // Authentification Super Admin
-  const handleSuperAdminLogin = async (e) => {
+  const handleSuperAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErreurSuperAdmin('');
 
@@ -523,7 +535,7 @@ function LoginPage() {
 
       setModalSuperAdminOuverte(false);
       navigate('/superadmin/dashboard');
-    } catch (err) {
+    } catch (err: any) {
       const nouvellesTentatives = tentativesSuperAdmin + 1;
       setTentativesSuperAdmin(nouvellesTentatives);
 
@@ -716,7 +728,7 @@ function LoginPage() {
                 Université
               </label>
 
-              {/* Bannière de redirection pour admin_universite en mode inscription */}
+              {/* Bandeau de redirection pour admin_universite en mode inscription */}
               {estInscription && roleSelectionne === 'admin_universite' ? (
                 <div style={{
                   padding: '12px 16px',
@@ -774,10 +786,10 @@ function LoginPage() {
                       boxSizing: 'border-box',
                       fontSize: '0.9rem',
                     }}
-                    onFocusCapture={(e) => e.target.style.borderColor = 'var(--color-primary)'}
+                    onFocusCapture={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
                     onBlurCapture={(e) => {
                       setTimeout(() => setAfficherSuggestions(false), 200);
-                      e.target.style.borderColor = 'var(--glass-border)';
+                      e.currentTarget.style.borderColor = 'var(--glass-border)';
                     }}
                   />
                   {/* Suggestions Dropdown */}
@@ -810,8 +822,8 @@ function LoginPage() {
                             fontSize: '0.85rem',
                             borderBottom: '1px solid rgba(255,255,255,0.05)',
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                         >
                           {u.nom} <span style={{ fontSize: '0.75rem', color: 'var(--color-on-surface-muted)' }}>({u.ville || 'Côte d\'Ivoire'})</span>
                         </div>

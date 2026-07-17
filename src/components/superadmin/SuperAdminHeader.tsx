@@ -1,13 +1,16 @@
-// src/components/superadmin/SuperAdminHeader.jsx
+// src/components/superadmin/SuperAdminHeader.tsx
 // ──────────────────────────────────────────────────────────────
 // Header horizontal sticky pour le Command Center du Super Admin.
 // ──────────────────────────────────────────────────────────────
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SearchIcon, BellIcon, HelpIcon, PlusIcon } from '../icons/Icons.jsx';
+import { SearchIcon, BellIcon, HelpIcon, PlusIcon } from '../icons/Icons';
 
-function SuperAdminHeader({ title = 'Overview' }) {
+interface SuperAdminHeaderProps {
+  title?: string;
+}
+
+export function SuperAdminHeader({ title = 'Overview' }: SuperAdminHeaderProps) {
   const navigate = useNavigate();
 
   return (

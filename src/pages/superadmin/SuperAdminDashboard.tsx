@@ -20,7 +20,7 @@ import {
   sauvegarderConfigPlateforme,
 } from '../../services/superAdminService'
 import type { UtilisateurGlobal, ConfigPlateforme } from '../../services/superAdminService'
-import { lireAuditLogs } from '../../services/auditService.js'
+import { lireAuditLogs } from '../../services/auditService'
 import {
   MoneyIcon,
   BuildingIcon,

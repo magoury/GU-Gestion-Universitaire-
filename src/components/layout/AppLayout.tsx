@@ -1,4 +1,4 @@
-// src/components/layout/AppLayout.jsx
+// src/components/layout/AppLayout.tsx
 // ──────────────────────────────────────────────────────────────
 // Layout principal du SaaS GU avec le design system "Sylvan Command".
 // Sidebar fixe 240px (fond sombre vert forêt, bordure glass).
@@ -6,16 +6,24 @@
 // Header sticky avec LogoGU + Titre + Recherche + Notifications + Menu.
 // ──────────────────────────────────────────────────────────────
 
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import LogoGU from '../ui/LogoGU.jsx';
-import ForestBackground from './ForestBackground.jsx';
+import LogoGU from '../ui/LogoGU';
+import ForestBackground from './ForestBackground';
 import { useAuth } from '../../hooks/useAuth.js';
 import { logout } from '../../services/authService.js';
 
+type UserRole = 'super_admin_plateforme' | 'admin_universite' | 'teacher' | 'student' | 'parent';
+
+interface NavigationItem {
+  label: string;
+  path: string;
+  icon: string;
+}
+
 // ── Configuration de la Navigation par Rôle ──────────────────
 
-const NAVIGATION = {
+const NAVIGATION: Record<UserRole, NavigationItem[]> = {
   super_admin_plateforme: [
     { label: 'Tableau de bord', path: '/superadmin/dashboard', icon: '📊' },
     { label: 'Statistiques', path: '/superadmin/analytics', icon: '📈' },
@@ -56,7 +64,7 @@ const NAVIGATION = {
   ],
 };
 
-const TRADUCTION_ROLES = {
+const TRADUCTION_ROLES: Record<UserRole, string> = {
   super_admin_plateforme: 'Super Admin',
   admin_universite: 'Administrateur',
   teacher: 'Enseignant',
@@ -64,16 +72,18 @@ const TRADUCTION_ROLES = {
   parent: 'Parent',
 };
 
-/**
- * @param {{ role: string, children: import('react').ReactNode }} props
- */
-function AppLayout({ role, children }) {
+interface AppLayoutProps {
+  role: UserRole;
+  children: React.ReactNode;
+}
+
+export function AppLayout({ role, children }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile } = useAuth();
   const [sidebarOuverte, setSidebarOuverte] = useState(false);
 
-  const navItems = useMemo(() => NAVIGATION[role] || [], [role]);
+  const navItems = useMemo<NavigationItem[]>(() => NAVIGATION[role] || [], [role]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -398,8 +408,9 @@ function AppLayout({ role, children }) {
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              className: 'header-search-container',
-            }}>
+            }}
+              className="header-search-container"
+            >
               <input
                 type="text"
                 placeholder="Rechercher..."

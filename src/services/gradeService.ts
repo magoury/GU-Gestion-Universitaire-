@@ -6,7 +6,7 @@
 
 import { ref, get, push, update } from 'firebase/database';
 import { database, auth } from '@fb';
-import { ecrireAuditLog } from './auditService.js';
+import { ecrireAuditLog } from './auditService';
 import { calculerMoyenne } from '../lib/utils.js';
 import type { Grade, GradeType } from '@/types';
 
